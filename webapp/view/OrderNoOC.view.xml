@@ -28,6 +28,7 @@
                                 <f:FormElement label="{i18n>lbCondicionEntrega}">
                                     <f:fields>
                                         <Select
+                                        	id="slCondEntSinOC"
                                             change="fnSelectedCondEntregaOC"
                                             forceSelection="false"
                                             items="{
@@ -40,6 +41,7 @@
                                 <f:FormElement label="{i18n>lbEmpresa}">
                                     <f:fields>
                                         <Select
+                                        	id="slEmpSinOC"
                                             change="fnSelectedDestino"
                                             forceSelection="false"
                                             items="{
@@ -52,18 +54,20 @@
                                 <f:FormElement label="{i18n>lbDestinoFinal}">
                                     <f:fields>
                                         <Select
-                                        change=""
+                                        	id="slDestSinOC"
+                                        	change=""
                                             forceSelection="false"
                                             items="{
                                                 path: 'oModelGet>/oDestino'
                                             }">
-                                            <core:Item key="{oModelGet>Werks}" text="{oModelGet>Namew_f}" />
+                                            <core:Item key="{oModelGet>Werks_f}" text="{oModelGet>Namew_f}" />
                                         </Select>
                                     </f:fields>
                                 </f:FormElement>
                                 <f:FormElement label="{i18n>lbMotivo}">
                                     <f:fields>
                                         <Select
+                                        	id="slMotivoSinOC"
                                             forceSelection="false"
                                             items="{
                                                 path: 'oModelGet>/oMotivo'
@@ -88,12 +92,13 @@
                                 </f:FormElement>
                                 <f:FormElement label="{i18n>lbCantidadEmbalaje}">
                                     <f:fields>
-                                        <Text id="textCantEnt" text="{Twitter}" />
+                                        <Text id="textCantEnt" text="" />
                                     </f:fields>
                                 </f:FormElement>
                                 <f:FormElement label="{i18n>lbAreaSolicitante}">
                                     <f:fields>
                                         <Select
+                                        	id="slAreaSinOC"
                                             forceSelection="false"
                                             items="{
                                                 path: 'oModelGet>/oArea'

@@ -7,13 +7,14 @@
 					<content >
 						<HBox alignItems="Center" direction="Row" fitContainer="false" width="auto" height="100%" justifyContent="Center" renderType="Div"
 							visible="true" displayInline="false">
-							<VBox class="contenedor_principal" alignItems="Center" justifyContent="Center" width="40%" height="70%">
+							<VBox class="contenedor_principal" alignItems="Center" justifyContent="Center" width="45%" height="70%">
 								<Title class="sapUiMediumMargin" text="{i18n>titleInitSession}" titleStyle="H3"/>
-								<VBox>
+								<VBox width="100%">
 									<HBox alignItems="Center" direction="Row" fitContainer="false" width="auto" height="auto" justifyContent="Center" renderType="Div"
 										visible="true" displayInline="false">
 										<Input id="usuario" class="input1" placeholder="Correo electronico" type="Text" showValueHelp="false" enabled="true" visible="true"
-											width="100%" valueHelpOnly="false" required="false" valueStateText="" maxLength="0"></Input>
+											width="100%" valueHelpOnly="false" required="false" valueStateText="" maxLength="0">
+										</Input>
 										<core:Icon class="icon1" src="sap-icon://person-placeholder" size="39.6px" height="39.75px" width="39.7px" visible="true"/>
 									</HBox>
 									<HBox alignItems="Center" direction="Row" fitContainer="false" width="auto" height="auto" justifyContent="Center" renderType="Div"

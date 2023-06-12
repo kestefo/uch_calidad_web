@@ -21,6 +21,16 @@ sap.ui.define([
             var sUser = this._byId("usuario").getValue();
             var sPassword = this._byId("contra").getValue();
             
+            if(this.isEmpty(sUser)){
+            	this.getMessageBox("error", that.getI18nText("errorNoDataUser"));
+            	return; 
+            }
+            
+            if(this.isEmpty(sPassword)){
+            	this.getMessageBox("error", that.getI18nText("errorNoDataPassword"));
+            	return; 
+            }
+            
             var oFiltro = {
 				"oResults": {
 					"sUser": sUser,

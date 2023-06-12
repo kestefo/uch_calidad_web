@@ -1279,7 +1279,8 @@ sap.ui.define([
 			try {
 				that = this;
 				return new Promise(function (resolve, reject) {
-					var oCodigoTable = ["T_ERP_STATUS","T_ERP_AREA","T_ERP_LUMP_TYPE","T_ERP_UNIDADES","T_ERP_MOTIVE"];
+					var oCodigoTable = ["T_ERP_STATUS","T_ERP_AREA","T_ERP_LUMP_TYPE","T_ERP_UNIDADES","T_ERP_MOTIVE",
+					"T_ERP_COND","T_ERP_SOC","T_ERP_DEST"];
 					var oFiltro = [];
 					oCodigoTable.forEach(function (codigo) {
 						oFiltro.push(new Filter("CodigoTabla", "EQ", codigo));
