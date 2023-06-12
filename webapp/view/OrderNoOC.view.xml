@@ -62,7 +62,7 @@
                                             items="{
                                                 path: 'oModelGet>/oMotivo'
                                             }">
-                                            <core:Item key="{oModelGet>Motivo}" text="{oModelGet>DescMotivo}" />
+                                            <core:Item key="{oModelGet>Campo}" text="{oModelGet>DescripcionCampo}" />
                                         </Select>
                                     </f:fields>
                                 </f:FormElement>
@@ -92,7 +92,7 @@
                                             items="{
                                                 path: 'oModelGet>/oArea'
                                             }">
-                                            <core:Item key="{oModelGet>CodArea}" text="{oModelGet>DescArea}" />
+                                            <core:Item key="{oModelGet>Campo}" text="{oModelGet>DescripcionCampo}" />
                                         </Select>
                                     </f:fields>
                                 </f:FormElement>
@@ -127,10 +127,9 @@
 								width		="auto" 
 								selectedKey	="{oModel>selectedKey}"
 								items		="{
-											path:'oModelGet>/DataTipoBulto' , templateShareable:false
-											}">
-															
-								<core:Item 	 key="{oModelGet>Vegr2}" text="{oModelGet>Bezei}" />
+									path:'oModelGet>/oTipoBulto' , templateShareable:false
+								}">				
+								<core:Item 	 key="{oModelGet>Campo}" text="{oModelGet>DescripcionCampo}" />
 							</Select>
                         </ui:template>
                         </ui:Column>
@@ -205,8 +204,15 @@
                             <ui:Column width="auto" hAlign="Center">
                             <Label text="{i18n>titleUNMMaterial}" />
                             <ui:template>
-                            <Text text="{EntregaSinOC>nEmbalaje}" wrapping="false" />
-                        </ui:template>
+	                            <Select 
+									width		="auto" 
+									selectedKey	="{oModel>selectedKey}"
+									items		="{
+										path:'oModelGet>/oUnidades' , templateShareable:false
+									}">				
+									<core:Item 	 key="{oModelGet>Campo}" text="{oModelGet>DescripcionCampo}" />
+								</Select>
+                        	</ui:template>
                         </ui:Column>
                         <ui:Column width="25%" hAlign="Center">
                             <Label text="{i18n>titleObservacion}" />

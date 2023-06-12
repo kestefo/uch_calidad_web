@@ -23,14 +23,21 @@ sap.ui.define([
             that.oModel.setSizeLimit(99999999);
             that.oModelGet.setSizeLimit(99999999);
 
-            Promise.all([this.getERPMotivo(),this.getERPArea(),this.getERPCondicionEntrega()
+            Promise.all([this.getDataMaestro()
+            // ,this.getERPMotivo(),this.getERPArea(),this.getERPCondicionEntrega()
             ]).then(async values => {
                 //Uso de motivos
-                var oDataMotive = values[0].data;
+                var oDataMotive = values[0].T_ERP_MOTIVE;
                 that.oModelGet.setProperty("/oMotivo", oDataMotive);
                 //Uso de areas
-                var oDataArea = values[1].data;
+                var oDataArea = values[0].T_ERP_AREA;
                 that.oModelGet.setProperty("/oArea", oDataArea);
+                //Uso de Tipo Bulto
+                var oDataTipoBulto = values[0].T_ERP_LUMP_TYPE;
+                that.oModelGet.setProperty("/oTipoBulto", oDataTipoBulto);
+                //Uso de Unidad
+                var oDataUnidades = values[0].T_ERP_UNIDADES;
+                that.oModelGet.setProperty("/oUnidades", oDataUnidades);
                 //Uso de condicionarea
                 var oDataCondEnt = values[2].data;
                 this._onEstructureCondEnt(oDataCondEnt);

@@ -31,8 +31,14 @@ sap.ui.define([
 			Services.consultarUser(this, oFiltro, function (result) {
 				util.response.validateAjaxGetHana(result, {
 					success: function (data, message) {
-						// that.oRouter.navTo("RouteMain");
-						sap.ui.core.BusyIndicator.hide(0);
+						var sDecode = window.atob(data.oResults.PASSWORD);
+						if(sDecode === sPassword){
+							sap.ui.core.BusyIndicator.hide(0);
+							that.oRouter.navTo("RouteMain");
+						}else{
+							sap.ui.core.BusyIndicator.hide(0);
+							utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorPasswordIncorrect"));
+						}
 					},
 					error: function (message) {
 						sap.ui.core.BusyIndicator.hide(0);

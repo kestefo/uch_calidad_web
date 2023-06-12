@@ -24,18 +24,18 @@ sap.ui.define([
 	var sMessage = "";
 	return Controller.extend("solicitarcitapr.controller.BaseController", {
 		formatter: Formatter,
-        local: window.location.href.indexOf('launchpad') == -1 ? true : false,
+		local: window.location.href.indexOf('launchpad') == -1 ? true : false,
 		userSet: "liderdeproyecto1@omniasolution.com",
-		igv:1.18,
+		igv: 1.18,
 		sinigv: 0.82,
-        getUserLoged: function(){
+		getUserLoged: function () {
 			var user = "";
-			if(this.isEmpty(sap.ushell.Container)){
+			if (this.isEmpty(sap.ushell.Container)) {
 				user = this.userSet;
-			}else{
-				if(this.isEmpty(sap.ushell.Container.getService("UserInfo").getUser().getEmail())){
+			} else {
+				if (this.isEmpty(sap.ushell.Container.getService("UserInfo").getUser().getEmail())) {
 					user = this.userSet;
-				}else{
+				} else {
 					user = sap.ushell.Container.getService("UserInfo").getUser().getEmail();
 				}
 			}
@@ -73,31 +73,31 @@ sap.ui.define([
 			});
 
 		},
-        _onPressHome:function(){
-            that = this;
-            MessageBox.warning(this.getI18nText("textbtnHome"), {
+		_onPressHome: function () {
+			that = this;
+			MessageBox.warning(this.getI18nText("textbtnHome"), {
 				actions: [this.getI18nText("acceptText"), this.getI18nText("cancelText")],
 				emphasizedAction: MessageBox.Action.OK,
 				onClose: function (sAction) {
 					if (sAction === that.getI18nText("acceptText")) {
-                        var aplicacion = "#";
-                        var accion = "";
-                        if(!that.isEmpty(sap.ushell)){
-                            var oCrossAppNavigator = sap.ushell.Container.getService("CrossApplicationNavigation");
-                            oCrossAppNavigator.toExternal({
-                                target: {
-                                    semanticObject: aplicacion,
-                                    action: accion
-                                }
-                            });
-                        }else{
+						var aplicacion = "#";
+						var accion = "";
+						if (!that.isEmpty(sap.ushell)) {
+							var oCrossAppNavigator = sap.ushell.Container.getService("CrossApplicationNavigation");
+							oCrossAppNavigator.toExternal({
+								target: {
+									semanticObject: aplicacion,
+									action: accion
+								}
+							});
+						} else {
 							that.oRouter.navTo("RouteLogin");
 						}
 					}
 				}
 			});
-        },
-        isEmpty: function (inputStr) {
+		},
+		isEmpty: function (inputStr) {
 			var flag;
 			flag = false;
 			if (inputStr === '') {
@@ -115,7 +115,7 @@ sap.ui.define([
 
 			return flag;
 		},
-        validateInternet: function () {
+		validateInternet: function () {
 			var bValidate;
 			bValidate = false;
 			if (!window.navigator.onLine) {
@@ -465,7 +465,7 @@ sap.ui.define([
 				var sControllerRoot = "";
 				sControllerRoot = this.getView()._controllerName.split(".")[0];
 				if (!that[sDialogName]) {
-					that[sDialogName] = sap.ui.xmlfragment(sFragmentId, sControllerRoot+".view.dialogs." + sNameFragment,
+					that[sDialogName] = sap.ui.xmlfragment(sFragmentId, sControllerRoot + ".view.dialogs." + sNameFragment,
 						that);
 					that.getView().addDependent(that[sDialogName]);
 				}
@@ -533,79 +533,79 @@ sap.ui.define([
 				return x.toString();
 			}
 		},
-		reverseStringForParameter: function(str,variable) {
-			var splitString = str.split(variable); 
-			var reverseArray = splitString.reverse(); 
-			var joinArray = reverseArray.join(variable); 
+		reverseStringForParameter: function (str, variable) {
+			var splitString = str.split(variable);
+			var reverseArray = splitString.reverse();
+			var joinArray = reverseArray.join(variable);
 			return joinArray;
 		},
 		currencyFormat: function (value) {
-			if(value){
-				var sNumberReplace = value.replaceAll(",","");
+			if (value) {
+				var sNumberReplace = value.replaceAll(",", "");
 				var iNumber = parseFloat(sNumberReplace);
 				return iNumber.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
-			}else{
+			} else {
 				return "0.00";
 			}
 		},
 		currencyFormatTreeDig: function (value) {
-			if(value){
-				var sNumberReplace = value.replaceAll(",","");
+			if (value) {
+				var sNumberReplace = value.replaceAll(",", "");
 				var iNumber = parseFloat(sNumberReplace);
 				return iNumber.toFixed(3).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
-			}else{
+			} else {
 				return "0.000";
 			}
 		},
 		currencyFormatIGV: function (value) {
-			if(value){
-				var sNumberReplace = value.replaceAll(",","");
+			if (value) {
+				var sNumberReplace = value.replaceAll(",", "");
 				var iNumber = parseFloat(sNumberReplace) * this.igv;
 				return iNumber.toFixed(2).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
-			}else{
+			} else {
 				return "0.00";
 			}
 		},
 		currencyFormatIGVTreeDig: function (value) {
-			if(value){
-				var sNumberReplace = value.replaceAll(",","");
+			if (value) {
+				var sNumberReplace = value.replaceAll(",", "");
 				var iNumber = parseFloat(sNumberReplace) * this.igv;
 				return iNumber.toFixed(3).replace(/(\d)(?=(\d{3})+(?!\d))/g, "$1,");
-			}else{
+			} else {
 				return "0.000";
 			}
 		},
 		formatMay: function (value) {
-			if(value){
+			if (value) {
 				return value.toUpperCase();
-			}else{
+			} else {
 				return "";
 			}
 		},
-		onValidateChange: function(oEvent){
-			var kSelected=oEvent.getSource().getSelectedKey();
-			var sSelected=oEvent.getSource().getValue();
+		onValidateChange: function (oEvent) {
+			var kSelected = oEvent.getSource().getSelectedKey();
+			var sSelected = oEvent.getSource().getValue();
 			if (kSelected !== '') {
 				oEvent.getSource().setValue(sSelected);
-			}else{
-				if(oEvent.getSource().getValue()){
+			} else {
+				if (oEvent.getSource().getValue()) {
 					this.getMessageBox("error", this.getI18nText("sErrorSelect"));
 				}
 				oEvent.getSource().setValue("");
 			}
 		},
-		onValidateChangeFilterPromotion: function(oEvent){
-			var kSelected=oEvent.getSource().getSelectedKey();
-			var sSelected=oEvent.getSource().getValue();
+		onValidateChangeFilterPromotion: function (oEvent) {
+			var kSelected = oEvent.getSource().getSelectedKey();
+			var sSelected = oEvent.getSource().getValue();
 
 			var oTable = this.byId("tbPromociones");
-            var aFilter = [];
+			var aFilter = [];
 
 			if (kSelected !== '') {
 				oEvent.getSource().setValue(sSelected);
 				aFilter.push(new Filter("Numpro", 'Contains', kSelected));
-			}else{
-				if(oEvent.getSource().getValue()){
+			} else {
+				if (oEvent.getSource().getValue()) {
 					this.getMessageBox("error", this.getI18nText("sErrorSelect"));
 				}
 				oEvent.getSource().setValue("");
@@ -613,18 +613,18 @@ sap.ui.define([
 
 			oTable.getBinding("items").filter(aFilter);
 		},
-		onValidateChangeFilterPromotion1: function(oEvent){
-			var kSelected=oEvent.getSource().getSelectedKey();
-			var sSelected=oEvent.getSource().getValue();
+		onValidateChangeFilterPromotion1: function (oEvent) {
+			var kSelected = oEvent.getSource().getSelectedKey();
+			var sSelected = oEvent.getSource().getValue();
 
 			var oTable = this.byId("tbPromociones");
-            var aFilter = [];
+			var aFilter = [];
 
 			if (kSelected !== '') {
 				oEvent.getSource().setValue(sSelected);
 				aFilter.push(new Filter("Numpro", 'Contains', kSelected));
-			}else{
-				if(oEvent.getSource().getValue()){
+			} else {
+				if (oEvent.getSource().getValue()) {
 					this.getMessageBox("error", this.getI18nText("sErrorSelect"));
 				}
 				oEvent.getSource().setValue("");
@@ -638,81 +638,81 @@ sap.ui.define([
 			var regex = /[^\d]/g;
 			var x = values.replace(/[^\d]/g, '');
 
-			if(values.match(regex)){
+			if (values.match(regex)) {
 				var x = values;
-			}else{
+			} else {
 				var x = values.substring(0, values.length - 1);
 			}
 			var x = parseInt(values);
 			var sValueUsed = isNaN(x) ? '0' : x;
-			
+
 			oSource.setValue(sValueUsed);
 		},
-        liveChangeFormatFloat: function (oEvent) {
-            var oSource = oEvent.getSource();
-            var values = oSource.getValue();
-            var regex = /[^\d]/g;
-            var x = values.replace(/[^\d]/g, '');
+		liveChangeFormatFloat: function (oEvent) {
+			var oSource = oEvent.getSource();
+			var values = oSource.getValue();
+			var regex = /[^\d]/g;
+			var x = values.replace(/[^\d]/g, '');
 
-            if (values.match(regex)) {
-                var x = values;
-            } else {
-                var x = '';
-            }
-            var x = parseFloat(values);
-            var sValueUsed = isNaN(x) ? '0.00' : values;
+			if (values.match(regex)) {
+				var x = values;
+			} else {
+				var x = '';
+			}
+			var x = parseFloat(values);
+			var sValueUsed = isNaN(x) ? '0.00' : values;
 
-            oSource.setValue(sValueUsed);
-        },
+			oSource.setValue(sValueUsed);
+		},
 		goNavListItem: function (oEvent) {
 			var oSource = oEvent.getSource();
 			var sCustom = oSource.data("custom");
 			switch (sCustom) {
-				case "":
-					break;
-				default:
-					this.getView().byId("SplitContainter").to(this.createId(sCustom));
-					break;
+			case "":
+				break;
+			default:
+				this.getView().byId("SplitContainter").to(this.createId(sCustom));
+				break;
 			}
 		},
-        _onPressClose: function (oEvent) {
+		_onPressClose: function (oEvent) {
 			var oSource = oEvent.getSource();
 			var sCustom = oSource.data("custom");
 			switch (sCustom) {
-				case "DetailClient":
-					this._onClearComponentDetailClient();
-					this._onClearDataDetailClient();
-					oSource.getParent().close();
-					break;
-				default:
-					oSource.getParent().close();
+			case "DetailClient":
+				this._onClearComponentDetailClient();
+				this._onClearDataDetailClient();
+				oSource.getParent().close();
+				break;
+			default:
+				oSource.getParent().close();
 			}
 		},
-		_onClearComponentDetailClient: function(){
+		_onClearComponentDetailClient: function () {
 			this._byId("frgIdDetailCliente--slDirecciones").setSelectedKey("");
 			this._byId("frgIdDetailCliente--rbgComprobante").setSelectedIndex(0);
 			this._byId("frgIdDetailCliente--inOrdenCompra").setValue("");
 			this._byId("frgIdDetailCliente--tardenCompra").setValue("");
 		},
-		_onClearDataDetailClient: function(){
+		_onClearDataDetailClient: function () {
 			this.getModel("oModelPedidoVenta").setProperty("/DataGeneral/sNumPedido", "");
 			this.getModel("oModelPedidoVenta").setProperty("/DataGeneral/sStatus", "");
 			this.getModel("oModelPedidoVenta").setProperty("/DataGeneral/oFlete", []);
 			this.getModel("oModelPedidoVenta").setProperty("/DataGeneral/oSelectedCliente", {});
 			this.getModel("oModelPedidoVenta").setProperty("/DataGeneral/oMaterialSelectEan", {});
 			this.getModel("oModelPedidoVenta").setProperty("/DataGeneral/oMaterialSelectMasive", {
-				titulo:"",
-				oDataCargadaPrev:[],
-				oDataCargadaMost:[]
+				titulo: "",
+				oDataCargadaPrev: [],
+				oDataCargadaMost: []
 			});
 			this.getModel("oModelPedidoVenta").setProperty("/DataGeneral/Spots", {
-				items:[{}]
+				items: [{}]
 			});
 			this.getModel("oModelPedidoVenta").setProperty("/DataGeneral/oPromotions", {
-				oComponent:{},
+				oComponent: {},
 				sCantBoni: "",
 				sCantProm: "",
-				oPromotion:[],
+				oPromotion: [],
 				oTablaPrimerMoment: [],
 				oPromotionDetail: [],
 				oPromotionPadre: [],
@@ -723,159 +723,159 @@ sap.ui.define([
 			this.getModel("oModelPedidoVenta").setProperty("/DataGeneral/oMaterial", []);
 			this.getModel("oModelPedidoVenta").setProperty("/DataGeneral/objects", {});
 		},
-        goNavConTo: function (sFragmentId, sNavId, sPageId) {
+		goNavConTo: function (sFragmentId, sNavId, sPageId) {
 			// Fragment.byId(sFragmentId, "btnIdNavDialog").setVisible(true);
 			var oNavCon = Fragment.byId(sFragmentId, sNavId);
 			var oDetailPage = Fragment.byId(sFragmentId, sPageId);
 			oNavCon.to(oDetailPage);
 		},
-        _groupByKey: function (array, groups, valueKey) {
-            var map = new Map;
-            groups = [].concat(groups);
-            return array.reduce((r, o) => {
-                groups.reduce((m, k, i, {
-                    length
-                }) => {
-                    var child;
-                    if (m.has(o[k])) return m.get(o[k]);
-                    if (i + 1 === length) {
-                        child = Object.assign(...groups.map(k => ({
-                            [k]: o[k]
-                        })), {
-                            [valueKey]: 0
-                        });
-                        r.push(child);
-                    } else {
-                        child = new Map;
-                    }
-                    m.set(o[k], child);
-                    return child;
-                }, map)[valueKey] += +o[valueKey];
-                return r;
-            }, [])
-        },
-        _groupBy: function (array, param) {
-            return array.reduce(function (groups, item) {
-                const val = item[param]
-                groups[val] = groups[val] || []
-                groups[val].push(item)
-                return groups
-            }, {});
-        },
-		zfill: function(number, width) {
+		_groupByKey: function (array, groups, valueKey) {
+			var map = new Map;
+			groups = [].concat(groups);
+			return array.reduce((r, o) => {
+				groups.reduce((m, k, i, {
+					length
+				}) => {
+					var child;
+					if (m.has(o[k])) return m.get(o[k]);
+					if (i + 1 === length) {
+						child = Object.assign(...groups.map(k => ({
+							[k]: o[k]
+						})), {
+							[valueKey]: 0
+						});
+						r.push(child);
+					} else {
+						child = new Map;
+					}
+					m.set(o[k], child);
+					return child;
+				}, map)[valueKey] += +o[valueKey];
+				return r;
+			}, [])
+		},
+		_groupBy: function (array, param) {
+			return array.reduce(function (groups, item) {
+				const val = item[param]
+				groups[val] = groups[val] || []
+				groups[val].push(item)
+				return groups
+			}, {});
+		},
+		zfill: function (number, width) {
 			var numberOutput = Math.abs(number); /* Valor absoluto del número */
-			var length = number.toString().length; /* Largo del número */ 
-			var zero = "0"; /* String de cero */  
-			
+			var length = number.toString().length; /* Largo del número */
+			var zero = "0"; /* String de cero */
+
 			if (width <= length) {
 				if (number < 0) {
-					 return ("-" + numberOutput.toString()); 
+					return ("-" + numberOutput.toString());
 				} else {
-					 return numberOutput.toString(); 
+					return numberOutput.toString();
 				}
 			} else {
 				if (number < 0) {
-					return ("-" + (zero.repeat(width - length)) + numberOutput.toString()); 
+					return ("-" + (zero.repeat(width - length)) + numberOutput.toString());
 				} else {
-					return ((zero.repeat(width - length)) + numberOutput.toString()); 
+					return ((zero.repeat(width - length)) + numberOutput.toString());
 				}
 			}
 		},
 
-        onInvoiceDateChange: function(oEvent){
-            var oSource = oEvent.getSource();
-            var sValue = oSource.getValue();
+		onInvoiceDateChange: function (oEvent) {
+			var oSource = oEvent.getSource();
+			var sValue = oSource.getValue();
 			var booleanFormatDate = this.formatValidateDate(sValue);
 			if (!booleanFormatDate) {
-                this.getMessageBox('error', this.getI18nText("sErrorChangeDatePicker") + sValue);
-                oSource.setValue("");
-                return;
+				this.getMessageBox('error', this.getI18nText("sErrorChangeDatePicker") + sValue);
+				oSource.setValue("");
+				return;
 			}
-			
+
 			var booleanDate = this.ValidateDate(sValue);
 			if (!booleanDate) {
 				this.getMessageBox('error', this.getI18nText("sErrorChangeDatePicker") + sValue);
-                oSource.setValue("");
-                return;
+				oSource.setValue("");
+				return;
 			}
-			
-			var dateReverseToString = this.reverseStringForParameter(sValue,"/");
+
+			var dateReverseToString = this.reverseStringForParameter(sValue, "/");
 			var booleanValidateDate = Date.parse(dateReverseToString);
-			
+
 			if (isNaN(booleanValidateDate)) {
 				this.getMessageBox('error', this.getI18nText("sErrorChangeDatePicker") + sValue);
-                oSource.setValue("");
-                return;
+				oSource.setValue("");
+				return;
 			}
-			
+
 			oSource.setValue(sValue);
 		},
-        ValidateFormatDate: function(sValue){
+		ValidateFormatDate: function (sValue) {
 			var booleanFormatDate = this.formatValidateDate(sValue);
 			if (!booleanFormatDate) {
 				return false;
 			}
-			
+
 			var booleanDate = this.ValidateDate(sValue);
 			if (!booleanDate) {
 				return false;
 			}
-			
-			var dateReverseToString = this.reverseStringForParameter(sValue,"/");
+
+			var dateReverseToString = this.reverseStringForParameter(sValue, "/");
 			var booleanValidateDate = Date.parse(dateReverseToString);
-			
+
 			if (isNaN(booleanValidateDate)) {
 				return false;
 			}
-			
+
 			return true;
 		},
-        formatValidateDate:function(campo){
+		formatValidateDate: function (campo) {
 			var RegExPattern = /^\d{1,2}\/\d{1,2}\/\d{2,4}$/;
-			if ((campo.match(RegExPattern)) && (campo!='')) {
+			if ((campo.match(RegExPattern)) && (campo != '')) {
 				return true;
 			} else {
 				return false;
 			}
 		},
-		ValidateDate:function(fecha){
+		ValidateDate: function (fecha) {
 			var fechaf = fecha.split("/");
 			var day = fechaf[0];
 			var month = fechaf[1];
 			var year = fechaf[2];
-			var date = new Date(year,month,'0');
-			if((day-0)>(date.getDate()-0)){
+			var date = new Date(year, month, '0');
+			if ((day - 0) > (date.getDate() - 0)) {
 				return false;
 			}
 			return true;
 		},
 
-		xmlToJson: function(xml) {
+		xmlToJson: function (xml) {
 			function parse(node, j) {
-			  var nodeName = node.nodeName.replace(/^.+:/, '').toLowerCase();
-			  var cur = null;
-			  var text = $(node).contents().filter(function(x) {
-				return this.nodeType === 3;
-			  });
-			  if (text[0] && text[0].nodeValue.trim()) {
-				cur = text[0].nodeValue;
-			  } else {
-				cur = {};
-				$.each(node.attributes, function() {
-				  if (this.name.indexOf('xmlns:') !== 0) {
-					cur[this.name.replace(/^.+:/, '')] = this.value;
-				  }
+				var nodeName = node.nodeName.replace(/^.+:/, '').toLowerCase();
+				var cur = null;
+				var text = $(node).contents().filter(function (x) {
+					return this.nodeType === 3;
 				});
-				$.each(node.children, function() {
-				  parse(this, cur);
-				});
-			  }
-			  
-			  j[nodeName] = cur;
+				if (text[0] && text[0].nodeValue.trim()) {
+					cur = text[0].nodeValue;
+				} else {
+					cur = {};
+					$.each(node.attributes, function () {
+						if (this.name.indexOf('xmlns:') !== 0) {
+							cur[this.name.replace(/^.+:/, '')] = this.value;
+						}
+					});
+					$.each(node.children, function () {
+						parse(this, cur);
+					});
+				}
+
+				j[nodeName] = cur;
 			}
-		   
+
 			var roots = $(xml);
-			var root = roots[roots.length-1];
+			var root = roots[roots.length - 1];
 			var json = {};
 			parse(root, json);
 			console.log(json);
@@ -921,8 +921,8 @@ sap.ui.define([
 		formatDayDateHana: function (e) {
 			if (e) {
 				var split = e.split("T");
-				var date = split[0].replaceAll("-","/");
-				var fechaf = this.reverseStringForParameter(date,"/");;
+				var date = split[0].replaceAll("-", "/");
+				var fechaf = this.reverseStringForParameter(date, "/");;
 				return fechaf;
 			}
 		},
@@ -962,51 +962,51 @@ sap.ui.define([
 		},
 
 		formatYYYYMMDDAbapStringDate: function (e) {
-			if(this.isEmpty(e)){
+			if (this.isEmpty(e)) {
 				return "";
-			}else{
-				var fecha=new Date(parseInt(e.split("(")[1].split(")")[0]));
+			} else {
+				var fecha = new Date(parseInt(e.split("(")[1].split(")")[0]));
 				fecha.setHours(fecha.getHours() + 24);
-				var fechaOC=this.getYYYYMMDD(fecha);
+				var fechaOC = this.getYYYYMMDD(fecha);
 				return fechaOC;
 			}
 		},
 
-		convertformatDateTotalAbapInDateTotal: function(sValueDate, sValueHour){
-			if(sValueDate != null &&  sValueDate != ""){
+		convertformatDateTotalAbapInDateTotal: function (sValueDate, sValueHour) {
+			if (sValueDate != null && sValueDate != "") {
 				var hour = "";
-				if(sValueHour != null &&  sValueHour != ""){
+				if (sValueHour != null && sValueHour != "") {
 					hour = this.convertformatHourAbapInHour(sValueHour);
 				}
 				var fecha = "";
-				if(hour){
-					fecha = new Date(sValueDate.substr(0,4)+"/"+sValueDate.substr(4,2)+"/"+sValueDate.substr(6,2) + " " + hour);
-				}else{
-					fecha = new Date(sValueDate.substr(0,4)+"/"+sValueDate.substr(4,2)+"/"+sValueDate.substr(6,2));
+				if (hour) {
+					fecha = new Date(sValueDate.substr(0, 4) + "/" + sValueDate.substr(4, 2) + "/" + sValueDate.substr(6, 2) + " " + hour);
+				} else {
+					fecha = new Date(sValueDate.substr(0, 4) + "/" + sValueDate.substr(4, 2) + "/" + sValueDate.substr(6, 2));
 				}
 				return fecha;
-			}else{
+			} else {
 				return sValue;
 			}
 		},
-		convertformatDateAbapInDate: function(sValue){
-			if(sValue != null &&  sValue != ""){
-				var fecha = new Date(sValue.substr(0,4) + "/" + sValue.substr(4,2) + "/" +sValue.substr(6,2) );
+		convertformatDateAbapInDate: function (sValue) {
+			if (sValue != null && sValue != "") {
+				var fecha = new Date(sValue.substr(0, 4) + "/" + sValue.substr(4, 2) + "/" + sValue.substr(6, 2));
 				return fecha;
-			}else{
+			} else {
 				return sValue;
 			}
 		},
-		convertformatHourAbapInHour: function(sValue){
-			if(sValue != null &&  sValue != ""){
-				var hour = sValue.substr(0,2) + ":" + sValue.substr(2,2) + ":" +sValue.substr(4,2);
+		convertformatHourAbapInHour: function (sValue) {
+			if (sValue != null && sValue != "") {
+				var hour = sValue.substr(0, 2) + ":" + sValue.substr(2, 2) + ":" + sValue.substr(4, 2);
 				return hour;
-			}else{
+			} else {
 				return sValue;
 			}
 		},
-		convertformatDateInAbap: function(sValue){
-			if(sValue != null &&  sValue != ""){
+		convertformatDateInAbap: function (sValue) {
+			if (sValue != null && sValue != "") {
 				var t = (sValue.getDate()).toString();
 				var n = (sValue.getMonth() + 1).toString();
 				var r = (sValue.getFullYear()).toString();
@@ -1018,27 +1018,27 @@ sap.ui.define([
 				}
 				var o = r + n + t;
 				return o;
-			}else{
+			} else {
 				return sValue;
 			}
 		},
-		reformatDateString: function(s) {
+		reformatDateString: function (s) {
 			var b = s.split(/\D/);
 			return b.reverse().join('/');
 		},
 		formatDayRayDateSl: function (value) {
-			if(value){
-				var date = value.replaceAll("-","/");
+			if (value) {
+				var date = value.replaceAll("-", "/");
 				return date;
-			}else{
+			} else {
 				return "";
 			}
 		},
-		formatDaySlDateRay: function(value){
-			if(value){
-				var date = value.replaceAll("/","-");
+		formatDaySlDateRay: function (value) {
+			if (value) {
+				var date = value.replaceAll("/", "-");
 				return date;
-			}else{
+			} else {
 				return "";
 			}
 		},
@@ -1048,11 +1048,11 @@ sap.ui.define([
 			if (!this.isEmpty(sValue)) {
 				var sFechaInicio = "";
 				var bFechaInicio = "";
-				
+
 				sFechaInicio = sValue.trim();
-				
+
 				var booleanValidateFirst = this.ValidateFormatDate(sFechaInicio);
-				if(!booleanValidateFirst){
+				if (!booleanValidateFirst) {
 					this.getMessageBox('error', this.getI18nText("sErrorChangeDatePicker") + sValue);
 					oSource.setValue("");
 					this._byId("dpDateFilterHasta").setValue("");
@@ -1076,11 +1076,11 @@ sap.ui.define([
 			if (!this.isEmpty(sValue)) {
 				var sFechaInicio = "";
 				var bFechaInicio = "";
-				
+
 				sFechaInicio = sValue.trim();
-				
+
 				var booleanValidateFirst = this.ValidateFormatDate(sFechaInicio);
-				if(!booleanValidateFirst){
+				if (!booleanValidateFirst) {
 					this.getMessageBox('error', this.getI18nText("sErrorChangeDatePicker") + sValue);
 					oSource.setValue("");
 					return;
@@ -1092,85 +1092,84 @@ sap.ui.define([
 				oSource.setValue("");
 			}
 		},
-		_onNavigateDateHasta:function(oEvent){
+		_onNavigateDateHasta: function (oEvent) {
 			var oSource = oEvent.getSource();
 			var sValueDesde = this._byId("dpDateFilterDesde").getValue();
 			var sValueDesdeSplit = sValueDesde.split("/");
 			var year = parseInt(sValueDesdeSplit[2]);
 			var mount = parseInt(sValueDesdeSplit[1]);
 			var day = parseInt(sValueDesdeSplit[0]);
-			oSource.setMinDate(new Date(year, mount-1, day));
+			oSource.setMinDate(new Date(year, mount - 1, day));
 		},
-		onColorForState: function(value){
+		onColorForState: function (value) {
 			var sReturn;
-			if(this.isEmpty(value)){
+			if (this.isEmpty(value)) {
 				sReturn = "None";
-			}else{
+			} else {
 				switch (value) {
-					case "N":
-						sReturn = "None";
-						break;
-					case "S":
-						sReturn = "Success";
-						break;
-					case "E":
-						sReturn = "Error";
-						break;
-					case "W":
-						sReturn = "Warning";
-						break;
-					case "I":
-						sReturn = "Information";
-						break;
-					case "C":
-						sReturn = "Confirm";
-						break;
-					default:
-						sReturn = "None";
-						break;
+				case "N":
+					sReturn = "None";
+					break;
+				case "S":
+					sReturn = "Success";
+					break;
+				case "E":
+					sReturn = "Error";
+					break;
+				case "W":
+					sReturn = "Warning";
+					break;
+				case "I":
+					sReturn = "Information";
+					break;
+				case "C":
+					sReturn = "Confirm";
+					break;
+				default:
+					sReturn = "None";
+					break;
 				}
 			}
 			return sReturn;
 		},
-		fnExportarExcel: function(oData1,oData2,oData3,sAuthor){
+		fnExportarExcel: function (oData1, oData2, oData3, sAuthor) {
 			var that = this;
 			var jsonDataTotal = oData1;
 			var jsonDataMaster = oData2;
 			var jsonDataHija = oData3;
-			
-			
-			var jsonDataTableExcel=[];
-			if(jsonDataTotal.length != 0){
-				for(var i=0;i<jsonDataTotal.length;i++){
+
+			var jsonDataTableExcel = [];
+			if (jsonDataTotal.length != 0) {
+				for (var i = 0; i < jsonDataTotal.length; i++) {
 					jsonDataTableExcel.push(jsonDataTotal[i]);
 				}
 			}
-			if(jsonDataMaster.length != 0){
-				for(var i=0;i<jsonDataMaster.length;i++){
+			if (jsonDataMaster.length != 0) {
+				for (var i = 0; i < jsonDataMaster.length; i++) {
 					jsonDataTableExcel.push(jsonDataMaster[i]);
 				}
-			}else if(jsonDataHija.length != 0){
-				for(var j=0;j<jsonDataHija.length;j++){
+			} else if (jsonDataHija.length != 0) {
+				for (var j = 0; j < jsonDataHija.length; j++) {
 					jsonDataTableExcel.push(jsonDataHija[j]);
 				}
 			}
-			
-			if(jsonDataTableExcel.length < 1){
+
+			if (jsonDataTableExcel.length < 1) {
 				this.getMessageBox("error", this.getI18nText("errorNoDataExport"));
 				return;
 			}
-			
+
 			var aCols, oSettings;
 
 			aCols = this.createColumnConfig();
 			var dDate = new Date();
 			var sGetTime = dDate.getTime().toString();
-			var sTitleExcel = this.getI18nText("sTitleExport")+'-'+sGetTime+'.xlsx';
+			var sTitleExcel = this.getI18nText("sTitleExport") + '-' + sGetTime + '.xlsx';
 			var sTitleDocument = ""
-			if(this.isEmpty(sAuthor)){
+			if (this.isEmpty(sAuthor)) {
 				sTitleDocument = this.getI18nText("Token");
-			}else{
-				sTitleDocument = this.getI18nText("Token")+"-"+sAuthor;
+			} else {
+				sTitleDocument = this.getI18nText("Token") + "-" + sAuthor;
 			}
 
 			oSettings = {
@@ -1203,12 +1202,11 @@ sap.ui.define([
 					property: 'Matnr',
 					width: '20',
 					type: 'String'
-				},
-				{
+				}, {
 					label: this.getI18nText("titleExportColCantidad"),
 					property: 'cantidad',
 					width: '15'
-				}, 
+				},
 				// {
 				// 	label: this.getI18nText("titleExportColPrecio"),
 				// 	property: 'Kbetr',
@@ -1216,20 +1214,21 @@ sap.ui.define([
 				// }
 			];
 		},
-		fnLiveChangeInputsNotEmptyEmail:function(oEvent){//solo para inputs
-			const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;  
-			var value=oEvent.getSource().getValue();
-			
+		fnLiveChangeInputsNotEmptyEmail: function (oEvent) { //solo para inputs
+			const re =
+				/^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+			var value = oEvent.getSource().getValue();
+
 			re.test(value.toLowerCase());
-			
-			if(value == "" || value == undefined){
+
+			if (value == "" || value == undefined) {
 				oEvent.getSource().setValueState("Error");
 				oEvent.getSource().setValueStateText(this.getI18nText("textCampoVacio"));
-			}else{
+			} else {
 				if (!re.test(value.toLowerCase())) {
 					oEvent.getSource().setValueState("Error");
 					oEvent.getSource().setValueStateText(this.getI18nText("textCorreoNoValido"));
-				}else{
+				} else {
 					oEvent.getSource().setValueState("Success");
 				}
 			}
@@ -1251,121 +1250,148 @@ sap.ui.define([
 			return sProveedor;
 		},
 
-        getDataHana: function(){
-            try{
-                return new Promise(function (resolve, reject) {
-                    var filtro = {
-                        "oResults": {
-                            "MODULO": "MM",
-                            "APLICATIVO": "SOLICITAR_CITA",
-                        }
-                    };
-                    util.response.validateAjaxGetHana(models.JsonGetHana(), {
-                        success: function (oData, message) {
-                            resolve(oData);
-                        },
-                        error: function (message) {
-                            reject(message);
-                        }
-                    });
-                });
-            }catch(oError){
-                that.getMessageBox("error", that.getI18nText("sErrorTry"));
-            }
-        },
-        getERPStatus:function(){
-            try{
-                return new Promise(function (resolve, reject) {
-                    var respuestaService = {
-                        iCode:1,
-                        c: "suc",
-                        u: constantes.services.getERPStatus,
-                        m: "Exito HTTP - GET",
-                        data: models.JsonGetERPStatus().d.results 
-                    };
-                    util.response.validateAjaxGetERPNotMessage(respuestaService, {
-                        success: function (oData, message) {
-                            resolve(oData);
-                        },
-                        error: function (message) {
-                            reject(message);
-                        }
-                    });
-                });
-            }catch(oError){
-                that.getMessageBox("error", that.getI18nText("sErrorTry"));
-            }
-        },
-        getERPArea: function(){
-            try{
-                return new Promise(function (resolve, reject) {
-                    var respuestaService = {
-                        iCode:1,
-                        c: "suc",
-                        u: constantes.services.getERPArea,
-                        m: "Exito HTTP - GET",
-                        data: models.JsonGetERPArea().d.results 
-                    };
-                    util.response.validateAjaxGetERPNotMessage(respuestaService, {
-                        success: function (oData, message) {
-                            resolve(oData);
-                        },
-                        error: function (message) {
-                            reject(message);
-                        }
-                    });
-                });
-            }catch(oError){
-                that.getMessageBox("error", that.getI18nText("sErrorTry"));
-            }
-        },
-		getERPLumpType: function(){
-            try{
-                return new Promise(function (resolve, reject) {
-                    var respuestaService = {
-                        iCode:1,
-                        c: "suc",
-                        u: constantes.services.getERPLumpType,
-                        m: "Exito HTTP - GET",
-                        data: models.JsonGetERPLumpType().d.results 
-                    };
-                    util.response.validateAjaxGetERPNotMessage(respuestaService, {
-                        success: function (oData, message) {
-                            resolve(oData);
-                        },
-                        error: function (message) {
-                            reject(message);
-                        }
-                    });
-                });
-            }catch(oError){
-                that.getMessageBox("error", that.getI18nText("sErrorTry"));
-            }
-        },
-		getERPMeasurementUnits: function(){
-            try{
-                return new Promise(function (resolve, reject) {
-                    var respuestaService = {
-                        iCode:1,
-                        c: "suc",
-                        u: constantes.services.getERPMeasurementUnits,
-                        m: "Exito HTTP - GET",
-                        data: models.JsonGetERPMeasurementUnits().d.results 
-                    };
-                    util.response.validateAjaxGetERPNotMessage(respuestaService, {
-                        success: function (oData, message) {
-                            resolve(oData);
-                        },
-                        error: function (message) {
-                            reject(message);
-                        }
-                    });
-                });
-            }catch(oError){
-                that.getMessageBox("error", that.getI18nText("sErrorTry"));
-            }
-        },
-		_onCasoUso:function(){
+		getDataHana: function () {
+			try {
+				return new Promise(function (resolve, reject) {
+					var filtro = {
+						"oResults": {
+							"MODULO": "MM",
+							"APLICATIVO": "SOLICITAR_CITA",
+						}
+					};
+					Services.consultarUser(this, oFiltro, function (result) {
+						util.response.validateAjaxGetHana(models.JsonGetHana(), {
+							success: function (oData, message) {
+								resolve(oData);
+							},
+							error: function (message) {
+								reject(message);
+							}
+						});
+					});
+
+				});
+			} catch (oError) {
+				that.getMessageBox("error", that.getI18nText("sErrorTry"));
+			}
+		},
+		getDataMaestro: function () {
+			try {
+				that = this;
+				return new Promise(function (resolve, reject) {
+					var oCodigoTable = ["T_ERP_STATUS","T_ERP_AREA","T_ERP_LUMP_TYPE","T_ERP_UNIDADES","T_ERP_MOTIVE"];
+					var oFiltro = [];
+					oCodigoTable.forEach(function (codigo) {
+						oFiltro.push(new Filter("CodigoTabla", "EQ", codigo));
+					})
+					Services.getoDataVGenericaCampo(that, oFiltro, function (result) {
+						util.response.validateAjaxGetHanaMaestro(result, {
+							success: function (oData, message) {
+								resolve(oData);
+							},
+							error: function (message) {
+								reject(message);
+							}
+						});
+					});
+				});
+			} catch (oError) {
+				that.getMessageBox("error", that.getI18nText("sErrorTry"));
+			}
+		},
+		getERPStatus: function () {
+			try {
+				return new Promise(function (resolve, reject) {
+					var respuestaService = {
+						iCode: 1,
+						c: "suc",
+						u: constantes.services.getERPStatus,
+						m: "Exito HTTP - GET",
+						data: models.JsonGetERPStatus().d.results
+					};
+					util.response.validateAjaxGetERPNotMessage(respuestaService, {
+						success: function (oData, message) {
+							resolve(oData);
+						},
+						error: function (message) {
+							reject(message);
+						}
+					});
+				});
+			} catch (oError) {
+				that.getMessageBox("error", that.getI18nText("sErrorTry"));
+			}
+		},
+		getERPArea: function () {
+			try {
+				return new Promise(function (resolve, reject) {
+					var respuestaService = {
+						iCode: 1,
+						c: "suc",
+						u: constantes.services.getERPArea,
+						m: "Exito HTTP - GET",
+						data: models.JsonGetERPArea().d.results
+					};
+					util.response.validateAjaxGetERPNotMessage(respuestaService, {
+						success: function (oData, message) {
+							resolve(oData);
+						},
+						error: function (message) {
+							reject(message);
+						}
+					});
+				});
+			} catch (oError) {
+				that.getMessageBox("error", that.getI18nText("sErrorTry"));
+			}
+		},
+		getERPLumpType: function () {
+			try {
+				return new Promise(function (resolve, reject) {
+					var respuestaService = {
+						iCode: 1,
+						c: "suc",
+						u: constantes.services.getERPLumpType,
+						m: "Exito HTTP - GET",
+						data: models.JsonGetERPLumpType().d.results
+					};
+					util.response.validateAjaxGetERPNotMessage(respuestaService, {
+						success: function (oData, message) {
+							resolve(oData);
+						},
+						error: function (message) {
+							reject(message);
+						}
+					});
+				});
+			} catch (oError) {
+				that.getMessageBox("error", that.getI18nText("sErrorTry"));
+			}
+		},
+		getERPMeasurementUnits: function () {
+			try {
+				return new Promise(function (resolve, reject) {
+					var respuestaService = {
+						iCode: 1,
+						c: "suc",
+						u: constantes.services.getERPMeasurementUnits,
+						m: "Exito HTTP - GET",
+						data: models.JsonGetERPMeasurementUnits().d.results
+					};
+					util.response.validateAjaxGetERPNotMessage(respuestaService, {
+						success: function (oData, message) {
+							resolve(oData);
+						},
+						error: function (message) {
+							reject(message);
+						}
+					});
+				});
+			} catch (oError) {
+				that.getMessageBox("error", that.getI18nText("sErrorTry"));
+			}
+		},
+		_onCasoUso: function () {
 			//en caso de usar el main
 		}
 	});

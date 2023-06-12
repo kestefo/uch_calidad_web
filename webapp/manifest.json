@@ -12,6 +12,16 @@
 		"sourceTemplate": {
 			"id": "ui5template.basicSAPUI5ApplicationProject",
 			"version": "1.40.12"
+		},
+		"dataSources": {
+			"serviceOdata": {
+				"uri": "/hana/BnvService/Core/OData/services.xsodata",
+				"type": "OData",
+				"settings": {
+					"odataVersion": "2.0",
+					"localUri": "localService/metadata.xml"
+				}
+			}
 		}
 	},
 
@@ -66,7 +76,12 @@
 			"oModelGet": {
 				"type": "sap.ui.model.json.JSONModel",
 				"preload": true,
+				"dataSource": "serviceOdata",
 				"settings": {}
+			},
+			"oModelGetMaestro": {
+				"preload": true,
+				"dataSource": "serviceOdata"
 			},
 			"oModelUser": {
 				"type": "sap.ui.model.json.JSONModel",

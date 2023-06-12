@@ -5,7 +5,7 @@ sap.ui.define([
 		idProyecto: "tomapedido",
 		PaginaHome: "Main",
 		IdApp: "Solicitar_Cita",
-		modelOdata: "modelOdata",
+		modelOdata: "oModelGetMaestro",
 		root: "/",
 		userApi: "API-USER-IAS",
 		services: {

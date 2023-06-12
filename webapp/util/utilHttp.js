@@ -150,7 +150,7 @@ sap.ui.define([
 		},
 		serviceRootpath: function () {
 			var rootPath;
-				rootPath = "/hana/IPROVIDER";
+				rootPath = "/hana/IPROVIDER_ENTREGA";
 				//rootPath = "https://flpnwc-zdlgl0m4e5.dispatcher.br1.hana.ondemand.com/BnvDev";//Debugg
 			return rootPath;
 		},

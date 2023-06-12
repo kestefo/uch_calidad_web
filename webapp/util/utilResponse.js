@@ -1,6 +1,7 @@
 sap.ui.define([
-	"./utilUI"
-], function(utilUI) {
+	"./utilUI",
+	"../estructuras/Estructura"
+], function(utilUI, Estructura) {
     "use strict";
     return {
     	iCodeSuccess	: 1,
@@ -120,6 +121,37 @@ sap.ui.define([
         	}
         },
         validateAjaxGetHana: function(result,events){
+        	var valid = result.oAuditResponse;
+        	if(valid.iCode === 1){
+        		//Dato Variable depende de la situacion
+        		// utilUI.onMessageSuccessDialogPress2(valid.sIdTransaction, valid.sMessage);
+        		// utilUI.onMessageSuccessDialogPress(valid.sIdTransaction, valid.sMessage);
+        		//Dato Variable depende de la situacion
+        		events.success(result,valid.m);
+        	}else{
+        		if(result.u){
+        			utilUI.onMessageErrorDialogPress2("Error en el metodo " + result.u);
+        		}else{
+        			utilUI.onMessageErrorDialogPress2(result.oAuditResponse.sMessage);
+        		}
+        		events.error(valid);
+        	}
+        },
+        validateAjaxGetHanaMaestro: function(result,events){
+        	var valid = result.oAuditResponse;
+        	if(valid.iCode === 1){
+				var oEstructura = Estructura.maestro.mapVGenericaCampoNotModel(self, result.oResults);
+				events.success(oEstructura,valid.sMessage);
+        	}else{
+        		if(result.u){
+        			utilUI.onMessageErrorDialogPress2("Error en el metodo " + result.u);
+        		}else{
+        			utilUI.onMessageErrorDialogPress2(result.oAuditResponse.sMessage);
+        		}
+        		events.error(valid);
+        	}
+        },
+        validateAjaxGetHanaGroup: function(result,events){
         	var valid = result.oAuditResponse;
         	if(valid.iCode === 1){
         		//Dato Variable depende de la situacion

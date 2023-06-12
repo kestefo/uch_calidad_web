@@ -15,6 +15,14 @@ sap.ui.define([
 				self.getView().getModel(nameModel).setProperty("/" + nameTable, modelSet);
 				self.getView().getModel(nameModel).refresh(true);
 			},
+			mapComboGeneralNotModel: function (self, nameTable, campoKey, campoDescripcion, servDatos) {
+				var modelSet = [];
+				var modDatos = servDatos;
+				modDatos.Codigo = campoKey;
+				modDatos.Descripcion = campoDescripcion;
+
+				return modDatos;
+			},
 			mapVGenericaCampo: function (self, datos) {
 				var servDatos = datos;
 				// var via = self.getView().getModel("DetailModel").getProperty("/Itinerario/CodVia");
@@ -38,7 +46,51 @@ sap.ui.define([
 					}
 				}
 			},
+			mapVGenericaCampoNotModel: function (self, datos) {
+				var servDatos = datos;
+				var oResults = [];
+				var oResultsGroup = [];
+				var oResultsGroup2 = [];
+				
+				$.each(this._groupBy(datos,"CodigoTabla"), function (x, y) {
+					y.forEach(function(value){
+						delete value["__metadata"];
+						value.Codigo = 	value.CodigoTabla;
+						value.Descripcion = value.Campo;
+					});
+					
+					var sJsonKey = '"'+x+'":'+ JSON.stringify(y);
+					oResultsGroup.push(sJsonKey);
+				});
+				
+				var sJsonTotal = "";
+					oResultsGroup.forEach(function(value,index){
+						if(oResultsGroup.length > 1){
+							if(index === 0){
+								sJsonTotal += '{' +value + ',';
+							}else if(index === oResultsGroup.length-1){
+								sJsonTotal += value + '}';
+							}else {
+								sJsonTotal += value + ',';
+							}
+						}else{
+							sJsonTotal += '{' + value + '}';
+						}
+					});
+				
+				var oJsonTotal = JSON.parse(sJsonTotal);
+				return oJsonTotal;
+			},
+			_groupBy: function (array, param) {
+				return array.reduce(function (groups, item) {
+					const val = item[param]
+					groups[val] = groups[val] || []
+					groups[val].push(item)
+					return groups
+				}, {});
+			}
 		},
+		
 		masterPage: {
 			masterImportacion: function (datos) {
 				var servDatos = datos;
