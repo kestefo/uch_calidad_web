@@ -1,0 +1,231 @@
+<mvc:View controllerName="solicitarcitapr.controller.OrderNoOC"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m"
+    xmlns:f="sap.ui.layout.form"
+	xmlns:core="sap.ui.core"
+    xmlns:ui="sap.ui.table">
+    <Page id="pageOrderNoOC" title="{i18n>titleOrderNoOC}">
+        <content >
+            <VBox class="sapUiSmallMargin">
+                <f:Form id="FormDisplay354wideDual"
+                    editable="false">
+                    <f:title>
+                        <core:Title text="{i18n>titleFormOrderNoOC}" />
+                    </f:title>
+                    <f:layout>
+                        <f:ResponsiveGridLayout
+                            adjustLabelSpan="false" columnsL="2" labelSpanL="3" columnsM="1" labelSpanM="2" labelSpanS="12"/>
+                    </f:layout>
+                    <f:formContainers>
+                        <f:FormContainer>
+                            <f:formElements>
+                                <f:FormElement label="{i18n>lbCondicionEntrega}">
+                                    <f:fields>
+                                        <Select
+                                            change="fnSelectedCondEntregaOC"
+                                            forceSelection="false"
+                                            items="{
+                                                path: 'oModelGet>/oCondEnt'
+                                            }">
+                                            <core:Item key="{oModelGet>CodigoCondicion}" text="{oModelGet>DescripcionCondicion}" />
+                                        </Select>
+                                    </f:fields>
+                                </f:FormElement>
+                                <f:FormElement label="{i18n>lbEmpresa}">
+                                    <f:fields>
+                                        <Select
+                                            change="fnSelectedDestino"
+                                            forceSelection="false"
+                                            items="{
+                                                path: 'oModelGet>/oEmpresa'
+                                            }">
+                                            <core:Item key="{oModelGet>Bukrs}" text="{oModelGet>Butxt}" />
+                                        </Select>
+                                    </f:fields>
+                                </f:FormElement>
+                                <f:FormElement label="{i18n>lbDestinoFinal}">
+                                    <f:fields>
+                                        <Select
+                                        change=""
+                                            forceSelection="false"
+                                            items="{
+                                                path: 'oModelGet>/oDestino'
+                                            }">
+                                            <core:Item key="{oModelGet>Werks}" text="{oModelGet>Namew_f}" />
+                                        </Select>
+                                    </f:fields>
+                                </f:FormElement>
+                                <f:FormElement label="{i18n>lbMotivo}">
+                                    <f:fields>
+                                        <Select
+                                            forceSelection="false"
+                                            items="{
+                                                path: 'oModelGet>/oMotivo'
+                                            }">
+                                            <core:Item key="{oModelGet>Motivo}" text="{oModelGet>DescMotivo}" />
+                                        </Select>
+                                    </f:fields>
+                                </f:FormElement>
+                            </f:formElements>
+                        </f:FormContainer>
+                        <f:FormContainer>
+                            <f:formElements>
+                                <f:FormElement label="{i18n>lbDestinatarioFinal}">
+                                    <f:fields>
+                                        <Input
+                                            liveChange="fnLiveChangeInputsNotEmptyEmail"
+                                            id="inputEmail"
+                                            type="Email"
+                                            placeholder="{i18n>textIngreseCorreo}"
+                                            class="sapUiSmallMarginBottom" />
+                                    </f:fields>
+                                </f:FormElement>
+                                <f:FormElement label="{i18n>lbCantidadEmbalaje}">
+                                    <f:fields>
+                                        <Text id="textCantEnt" text="{Twitter}" />
+                                    </f:fields>
+                                </f:FormElement>
+                                <f:FormElement label="{i18n>lbAreaSolicitante}">
+                                    <f:fields>
+                                        <Select
+                                            forceSelection="false"
+                                            items="{
+                                                path: 'oModelGet>/oArea'
+                                            }">
+                                            <core:Item key="{oModelGet>CodArea}" text="{oModelGet>DescArea}" />
+                                        </Select>
+                                    </f:fields>
+                                </f:FormElement>
+                            </f:formElements>
+                        </f:FormContainer>
+                    </f:formContainers>
+                </f:Form>
+                <ui:Table id="tableEmbalajes" visibleRowCount="4" rows="{path:'oModel>/oEmbalajeEntregasinOC'}">
+                    <ui:extension>
+                        <OverflowToolbar style="Clear">
+                        <content>
+                        <Title id="titleEmbalajes" text="{i18n>titleEmbalajes}"/>
+                        <ToolbarSpacer width=""/>
+                        <Button id="idbtnTableEmbalajesCopy" text="{i18n>btnEmbalajesCopy}" icon="sap-icon://copy" type="Emphasized"/>
+                        <Button id="idbtnTableEmbalajesAdd" press="fnPressAddEmbalajes" text="{i18n>btnEmbalajesAdd}" icon="sap-icon://add" type="Accept"/>
+                        <Button id="idbtnTableEmbalajesDelete" text="{i18n>btnEmbalajesDelete}" icon="sap-icon://delete" type="Reject"/>
+                        </content>
+                        </OverflowToolbar>
+					</ui:extension>
+                    <ui:columns>
+                        <ui:Column width="auto" hAlign="Center">
+                            <Label text="{i18n>titleNEmbalaje}" />
+                            <ui:template>
+                            <Text text="{oModel>nEmbalaje}" wrapping="false" />
+                            </ui:template>
+                        </ui:Column>
+                        <ui:Column width="auto" hAlign="Center">
+                            <Label text="{i18n>titleTipoNEmbalaje}" />
+                            <ui:template>
+                            <Select 
+								change		="fnSelectedTipoBultoEntregaOC" 
+								width		="auto" 
+								selectedKey	="{oModel>selectedKey}"
+								items		="{
+											path:'oModelGet>/DataTipoBulto' , templateShareable:false
+											}">
+															
+								<core:Item 	 key="{oModelGet>Vegr2}" text="{oModelGet>Bezei}" />
+							</Select>
+                        </ui:template>
+                        </ui:Column>
+                        <ui:Column width="30%" hAlign="Center">
+                            <Label text="{i18n>titleDesContenido}" />
+                            <ui:template>
+                            <Input type="Text" value="{oModel>descripcionContenido}"  maxLength="40"/>
+                            </ui:template>
+                        </ui:Column>
+                        <ui:Column width="auto" hAlign="Center">
+                            <Label text="{i18n>titlePeso}" />
+                            <ui:template>
+                            <Input type="Text" value="{oModel>peso}" change="fnreemLetrasCant" maxLength="20"/>
+                            </ui:template>
+                        </ui:Column>
+                            <ui:Column width="auto" hAlign="Center">
+                            <Label text="{i18n>titleLongitud}" />
+                            <ui:template>
+                            <Input type="Text" value="{oModel>longitud}" change="fnreemLetrasCant" maxLength="20"/>
+                        </ui:template>
+                        </ui:Column>
+                        <ui:Column width="auto" hAlign="Center">
+                            <Label text="{i18n>titleAncho}" />
+                            <ui:template>
+                            <Input type="Text" value="{oModel>ancho}" change="fnreemLetrasCant" maxLength="20"/>
+                            </ui:template>
+                        </ui:Column>
+                        <ui:Column width="auto" hAlign="Center">
+                            <Label text="{i18n>titleAltura}" />
+                            <ui:template>
+                            <Input type="Text" value="{oModel>altura}" change="fnreemLetrasCant" maxLength="20"/>
+                            </ui:template>
+                        </ui:Column>
+                    </ui:columns>
+                </ui:Table>
+                <ui:Table visibleRowCount="4" class="sapUiLargeMarginTop">
+                    <ui:extension>
+                        <OverflowToolbar style="Clear">
+                        <content>
+                        <Title id="titleItems" text="{i18n>titleItems}"/>
+                        <ToolbarSpacer width=""/>
+                        <Button id="idbtnTableItemsAdd" text="{i18n>btnItemsAdd}" icon="sap-icon://add" type="Accept"/>
+                        <Button id="idbtnTableItemsDelete" text="{i18n>btnItemsDelete}" icon="sap-icon://delete" type="Reject"/>
+                        </content>
+                        </OverflowToolbar>
+					</ui:extension>
+                    <ui:columns>
+                        <ui:Column width="auto" hAlign="Center">
+                            <Label text="{i18n>titleNEmbalaje}" />
+                            <ui:template>
+                            <Text text="{EntregaSinOC>nEmbalaje}" wrapping="false" />
+                            </ui:template>
+                        </ui:Column>
+                        <ui:Column width="auto" hAlign="Center">
+                            <Label text="{i18n>titleItem}" />
+                            <ui:template>
+                            <Text text="{EntregaSinOC>nEmbalaje}" wrapping="false" />
+                        </ui:template>
+                        </ui:Column>
+                        <ui:Column width="25%" hAlign="Center">
+                            <Label text="{i18n>titleDesMaterial}" />
+                            <ui:template>
+                            <Text text="{EntregaSinOC>nEmbalaje}" wrapping="false" />
+                            </ui:template>
+                        </ui:Column>
+                        <ui:Column width="auto" hAlign="Center">
+                            <Label text="{i18n>titleCantidad}" />
+                            <ui:template>
+                            <Text text="{EntregaSinOC>nEmbalaje}" wrapping="false" />
+                            </ui:template>
+                        </ui:Column>
+                            <ui:Column width="auto" hAlign="Center">
+                            <Label text="{i18n>titleUNMMaterial}" />
+                            <ui:template>
+                            <Text text="{EntregaSinOC>nEmbalaje}" wrapping="false" />
+                        </ui:template>
+                        </ui:Column>
+                        <ui:Column width="25%" hAlign="Center">
+                            <Label text="{i18n>titleObservacion}" />
+                            <ui:template>
+                            <Text text="{EntregaSinOC>nEmbalaje}" wrapping="false" />
+                            </ui:template>
+                        </ui:Column>
+                    </ui:columns>
+                </ui:Table>           
+            </VBox>
+        </content>
+        <footer>
+			<OverflowToolbar width="auto" height="auto" design="Auto" enabled="true" visible="true">
+                <content>
+                    <ToolbarSpacer width=""/>
+                    <Button id="guardarEntregaOC" text="{i18n>btnGuardar}"  press="fnPressGuardarOC"  type="Accept" icon="sap-icon://save" iconFirst="true" width="auto" enabled="true" visible="true" iconDensityAware="false"/>
+                    <Button id="cancelarEntregaOC" text="{i18n>btnCancelar}" press="_onPressCancel" icon="sap-icon://cancel" type="Reject" iconFirst="true" width="auto" enabled="true" visible="true" iconDensityAware="false"/>
+                </content>
+			</OverflowToolbar>
+		</footer>
+    </Page>
+</mvc:View>

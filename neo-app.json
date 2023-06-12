@@ -36,7 +36,21 @@
         "entryPath": "/test-resources"
       },
       "description": "SAPUI5 Test Resources"
-    }
+    },
+    {
+      "path": "/hana",
+      "target": {
+        "type": "destination",
+        "name": "HANAXS-SERVICE"
+      },
+      "description": "Back-Dev-Hana"
+    },
   ],
-  "sendWelcomeFileRedirect": true
+  "authenticationMethod": "none",
+  "sendWelcomeFileRedirect": true,
+  "headerWhiteList": [
+    "sToken",
+    "sIdTransaccion",
+    "sAplicacion"
+  ]
 }

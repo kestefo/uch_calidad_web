@@ -1,11 +1,12 @@
 sap.ui.define([
 	"sap/ui/core/UIComponent",
 	"sap/ui/Device",
-	"SolicitarCita/SolicitarCita/model/models"
-], function (UIComponent, Device, models) {
+	"solicitarcitapr/model/models",
+    "sap/ui/model/json/JSONModel"
+], function (UIComponent, Device, models, JSONModel) {
 	"use strict";
 
-	return UIComponent.extend("SolicitarCita.SolicitarCita.Component", {
+	return UIComponent.extend("solicitarcitapr.Component", {
 
 		metadata: {
 			manifest: "json"
@@ -25,6 +26,9 @@ sap.ui.define([
 
 			// set the device model
 			this.setModel(models.createDeviceModel(), "device");
+			
+			var oModelUserLoged = new JSONModel(models.JsonUserLoged());
+            this.setModel(oModelUserLoged, "oModelUser");
 		}
 	});
 });

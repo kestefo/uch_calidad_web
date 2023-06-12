@@ -7,7 +7,7 @@ sap.ui.define([
 
 	Opa5.extendConfig({
 		arrangements: new Startup(),
-		viewNamespace: "SolicitarCita.SolicitarCita.view.",
+		viewNamespace: "solicitarcitapr.view.",
 		autoWait: true
 	});
 });

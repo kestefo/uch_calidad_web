@@ -5,7 +5,7 @@ sap.ui.getCore().attachInit(function () {
 	"use strict";
 
 	sap.ui.require([
-		"SolicitarCita/SolicitarCita/test/unit/AllTests"
+		"solicitarcitapr/test/unit/AllTests"
 	], function () {
 		QUnit.start();
 	});

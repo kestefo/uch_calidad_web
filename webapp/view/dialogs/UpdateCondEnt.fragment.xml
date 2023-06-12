@@ -1,0 +1,19 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:fb="sap.ui.comp.filterbar" xmlns:l="sap.ui.layout"
+	xmlns:custom="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
+	<Dialog title="{i18n>titleDialogAddEan}" contentHeight="auto" contentWidth="auto" afterOpen="_afterOpenAddPedido">
+        <content>
+            <VBox class="sapUiSmallMargin">
+                <Label text="{i18n>lbCondicionEntrega}" />
+                <Select 
+                    id="slTipoCondEntOC"
+                    >
+                    <core:Item text=""/>
+                </Select>
+            </VBox>
+        </content>
+		<buttons>
+			<Button text="{i18n>textbtnConfirm}" press="_onAcceptProductEan" custom:custom="default" type="Accept"/>
+			<Button text="{i18n>cancelText}" press="_onPressClose" custom:custom="AddEanProduct" type="Default"/>
+		</buttons>
+	</Dialog>
+</core:FragmentDefinition>

@@ -1,7 +1,7 @@
 /*global QUnit*/
 
 sap.ui.define([
-	"SolicitarCita/SolicitarCita/controller/Login.controller"
+	"solicitarcitapr/controller/Login.controller"
 ], function (Controller) {
 	"use strict";
 

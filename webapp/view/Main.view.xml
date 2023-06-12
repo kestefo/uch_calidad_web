@@ -1,0 +1,82 @@
+<mvc:View controllerName="solicitarcitapr.controller.Main"
+    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
+    xmlns="sap.m"
+	xmlns:u="sap.ui.unified"
+	xmlns:tnt="sap.tnt"
+	xmlns:core="sap.ui.core"
+	xmlns:custom="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
+    <Page id="pageMain" title="{i18n>titleMain}" titleAlignment="Start">
+        <headerContent>
+            <HBox>
+                <Button press="_onPressHome" icon="sap-icon://home" tooltip="{i18n>tooltipHome}"/>
+                <ToolbarSpacer width=""/>
+                <Button press="_onPressRefresh" icon="sap-icon://refresh" tooltip="{i18n>tooltipRefresh}"/>
+            </HBox>
+        </headerContent>
+        <content >
+            <VBox id="vbMain">
+                <IconTabBar
+                    id="itbPlanAppointment"
+                    select="_onSelectPlan"
+                    expandable="false"
+                    class="sapUiResponsiveContentPadding">
+                    <items>
+                        <IconTabFilter
+                            icon		="sap-icon://grid"
+                            iconColor	="Positive"
+                            design		="Horizontal"
+                            class		="sapUiResponsiveContentPadding"
+                            text		="{i18n>textIconTabFilterPedEmb}"
+                            key			="keyTabFilterPedEmb">
+                            <content>
+                                <core:Fragment fragmentName="solicitarcitapr.view.fragments.TabFilterPedEmb" type="XML"/>
+                            </content>
+                        </IconTabFilter>
+                        <IconTabSeparator />
+                        <IconTabFilter
+                            icon		="sap-icon://list"
+                            iconColor	="Positive"
+                            class		="sapUiResponsiveContentPadding"
+                            design		="Horizontal"
+                            text		="{i18n>textIconTabFilterGenCit}"
+                            key			="keyTabFilterGenCit">
+                            <content>
+                                <core:Fragment fragmentName="solicitarcitapr.view.fragments.TabFilterGenCit" type="XML"/>
+                            </content>
+                        </IconTabFilter>
+                        <IconTabSeparator />
+                        <IconTabFilter
+                            icon		="sap-icon://customer-order-entry"
+                            iconColor	="Positive"
+                            class		="sapUiResponsiveContentPadding"
+                            design		="Horizontal"
+                            text		="{i18n>textIconTabFilterCitEnt}"
+                            key			="keyTabFilterCitEnt">
+                            <content>
+                                <core:Fragment fragmentName="solicitarcitapr.view.fragments.TabFilterCitEnt" type="XML"/>
+                            </content>
+                        </IconTabFilter>
+                    </items>
+                </IconTabBar>
+            </VBox>
+        </content>
+        <footer>
+            <OverflowToolbar>
+                <content>
+                    <Button id="btChangeOrder" text="{i18n>textButtonChangeOrder}" type="Accept" icon="sap-icon://edit" visible="false"/>
+                    <Button id="btDeleteOrder" text="{i18n>textButtonDeleteOrder}" press="" type="Reject" icon="sap-icon://delete" visible="false"/>
+                    
+                    <ToolbarSpacer width=""/>
+                    <Button id="btOrderNoOC" text="{i18n>textButtonOrderNoOC}" press="_onPressOrderNoOC" type="Emphasized" visible="true"/>
+                    <Button id="btOrderOC" text="{i18n>textButtonOrdenOC}" press="_onPressOrderOC" type="Accept" visible="true"/>
+                    <Button id="btMakeAppointment" text="{i18n>textButtonMakeAppointment}" press="" type="Accept" icon="sap-icon://timesheet" visible="false"/>
+                    
+
+                    <Button id="btUpdateRegister" text="{i18n>textButtonUpdateRegister}" press="" type="Accept" icon="sap-icon://edit" visible="false"/>
+                    <Button id="btUpdateDate" text="{i18n>textButtonUpdateDate}" press="" type="Accept" icon="sap-icon://edit" visible="false"/>
+                    <Button id="btDeleteAppointment" text="{i18n>textButtonDeleteAppointment}" press="" type="Reject" icon="sap-icon://delete" visible="false"/>
+                </content>
+            </OverflowToolbar>
+        </footer>
+    </Page>
+</mvc:View>
