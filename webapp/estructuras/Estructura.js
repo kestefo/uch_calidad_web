@@ -53,30 +53,34 @@ sap.ui.define([
 				var oResultsGroup2 = [];
 				
 				$.each(this._groupBy(datos,"CodigoTabla"), function (x, y) {
+					var oCoincidencia = [];
 					y.forEach(function(value){
 						delete value["__metadata"];
 						value.Codigo = 	value.CodigoTabla;
 						value.Descripcion = value.Campo;
+						if(value.IdEstado === 23){
+							oCoincidencia.push(value);
+						}
 					});
 					
-					var sJsonKey = '"'+x+'":'+ JSON.stringify(y);
+					var sJsonKey = '"'+x+'":'+ JSON.stringify(oCoincidencia);
 					oResultsGroup.push(sJsonKey);
 				});
 				
 				var sJsonTotal = "";
-					oResultsGroup.forEach(function(value,index){
-						if(oResultsGroup.length > 1){
-							if(index === 0){
-								sJsonTotal += '{' +value + ',';
-							}else if(index === oResultsGroup.length-1){
-								sJsonTotal += value + '}';
-							}else {
-								sJsonTotal += value + ',';
-							}
-						}else{
-							sJsonTotal += '{' + value + '}';
+				oResultsGroup.forEach(function(value,index){
+					if(oResultsGroup.length > 1){
+						if(index === 0){
+							sJsonTotal += '{' +value + ',';
+						}else if(index === oResultsGroup.length-1){
+							sJsonTotal += value + '}';
+						}else {
+							sJsonTotal += value + ',';
 						}
-					});
+					}else{
+						sJsonTotal += '{' + value + '}';
+					}
+				});
 				
 				var oJsonTotal = JSON.parse(sJsonTotal);
 				return oJsonTotal;

@@ -15,6 +15,9 @@ sap.ui.define([
             this.oRouter = sap.ui.core.UIComponent.getRouterFor(this);
             this.oRouter.getTarget("TargetOrderNoOC").attachDisplay(jQuery.proxy(this.handleRouteMatched, this));
         },
+         _onPressRefresh: function(){
+            this.handleRouteMatched();
+        },
         handleRouteMatched: function(){
             that.oModel = this.getModel("oModel");
             that.oModelGet = this.getModel("oModelGet");
@@ -22,7 +25,8 @@ sap.ui.define([
 
             that.oModel.setSizeLimit(99999999);
             that.oModelGet.setSizeLimit(99999999);
-
+			
+			sap.ui.core.BusyIndicator.show(0);
             Promise.all([this.getDataMaestro()
             // ,this.getERPMotivo(),this.getERPArea(),this.getERPCondicionEntrega()
             ]).then(async values => {
@@ -41,6 +45,7 @@ sap.ui.define([
                 //Uso de condicionarea
                 var oDataCondEnt = values[2].data;
                 this._onEstructureCondEnt(oDataCondEnt);
+                sap.ui.core.BusyIndicator.hide(0);
             }).catch(function (oError) {
                 sap.ui.core.BusyIndicator.hide(0);
             });

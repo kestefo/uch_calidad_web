@@ -5,6 +5,12 @@
 	xmlns:core="sap.ui.core"
     xmlns:ui="sap.ui.table">
     <Page id="pageOrderNoOC" title="{i18n>titleOrderNoOC}">
+    	<headerContent>
+            <HBox>
+                <ToolbarSpacer width=""/>
+                <Button press="_onPressRefresh" icon="sap-icon://refresh" tooltip="{i18n>tooltipRefresh}"/>
+            </HBox>
+        </headerContent>
         <content >
             <VBox class="sapUiSmallMargin">
                 <f:Form id="FormDisplay354wideDual"
