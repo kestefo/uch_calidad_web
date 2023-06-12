@@ -7,7 +7,6 @@ sap.ui.define([
 	"../util/utilUI",
 ], function (Controller, BaseController, constantes, Services, util, utilUI) {
     "use strict";
-
     var that;
     return BaseController.extend("solicitarcitapr.controller.Login", {
         onInit: function () {
