@@ -19,7 +19,6 @@ sap.ui.define([
             console.log("entro")
         },
         _onPressLogin: function(){
-            // that.oRouter.navTo("RouteMain");
             var sUser = this._byId("usuario").getValue();
             var sPassword = this._byId("contra").getValue();
             
