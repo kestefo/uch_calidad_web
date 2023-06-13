@@ -1,47 +1,40 @@
 <mvc:View controllerName="solicitarcitapr.controller.Login" xmlns:mvc="sap.ui.core.mvc" displayBlock="true" xmlns:core="sap.ui.core"
 	xmlns="sap.m">
-	<Shell id="shell">
-		<App id="app">
-			<pages>
-				<Page id="pageLogin" class="Login" title="{i18n>titleLogin}">
-					<content >
-						<HBox alignItems="Center" direction="Row" fitContainer="false" width="auto" height="100%" justifyContent="Center" renderType="Div"
+	<Page id="pageLogin" class="Login" title="{i18n>titleLogin}">
+		<content >
+			<HBox alignItems="Center" direction="Row" fitContainer="false" width="auto" height="100%" justifyContent="Center" renderType="Div"
+				visible="true" displayInline="false">
+				<VBox class="contenedor_principal" alignItems="Center" justifyContent="Center" width="50%" height="70%">
+					<Title class="sapUiMediumMargin" text="{i18n>titleInitSession}" titleStyle="H3"/>
+					<VBox width="100%">
+						<HBox alignItems="Center" direction="Row" fitContainer="false" width="auto" height="auto" justifyContent="Center" renderType="Div"
 							visible="true" displayInline="false">
-							<VBox class="contenedor_principal" alignItems="Center" justifyContent="Center" width="45%" height="70%">
-								<Title class="sapUiMediumMargin" text="{i18n>titleInitSession}" titleStyle="H3"/>
-								<VBox width="100%">
-									<HBox alignItems="Center" direction="Row" fitContainer="false" width="auto" height="auto" justifyContent="Center" renderType="Div"
-										visible="true" displayInline="false">
-										<Input id="usuario" class="input1" placeholder="Correo electronico" type="Text" showValueHelp="false" enabled="true" visible="true"
-											width="100%" valueHelpOnly="false" required="false" valueStateText="" maxLength="0">
-										</Input>
-										<core:Icon class="icon1" src="sap-icon://person-placeholder" size="39.6px" height="39.75px" width="39.7px" visible="true"/>
-									</HBox>
-									<HBox alignItems="Center" direction="Row" fitContainer="false" width="auto" height="auto" justifyContent="Center" renderType="Div"
-										visible="true" displayInline="false">
-										<Input id="contra" class="input2" placeholder="Contraseña" type="Password" enabled="true" visible="true" width="100%" required="true"
-											maxLength="0"></Input>
-										<core:Icon class="icon1" src="sap-icon://key" size="39.6px" height="39.75px" width="39.7px" visible="true"/>
-									</HBox>
-								</VBox>
-								<HBox class="sapUiSmallMargin" alignItems="Center" direction="Row" width="80%" height="auto" justifyContent="Center">
-									<Link class="" text="¿Has olvidado tu correo electronico?" textAlign="Begin" width="auto" target="_blank" wrapping="true" enabled="true"
-										visible="true" emphasized="false" subtle="false"/>
-								</HBox>
-								<HBox class="informacion" alignItems="Center" direction="Row" fitContainer="false" width="80%" height="auto" justifyContent="SpaceAround"
-									renderType="Div" visible="true" displayInline="false">
-									<Text text="¿No puedes iniciar sesión? Contacta con soporte para validar tu usuario." wrapping="true"/>
-								</HBox>
-								<HBox class="sapUiMediumMargin" alignItems="Center" width="100%" height="auto" justifyContent="SpaceAround">
-									<Link text="Crear cuenta" visible="true" press="botonRegistrarUsuario"/>
-									<Button id="btLogin" text="{i18n>textLogin}" press="_onPressLogin" type="Default" icon="sap-icon://journey-arrive"
-										tooltip="{i18n>tooltipLogin}"/>
-								</HBox>
-							</VBox>
+							<Input id="usuario" class="input1" placeholder="Correo electronico" type="Text" showValueHelp="false" enabled="true" visible="true"
+								width="20rem" valueHelpOnly="false" required="false" valueStateText="" maxLength="0"></Input>
+							<core:Icon class="icon1" src="sap-icon://person-placeholder" size="39.6px" height="39.75px" width="39.7px" visible="true"/>
 						</HBox>
-					</content>
-				</Page>
-			</pages>
-		</App>
-	</Shell>
+						<HBox alignItems="Center" direction="Row" fitContainer="false" width="auto" height="auto" justifyContent="Center" renderType="Div"
+							visible="true" displayInline="false">
+							<Input id="contra" class="input2" placeholder="Contraseña" type="Password" enabled="true" visible="true" width="20rem" required="true"
+								maxLength="0"></Input>
+							<core:Icon class="icon1" src="sap-icon://key" size="39.6px" height="39.75px" width="39.7px" visible="true"/>
+						</HBox>
+					</VBox>
+					<HBox class="sapUiSmallMargin" alignItems="Center" direction="Row" width="80%" height="auto" justifyContent="Center">
+						<Link class="" text="¿Has olvidado tu correo electronico?" textAlign="Begin" width="auto" target="_blank" wrapping="true" enabled="true"
+							visible="true" emphasized="false" subtle="false"/>
+					</HBox>
+					<HBox class="informacion" alignItems="Center" direction="Row" fitContainer="false" width="80%" height="auto" justifyContent="SpaceAround"
+						renderType="Div" visible="true" displayInline="false">
+						<Text text="¿No puedes iniciar sesión? Contacta con soporte para validar tu usuario." wrapping="true"/>
+					</HBox>
+					<HBox class="sapUiMediumMargin" alignItems="Center" width="100%" height="auto" justifyContent="SpaceAround">
+						<Link text="Crear cuenta" visible="true" press="botonRegistrarUsuario"/>
+						<Button id="btLogin" text="{i18n>textLogin}" press="_onPressLogin" type="Default" icon="sap-icon://journey-arrive"
+							tooltip="{i18n>tooltipLogin}"/>
+					</HBox>
+				</VBox>
+			</HBox>
+		</content>
+	</Page>
 </mvc:View>

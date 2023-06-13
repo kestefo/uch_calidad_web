@@ -1233,6 +1233,27 @@ sap.ui.define([
 				}
 			}
 		},
+		validateInputs:function(id,value, parameter){
+				if(	this.getView().byId(id).getValueState() == "None"){
+					
+					if(value == "" || value == undefined){
+						utilUI.onMessageErrorDialogPress2("Campo vacio "+ parameter);
+						this.getView().byId(id).setValueState("Error");
+						this.getView().byId(id).setValueStateText("Campo Vacio");
+						return true;
+					}else{
+						this.getView().byId(id).setValueState("Success");
+						return false;
+					}
+					
+				}else if(this.getView().byId(id).getValueState() == "Error"){
+					utilUI.onMessageErrorDialogPress2("Campo incorrecto "+ parameter);
+					this.getView().byId(id).setValueState("Error");
+					return true;
+				}else if(this.getView().byId(id).getValueState() == "Success"){
+					return false;
+				}
+			},
 
 		//onMethodsGetStandard
 		getRuc: function () {

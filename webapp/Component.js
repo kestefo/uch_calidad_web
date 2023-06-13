@@ -29,6 +29,29 @@ sap.ui.define([
 			
 			var oModelUserLoged = new JSONModel(models.JsonUserLoged());
             this.setModel(oModelUserLoged, "oModelUser");
+		},
+		
+		createContent: function() {
+			var app = new sap.m.App({
+				id: "app"
+			});
+			
+			var uShell = new sap.m.Shell({
+				app: app
+			});
+			
+			// var appType = "app";
+			// var appBackgroundColor = "";
+			// if (appType === "App" && appBackgroundColor) {
+			// 	app.setBackgroundColor(appBackgroundColor);
+			// }
+
+			return uShell;
+		},
+
+		getNavigationPropertyForNavigationWithContext: function(sEntityNameSet, targetPageName) {
+			var entityNavigations = navigationWithContext[sEntityNameSet];
+			return entityNavigations == null ? null : entityNavigations[targetPageName];
 		}
 	});
 });
