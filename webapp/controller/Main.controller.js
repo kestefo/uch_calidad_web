@@ -345,8 +345,33 @@ sap.ui.define([
                     break; 
             }
         },
-        _onPressShowMaterials: function(){
+        _onPressShowMaterials: function(oEvent){
+            var oSource = oEvent.getSource();
+            var oRow = oSource.getParent();
+            var oRowData = oRow.getBindingContext("oModel").getObject();
+            var oMaterial = oRowData.materiales;
             this.setFragment("_dialogShowMaterials", this.frgIdShowMaterials, "ShowMaterials", this);
+            that.oModel.setProperty("/oEntregasNoCitaMateriales", oMaterial);
+        },
+        _onPressShowMaterials2: function(oEvent){
+            var oSource = oEvent.getSource();
+            var oRow = oSource.getParent();
+            var oRowData = oRow.getBindingContext("oModel").getObject();
+            var oMaterial = oRowData.materiales;
+            var oResults = [];
+            oMaterial.forEach(function(value){
+                var jMaterial = {
+                    "EbelnD": value.Zebeln,
+                    "PosnrD": value.Zvgpos,
+                    "MatnrD": value.Zlfdat,
+                    "MaktxD": value.Zmaktx,
+                    "VemngD": value.Zvemng,
+                    "VrkmeD": value.Zunmed,
+                };
+                oResults.push(jMaterial);
+            });
+            this.setFragment("_dialogShowMaterials", this.frgIdShowMaterials, "ShowMaterials", this);
+            that.oModel.setProperty("/oEntregasNoCitaMateriales", oResults);
         },
     });
 });
