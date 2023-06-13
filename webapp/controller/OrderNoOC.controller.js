@@ -28,7 +28,6 @@ sap.ui.define([
 
 			sap.ui.core.BusyIndicator.show(0);
 			Promise.all([this.getDataMaestro()
-				// ,this.getERPMotivo(),this.getERPArea(),this.getERPCondicionEntrega()
 			]).then(async values => {
 				this.fnClearComponent();
 				this.fnClearData();
@@ -59,15 +58,20 @@ sap.ui.define([
 			});
 		},
 		fnClearData: function () {
-			that.oModelGet.setProperty("/oMotivo", []);
-			that.oModelGet.setProperty("/oTipoBulto", []);
-			that.oModelGet.setProperty("/oUnidades", []);
+			that.oModelGet.setProperty("/oCondEnt", []);
 			that.oModelGet.setProperty("/oEmpresa", []);
 			that.oModelGet.setProperty("/oDestino", []);
 			that.oModelGet.setProperty("/oMotivo", []);
+			that.oModelGet.setProperty("/oArea", []);
+			that.oModelGet.setProperty("/oTipoBulto", []);
+			that.oModelGet.setProperty("/oUnidades", []);
 			
 			that.oModel.setProperty("/oEmbalajeEntregasinOC", []);
 			that.oModel.setProperty("/oEmbalajeItemssinOC", []);
+			
+			this._byId("textCantEnt").setText("0");
+			this._byId("inputEmail").setValue("");
+			this._byId("otrosid").setValue("");
 		},
 		fnClearComponent: function () {
 			this._byId("slCondEntSinOC").setSelectedKey("");
@@ -75,7 +79,10 @@ sap.ui.define([
 			this._byId("slDestSinOC").setSelectedKey("");
 			this._byId("slMotivoSinOC").setSelectedKey("");
 			this._byId("slAreaSinOC").setSelectedKey("");
-			this._byId("textCantEnt").setText("0");
+			
+			this._byId("inputEmail").setValueState("None");
+			that._byId("tableEmbalajes").clearSelection(true)
+			that._byId("tableItems").clearSelection(true)
 		},
 		_onEstructureCondEntFormat: function (oDataCondEnt, oDataSoc, oDataDest) {
 			var oResults = [];
@@ -99,11 +106,19 @@ sap.ui.define([
 						
 						oDataDest.forEach(function (xxx) {
 							if (xx.Id === xxx.IdPadre) {
+								var oAdicional2 = xxx.Adicional2.split(",");
+								var sWerks = oAdicional2[0] === undefined ? "" : oAdicional2[0];
+								var sNamew = oAdicional2[1] === undefined ? "" : oAdicional2[1];
+								var oAdicional1 = xxx.Adicional1.split(",");
+								var sLgort = oAdicional1[0] === undefined ? "" : oAdicional1[0];
+								var sNamel = oAdicional1[1] === undefined ? "" : oAdicional1[1];
 								var jDestino = {
 									"Id": xxx.Id,
 									"IdPadre": xxx.IdPadre,
-									"Werks": xxx.Adicional1,
-									"Namew": xxx.Adicional2,
+									"Werks": sWerks,
+									"Namew": sNamew,
+									"Lgort": sLgort,
+									"Namel": sNamel,
 									"Xhupf": xxx.CodigoSap === null ? "" : xxx.CodigoSap,
 									"Werks_f": xxx.Campo === null ? "" : xxx.Campo,
 									"Namew_f": xxx.DescripcionCampo  === null ? "" : xxx.DescripcionCampo,
@@ -119,33 +134,6 @@ sap.ui.define([
 				oResults.push(jCondEnt)
 			});
 			that.oModelGet.setProperty("/oCondEnt", oResults);
-		},
-		_onEstructureCondEnt: function (oData) {
-			var oResults = [];
-			$.each(that._groupBy(oData, 'CodCond'), function (x, y) {
-				var jCondEnt = {
-					"CodigoCondicion": y[0].CodCond,
-					"DescripcionCondicion": y[0].DescCond,
-					"Direccion": y[0].Direccion,
-					"Sociedad": []
-				}
-				var oResults2 = [];
-				$.each(that._groupBy(y, 'Bukrs'), function (xx, yy) {
-					var jEmpresa = {
-						"Bukrs": yy[0].Bukrs,
-						"Butxt": yy[0].Butxt,
-						"Centro": yy
-					}
-
-					oResults2.push(jEmpresa);
-				});
-
-				jCondEnt.Sociedad = oResults2;
-
-				oResults.push(jCondEnt);
-			});
-			that.oModelGet.setProperty("/oCondEnt", oResults);
-			console.log(oResults)
 		},
 		//AGREGADO ERICK
 		fnSelectedCondEntregaOC: function (oEvent) {
@@ -190,6 +178,40 @@ sap.ui.define([
 			}
 		},
 		//AGREGADO ERICK
+		fnSelectionEmbalajes: function (oEvent) {
+			var oView = this.getView();
+			var table = oView.byId("tableEmbalajes");
+			var context = oEvent.getParameter("rowContext");
+			var ModeloProyect = oView.getModel("Proyect");
+			var DatoAnterior = ModeloProyect.getProperty("/OneDataTreeTableEntregaSinOCEmbalaje");
+			if (context === null) {
+				return;
+			}
+
+			if (context != null) {
+				var path = context.sPath;
+				var Object = this.getView().getModel("EntregaSinOC").getProperty(path);
+			}
+
+			var oIndex = oEvent.getParameter('rowIndex');
+			var Selecciones = table.getSelectedIndices();
+			var selectedEntriesProvi = [];
+			var selectedEntries = [];
+
+			if (table.getSelectedIndices().length === 1) {
+				ModeloProyect.setProperty("/OneDataTreeTableEntregaSinOCEmbalaje", oIndex);
+				for (var i = 0; i < Selecciones.length; i++) {
+					var oData = table.getContextByIndex(Selecciones[i]);
+					selectedEntries.push(oData.getProperty(oData.getPath()));
+				}
+			} else if (table.getSelectedIndices().length === 0) {
+				ModeloProyect.setProperty("/OneDataTreeTableEntregaSinOCEmbalaje", "");
+			} else {
+				if (DatoAnterior !== oIndex) {
+					table.removeSelectionInterval(DatoAnterior, DatoAnterior);
+				}
+			}
+		},
 		fnPressAddEmbalajes: function (oEvent) {
 			var obj;
 			var items = [];
@@ -227,40 +249,6 @@ sap.ui.define([
 			items.push(obj);
 			that.oModel.setProperty("/oEmbalajeEntregasinOC", items);
 			this._byId("textCantEnt").setText(items.length);
-		},
-		fnSelectionEmbalajes: function (oEvent) {
-			var oView = this.getView();
-			var table = oView.byId("tableEmbalajes");
-			var context = oEvent.getParameter("rowContext");
-			var ModeloProyect = oView.getModel("Proyect");
-			var DatoAnterior = ModeloProyect.getProperty("/OneDataTreeTableEntregaSinOCEmbalaje");
-			if (context === null) {
-				return;
-			}
-
-			if (context != null) {
-				var path = context.sPath;
-				var Object = this.getView().getModel("EntregaSinOC").getProperty(path);
-			}
-
-			var oIndex = oEvent.getParameter('rowIndex');
-			var Selecciones = table.getSelectedIndices();
-			var selectedEntriesProvi = [];
-			var selectedEntries = [];
-
-			if (table.getSelectedIndices().length === 1) {
-				ModeloProyect.setProperty("/OneDataTreeTableEntregaSinOCEmbalaje", oIndex);
-				for (var i = 0; i < Selecciones.length; i++) {
-					var oData = table.getContextByIndex(Selecciones[i]);
-					selectedEntries.push(oData.getProperty(oData.getPath()));
-				}
-			} else if (table.getSelectedIndices().length === 0) {
-				ModeloProyect.setProperty("/OneDataTreeTableEntregaSinOCEmbalaje", "");
-			} else {
-				if (DatoAnterior !== oIndex) {
-					table.removeSelectionInterval(DatoAnterior, DatoAnterior);
-				}
-			}
 		},
 		fnPressDeleteEmbalajes: function () {
 			var that = this;
@@ -333,6 +321,37 @@ sap.ui.define([
 
 			MessageBox.success("Eliminado Correctamente.");
 		},
+		fnSelectionItems: function (oEvent) {
+			var oView = this.getView();
+			var table = oView.byId("tableItems");
+			var context = oEvent.getParameter("rowContext");
+			var ModeloProyect = oView.getModel("Proyect");
+			var DatoAnterior = ModeloProyect.getProperty("/OneDataTreeTableEntregaSinOCItems");
+
+			if (context != null) {
+				var path = context.sPath;
+				var Object = this.getView().getModel("ItemsSinOC").getProperty(path);
+			}
+
+			var oIndex = oEvent.getParameter('rowIndex');
+			var Selecciones = table.getSelectedIndices();
+			var selectedEntriesProvi = [];
+			var selectedEntries = [];
+
+			if (table.getSelectedIndices().length === 1) {
+				ModeloProyect.setProperty("/OneDataTreeTableEntregaSinOCItems", oIndex);
+				for (var i = 0; i < Selecciones.length; i++) {
+					var oData = table.getContextByIndex(Selecciones[i]);
+					selectedEntries.push(oData.getProperty(oData.getPath()));
+				}
+			} else if (table.getSelectedIndices().length === 0) {
+				ModeloProyect.setProperty("/OneDataTreeTableEntregaSinOCItems", "");
+			} else {
+				if (DatoAnterior !== oIndex) {
+					table.removeSelectionInterval(DatoAnterior, DatoAnterior);
+				}
+			}
+		},
 		fnPressAddItems: function (oEvent) {
 			var oSource = oEvent.getSource();
 			var obj;
@@ -381,37 +400,6 @@ sap.ui.define([
 				that.oModel.setProperty("/oEmbalajeItemssinOC", items);
 			} else {
 				that.getMessageBox("error", that.getI18nText("sErrorNotSelectEmb"));
-			}
-		},
-		fnSelectionItems: function (oEvent) {
-			var oView = this.getView();
-			var table = oView.byId("tableItems");
-			var context = oEvent.getParameter("rowContext");
-			var ModeloProyect = oView.getModel("Proyect");
-			var DatoAnterior = ModeloProyect.getProperty("/OneDataTreeTableEntregaSinOCItems");
-
-			if (context != null) {
-				var path = context.sPath;
-				var Object = this.getView().getModel("ItemsSinOC").getProperty(path);
-			}
-
-			var oIndex = oEvent.getParameter('rowIndex');
-			var Selecciones = table.getSelectedIndices();
-			var selectedEntriesProvi = [];
-			var selectedEntries = [];
-
-			if (table.getSelectedIndices().length === 1) {
-				ModeloProyect.setProperty("/OneDataTreeTableEntregaSinOCItems", oIndex);
-				for (var i = 0; i < Selecciones.length; i++) {
-					var oData = table.getContextByIndex(Selecciones[i]);
-					selectedEntries.push(oData.getProperty(oData.getPath()));
-				}
-			} else if (table.getSelectedIndices().length === 0) {
-				ModeloProyect.setProperty("/OneDataTreeTableEntregaSinOCItems", "");
-			} else {
-				if (DatoAnterior !== oIndex) {
-					table.removeSelectionInterval(DatoAnterior, DatoAnterior);
-				}
 			}
 		},
 		fnPressDeleteItems: function () {
@@ -505,73 +493,32 @@ sap.ui.define([
 
 		},
 		fnSelectedTipoBultoEntregaOC: function (oEvent) {
-			that = this;
-			oView = this.getView();
-			var tipoemb = oEvent.getSource().getSelectedItem().getBindingContext("Proyect").getObject();
-			var cell = oEvent.getSource().getParent().getBindingContext("EntregaSinOC").getObject();
-			var arr = oView.getModel("EntregaSinOC").getProperty("/DataEmbalajes");
+			var oSource = oEvent.getSource();
+			var oSelectItem = oSource.getSelectedItem();
+			var jSelectItem = oSelectItem.getBindingContext("oModelGet").getObject();
+			var oRow = oSource.getParent();
+			var jRow = oRow.getBindingContext("oModel").getObject();
+			var arr = that.oModel.getProperty("/oEmbalajeEntregasinOC");
 			for (var i = 0; i < arr.length; i++) {
-				if (cell.key == arr[i].key) {
-					arr[i].tipoEmbalaje = tipoemb.Vegr2;
-					arr[i].desctipoEmbalaje = tipoemb.Bezei;
+				if (jRow.key == arr[i].key) {
+					arr[i].desctipoEmbalaje = jSelectItem.DescripcionCampo;
 				}
 			}
-			oView.getModel("EntregaSinOC").setProperty("/DataEmbalajes", arr);
+			that.oModel.setProperty("/oEmbalajeEntregasinOC", arr);
 		},
 		fnSelectedUnmMaterial: function (oEvent) {
-			that = this;
-			oView = this.getView();
-			var booleanDescripcion = false;
-			var booleanKey = false;
-			var boolean = false;
-			var value = oEvent.getSource().getSelectedItem().getKey();
-			var data = oEvent.getSource().getItems();
-
-			var obj = {};
-			var cell = oEvent.getSource().getParent().getBindingContext("EntregaSinOC").getObject();
-			var arr = oView.getModel("EntregaSinOC").getProperty("/DataItems");
-
-			for (var i = 0; i < data.length; i++) {
-				if (data[i].getBindingContext("EntregaSinOC").getObject().Msehi) {
-					if (data[i].getKey() == value) {
-						obj = data[i].getBindingContext("EntregaSinOC").getObject();
-						boolean = true;
-					}
+			var oSource = oEvent.getSource();
+			var oSelectItem = oSource.getSelectedItem();
+			var jSelectItem = oSelectItem.getBindingContext("oModelGet").getObject();
+			var oRow = oSource.getParent();
+			var jRow = oRow.getBindingContext("oModel").getObject();
+			var arr = that.oModel.getProperty("/oEmbalajeItemssinOC");
+			for (var i = 0; i < arr.length; i++) {
+				if (jRow.key == arr[i].key) {
+					arr[i].descunmMaterial = jSelectItem.DescripcionCampo;
 				}
 			}
-
-			if (boolean && value != "") {
-				booleanKey = true;
-			}
-
-			if (oEvent.getSource().getSelectedKey() == "") {
-				if (booleanKey) {
-					var unm = obj;
-					for (var i = 0; i < arr.length; i++) {
-						if (cell.key == arr[i].key) {
-							arr[i].unmMaterial = unm.Msehi;
-							arr[i].descunmMaterial = unm.Msehl;
-						}
-					}
-					oView.getModel("EntregaSinOC").setProperty("/DataItems", arr);
-				} else {
-					for (var i = 0; i < arr.length; i++) {
-						arr[i].unmMaterial = "";
-						arr[i].descunmMaterial = "";
-					}
-					oView.getModel("EntregaSinOC").setProperty("/DataItems", arr);
-				}
-			} else {
-				var unm = oEvent.getSource().getSelectedItem().getBindingContext("EntregaSinOC").getObject();
-				for (var i = 0; i < arr.length; i++) {
-					if (cell.key == arr[i].key) {
-						arr[i].unmMaterial = unm.Msehi;
-						arr[i].descunmMaterial = unm.Msehl;
-					}
-				}
-				oView.getModel("EntregaSinOC").setProperty("/DataItems", arr);
-			}
-
+			that.oModel.setProperty("/oEmbalajeItemssinOC", arr);
 		},
 		fnPressGuardarOC:function(){
 			var prooveedores=that.oModelUser.getData();
@@ -752,130 +699,116 @@ sap.ui.define([
 				}
 			});
 			
-			var undmed;
-			if(oView.getModel("EntregaSinOC").getProperty("/DataUNDMed") == undefined){
-				utilUI.onMessageErrorDialogPress2("No se encontro data en la tabla constante sobre la unidad de medida");
-				return;
-			}
-			undmed=oView.getModel("EntregaSinOC").getProperty("/DataUNDMed")[0];
-			if(undmed.DESCRIPCION ==""){
-				utilUI.onMessageErrorDialogPress2("Descripcion no valida en la tabla constante sobre la unidad de medida");
-				return;
-			}
+			var undmed=that.oModelGet.getProperty("/oUnidades");
 			
-			sap.m.MessageBox.confirm("¿Desea guardar los cambios?", {
-				title: "Mensaje",
-				actions: ["Confirmar","Cancelar"],
-				onClose: function (sActionClicked) {
-					if(sActionClicked == "Confirmar"){
-						//Estructura Cabecera
-						var sum=0;
-						embalajes.forEach(function(x){
-							if(x.peso != "")
-							//JRodriguez 13/05/2021
-							var pesoRem = x.peso.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "");
-							sum += parseFloat(pesoRem);
-						});
-						var objCabecera={
-							"PROOVEDOR":prooveedores.oDataAditional[0].Lifnr, 
-							"NOMBRE_PROVEEDOR": prooveedores.oDataAditional[0].Name,
-							"CORREO_PROVEEDOR": prooveedores.oDataAditional[0].Smtp_addr,
-							"CENTRO_DETINO_FINAL": destino.Werks_f,
-							"DESCRIPCION_CENTRO_DESTINO_FINAL":destino.Namew_f,
-							"SOCIEDAD": empr.Bukrs, 
-							"NOMBRE_SOCIEDAD": empr.Butxt, 
-							"CENTRO": destino.Werks, 
-							"NOMBRE_CENTRO": destino.Namew, 
-							"HU":destino.Xhupf,
-							"CODIGO_CONDICION_ENTREGA": condEnt.CodigoCondicion,
-							"DESCRIPCION_CONDICION_ENTREGA": condEnt.DescripcionCondicion,
-							"ALMACEN": destino.Lgort, //---> buscar sol
-							"NOMBRE_ALMACEN": destino.Namel, //--->buscarsol
-							"CANTIDAD_EMBALAJE": embalajes.length.toString(), 
-							"PESO_TOTAL_EMBALAJE": sum.toFixed(2),
-							"AREA_RESPONSABLE": areaResp.DescripcionCampo,
-							"MOTIVOS": motivos.Campo,
-							"MOTIVOS_OTROS": otros,
-							"DESCRIPCION_MOTIVOS": motivos.DescripcionCampo,
-							"EMAIL_DESTINATARIO_FINAL": email,
-							"NUMERO_GUIA": "", // Manda Vacio
-							"ESTATUS_USUARIO": estatus.Campo,
-							"DESCRIPCION_ESTATUS_USUARIO": estatus.DescripcionCampo,
-							"DIRECCION":condEnt.Direccion,
-							"USUARIO_CREADOR": prooveedores.Resources[0].userName,
-							"USUARIO_MODIFICADOR": prooveedores.Resources[0].userName
-						}
-						
-						//Estructura detalles
-						var objDetalle=[];
-						for(var i = 0;i<embalajes.length ; i++){
-							var obj={};
-							var dataEmbalajes = embalajes[i];
-							for(var j = 0;j<items.length ; j++){
-								var dataItems = items[j];
-								if(dataEmbalajes.nEmbalaje == dataItems.nEmbalaje){
-									var pesoG		= dataEmbalajes.peso.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "");
-									var longitudG	= dataEmbalajes.longitud.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "");
-									var anchoG 		= dataEmbalajes.ancho.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "");
-									var alturaG		= dataEmbalajes.altura.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "");
-									var cantidadG	= dataItems.cantidad.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "");
-									
-									obj={
-										"ENTREGA":"",
-										"NUMERO_EMBALAJE":dataEmbalajes.nEmbalaje.toString(),
-										"TIPO_EMBALAJE":dataEmbalajes.tipoEmbalaje,
-										"DESCRIPCION_TIPO_EMBALAJE":dataEmbalajes.desctipoEmbalaje,
-										"DESCRIPCION_CONTENIDO":dataEmbalajes.descripcionContenido,
-										"PESO":parseFloat(pesoG).toFixed(2),
-										"LARGO":parseFloat(longitudG).toFixed(2),
-										"ANCHO":parseFloat(anchoG).toFixed(2),
-										"ALTURA":parseFloat(alturaG).toFixed(2),
-										"ITEM":dataItems.itemkey.toString(),
-										"DESCRIPCION_MATERIAL":dataItems.descripcionMaterial,
-										"CANTIDAD":parseFloat(cantidadG).toFixed(2),
-										"UNIDAD":dataItems.unmMaterial,
-										"DESCRIPCION_UNIDAD":dataItems.descunmMaterial,
-										"OBSERVACION_MATERIAL":dataItems.obsMaterial,
-										"USUARIO_CREADOR": prooveedores.Resources[0].userName,
-										"USUARIO_MODIFICADOR": prooveedores.Resources[0].userName,
-										"UNIDAD_PESO": undmed.DESCRIPCION,
-										"CODIGO_TIPO_MATERIAL": "03",
-										"TIPO_MATERIAL": "Comun",
-									}
-									objDetalle.push(obj);
+			utilUI.messageBox(this.getI18nText("sTextSave"), "C", function (value) {
+                if (value) {
+					//Estructura Cabecera
+					var sum=0;
+					embalajes.forEach(function(x){
+						if(x.peso != "")
+						//JRodriguez 13/05/2021
+						var pesoRem = x.peso.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "");
+						sum += parseFloat(pesoRem);
+					});
+					var objCabecera={
+						"PROOVEDOR":prooveedores.oDataAditional[0].Lifnr, 
+						"NOMBRE_PROVEEDOR": prooveedores.oDataAditional[0].Name,
+						"CORREO_PROVEEDOR": prooveedores.oDataAditional[0].Smtp_addr,
+						"CENTRO_DETINO_FINAL": destino.Werks_f,
+						"DESCRIPCION_CENTRO_DESTINO_FINAL":destino.Namew_f,
+						"SOCIEDAD": empr.Bukrs, 
+						"NOMBRE_SOCIEDAD": empr.Butxt, 
+						"CENTRO": destino.Werks, 
+						"NOMBRE_CENTRO": destino.Namew, 
+						"HU":destino.Xhupf,
+						"CODIGO_CONDICION_ENTREGA": condEnt.CodigoCondicion,
+						"DESCRIPCION_CONDICION_ENTREGA": condEnt.DescripcionCondicion,
+						"ALMACEN": destino.Lgort, //---> buscar sol
+						"NOMBRE_ALMACEN": destino.Namel, //--->buscarsol
+						"CANTIDAD_EMBALAJE": embalajes.length.toString(), 
+						"PESO_TOTAL_EMBALAJE": sum.toFixed(2),
+						"AREA_RESPONSABLE": areaResp.DescripcionCampo,
+						"MOTIVOS": motivos.Campo,
+						"MOTIVOS_OTROS": otros,
+						"DESCRIPCION_MOTIVOS": motivos.DescripcionCampo,
+						"EMAIL_DESTINATARIO_FINAL": email,
+						"NUMERO_GUIA": "", // Manda Vacio
+						"ESTATUS_USUARIO": estatus.Campo,
+						"DESCRIPCION_ESTATUS_USUARIO": estatus.DescripcionCampo,
+						"DIRECCION":condEnt.Direccion,
+						"USUARIO_CREADOR": prooveedores.Resources[0].userName,
+						"USUARIO_MODIFICADOR": prooveedores.Resources[0].userName
+					}
+					
+					//Estructura detalles
+					var objDetalle=[];
+					for(var i = 0;i<embalajes.length ; i++){
+						var obj={};
+						var dataEmbalajes = embalajes[i];
+						for(var j = 0;j<items.length ; j++){
+							var dataItems = items[j];
+							if(dataEmbalajes.nEmbalaje == dataItems.nEmbalaje){
+								var pesoG		= dataEmbalajes.peso.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "");
+								var longitudG	= dataEmbalajes.longitud.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "");
+								var anchoG 		= dataEmbalajes.ancho.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "");
+								var alturaG		= dataEmbalajes.altura.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "");
+								var cantidadG	= dataItems.cantidad.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "");
+								var oFindUnd = undmed.find(item => item.Campo === dataItems.unmMaterial);
+								obj={
+									"ENTREGA":"",
+									"NUMERO_EMBALAJE":dataEmbalajes.nEmbalaje.toString(),
+									"TIPO_EMBALAJE":dataEmbalajes.tipoEmbalaje,
+									"DESCRIPCION_TIPO_EMBALAJE":dataEmbalajes.desctipoEmbalaje,
+									"DESCRIPCION_CONTENIDO":dataEmbalajes.descripcionContenido,
+									"PESO":parseFloat(pesoG).toFixed(2),
+									"LARGO":parseFloat(longitudG).toFixed(2),
+									"ANCHO":parseFloat(anchoG).toFixed(2),
+									"ALTURA":parseFloat(alturaG).toFixed(2),
+									"ITEM":dataItems.itemkey.toString(),
+									"DESCRIPCION_MATERIAL":dataItems.descripcionMaterial,
+									"CANTIDAD":parseFloat(cantidadG).toFixed(2),
+									"UNIDAD":dataItems.unmMaterial,
+									"DESCRIPCION_UNIDAD":dataItems.descunmMaterial,
+									"OBSERVACION_MATERIAL":dataItems.obsMaterial,
+									"USUARIO_CREADOR": prooveedores.Resources[0].userName,
+									"USUARIO_MODIFICADOR": prooveedores.Resources[0].userName,
+									"UNIDAD_PESO": oFindUnd.DescripcionCampo === undefined ? "":oFindUnd.DescripcionCampo,
+									"CODIGO_TIPO_MATERIAL": "03",
+									"TIPO_MATERIAL": "Comun",
 								}
+								objDetalle.push(obj);
 							}
 						}
-						
-						var total={
-							"objCabecera": objCabecera,
-							"objDetalle": objDetalle,
-							"objEmbalaje": embalajes,
-							"user": that.getRuc()
-						}
-						
-						var obj = {
-							"oResults" : total
-						}
-						
-						that.RegistrarEntregaSinOC(obj);
-						
 					}
+					
+					var total={
+						"objCabecera": objCabecera,
+						"objDetalle": objDetalle,
+						"objEmbalaje": embalajes,
+						"user": that.getRuc()
+					}
+					
+					var obj = {
+						"oResults" : total
+					}
+					
+					that.RegistrarEntregaSinOC(obj);
 				}
 			});
 		},
 		RegistrarEntregaSinOC: function(obj){
-			
-			util.response.validateFunctionEndButton(models.modelSaveSinOC(), {
-				success: function (data, message) {
-					self.fnLimpiar();
-					self.fnLimpiarValueStates();
-					Busy.close();
-					self.getOwnerComponent().getRouter().navTo("Page1");
-				},
-				error: function (message) {
-					Busy.close();
-				}
+			sap.ui.core.BusyIndicator.show(0);
+			var oResults = obj;
+			Services.RegistrarEntregaSinOC(this, oResults, function (result) {
+				util.response.validateFunctionEndButton(result, {
+					success: function (data, message) {
+						that._onPressCancel();
+					},
+					error: function (message) {
+						Busy.close();
+					}
+				});
 			});
 		},
 		_onPressCancel: function () {

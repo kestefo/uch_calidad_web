@@ -33,5 +33,11 @@ sap.ui.define([
 		consultarUser:function(context, oResults, callback) {
 			utilHttp.Post(constantes.services.consultarUser, oResults, callback, context);
 		},
+		consultarUser:function(context, oResults, callback) {
+			utilHttp.Post(constantes.services.consultarUser, oResults, callback, context);
+		},
+		consultarHana: function (context, oResults, callback) {
+			utilHttp.Post(constantes.services.consultarHana, oResults, callback, context);
+		},
 	};
 });

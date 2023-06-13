@@ -54,7 +54,7 @@
 							<f:formElements>
 								<f:FormElement label="{i18n>lbDestinatarioFinal}">
 									<f:fields>
-										<Input liveChange="fnLiveChangeInputsNotEmptyEmail" id="inputEmail" type="Email" placeholder="{i18n>textIngreseCorreo}"
+										<Input id="inputEmail" liveChange="fnLiveChangeInputsNotEmptyEmail" type="Email" placeholder="{i18n>textIngreseCorreo}"
 											class="sapUiSmallMarginBottom"/>
 									</f:fields>
 								</f:FormElement>
@@ -96,7 +96,7 @@
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>titleTipoNEmbalaje}"/>
 							<ui:template>
-								<Select width="auto" selectedKey="{oModel>tipoEmbalaje}" forceSelection="false"
+								<Select width="auto" change="fnSelectedTipoBultoEntregaOC" selectedKey="{oModel>tipoEmbalaje}" forceSelection="false"
 									items="{ path:'oModelGet>/oTipoBulto' , templateShareable:false }">
 									<core:Item key="{oModelGet>Campo}" text="{oModelGet>DescripcionCampo}"/>
 								</Select>
@@ -170,16 +170,16 @@
 								<Input type="Text" value="{oModel>cantidad}" maxLength="20"/>
 							</ui:template>
 						</ui:Column>
-						<ui:Column width="auto" hAlign="Center">
+						<ui:Column width="9rem" hAlign="Center">
 							<Label text="{i18n>titleUNMMaterial}"/>
 							<ui:template>
-								<Select forceSelection="false" width="auto" selectedKey="{oModel>unmMaterial}"
-									items="{ path:'oModelGet>/oUnidades' , templateShareable:false }">
-									<core:Item key="{oModelGet>Campo}" text="{oModelGet>DescripcionCampo}"/>
+								<Select change="fnSelectedUnmMaterial" forceSelection="false" columnRatio="5:2" selectedKey="{oModel>unmMaterial}"
+									items="{ path:'oModelGet>/oUnidades' , templateShareable:false }" showSecondaryValues= "true" wrapItemsText="true">
+									<core:ListItem key="{oModelGet>Campo}" text="{oModelGet>DescripcionCampo}" additionalText="{oModelGet>Campo}"/>
 								</Select>
 							</ui:template>
 						</ui:Column>
-						<ui:Column width="25%" hAlign="Center">
+						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>titleObservacion}"/>
 							<ui:template>
 								<Input type="Text" value="{oModel>obsMaterial}"  maxLength="40"/>

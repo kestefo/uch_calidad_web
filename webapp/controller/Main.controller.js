@@ -33,14 +33,16 @@ sap.ui.define([
             
             that.oModel.setProperty("/", models.oDataGeneralModel());
             that.oModelGet.setProperty("/", models.oDataGeneralGetModel());
-
-            Promise.all([this.getDataHana(),this.getERPStatus(),this.getERPArea(),this.getERPLumpType(),
-                this.getERPMeasurementUnits(),
-                this.getERPOrdersToBePackaged(),this.getERPWalInOrders(),this.getHanaWalInOrders(), this.getERPOrdersByAppointment(),
+			
+			sap.ui.core.BusyIndicator.show(0);
+            Promise.all([this.getDataMaestro(),this.getDataHana()
+            	// ,this.getERPStatus(),this.getERPArea(),this.getERPLumpType(),
+             //   this.getERPMeasurementUnits(),
+             //   this.getERPOrdersToBePackaged(),this.getERPWalInOrders(),this.getHanaWalInOrders(), this.getERPOrdersByAppointment(),
             ]).then(async values => {
-
+				var oDataHana = values[1].oResults;
                 //angellyn get data table 1
-                var oDataPedEmb = values[5].data;
+                var oDataPedEmb = oDataHana.OrdersToBePackaged;
                 this._onEstructurePedEmb(oDataPedEmb);
 
                 //jose get data table 1
@@ -53,35 +55,10 @@ sap.ui.define([
 
                 //angelly 06/06/2023
                 this._onCasoUso();
-
+				sap.ui.core.BusyIndicator.hide(0);
             }).catch(function (oError) {
                 sap.ui.core.BusyIndicator.hide(0);
             });
-        },
-        getERPOrdersToBePackaged:function(){
-            try{
-                return new Promise(function (resolve, reject) {
-                    var ruc = "";
-                    ruc = that.getRuc();
-                    var respuestaService = {
-                        iCode:1,
-                        c: "suc",
-                        u: constantes.services.getERPOrdersToBePackaged+"filter=RucInput eq '" + ruc  +"'&$format=json",
-                        m: "Exito HTTP - GET",
-                        data: models.JsonGetERPOrdersToBePackaged().d.results 
-                    };
-                    util.response.validateAjaxGetERPNotMessage(respuestaService, {
-                        success: function (oData, message) {
-                            resolve(oData);
-                        },
-                        error: function (message) {
-                            reject(message);
-                        }
-                    });
-                });
-            }catch(oError){
-                that.getMessageBox("error", that.getI18nText("sErrorTry"));
-            }
         },
         getERPWalInOrders:function(){
             try{
@@ -186,6 +163,13 @@ sap.ui.define([
 
                             var arrayOrden = [];
                             $.each(that._groupBy(yyyy,'Ebeln'), function (xxxxx, yyyyy) {
+								yyyyy.forEach(function(value){
+									if(value.Xhupf === 0){
+										value.Xhupf = true;	
+									}else{
+										value.Xhupf = false;	
+									}
+                            	});
                                 var jOrdenes = {
                                     "Bedat": yyyyy[0].Bedat,
                                     "Ebeln": yyyyy[0].Ebeln,

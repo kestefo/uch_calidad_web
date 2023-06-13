@@ -1273,15 +1273,16 @@ sap.ui.define([
 
 		getDataHana: function () {
 			try {
+				that = this;
 				return new Promise(function (resolve, reject) {
-					var filtro = {
+					var oFiltro = {
 						"oResults": {
 							"MODULO": "MM",
 							"APLICATIVO": "SOLICITAR_CITA",
 						}
 					};
-					Services.consultarUser(this, oFiltro, function (result) {
-						util.response.validateAjaxGetHana(models.JsonGetHana(), {
+					Services.consultarHana(that, oFiltro, function (result) {
+						util.response.validateAjaxGetHana(result, {
 							success: function (oData, message) {
 								resolve(oData);
 							},
