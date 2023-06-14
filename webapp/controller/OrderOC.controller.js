@@ -441,7 +441,7 @@ sap.ui.define([
 			};
 			
 			sap.ui.core.BusyIndicator.show(0);
-			var oResults = 
+			var oResults = {
 				"oResults" : data2
 			};
 			Services.RegistrarEntregaConOC(that, oResults, function (result) {
