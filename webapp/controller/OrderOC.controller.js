@@ -448,7 +448,7 @@ sap.ui.define([
 				util.response.validateFunctionEndButton(result, {
 					success: function (data, message) {
 						that._onPressCancelDialog();
-						that._onPressCancelDialog();
+						that._onPressCancel();
 					},
 					error: function (message) {
 						Busy.close();
