@@ -1,60 +1,50 @@
-<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:fb="sap.ui.comp.filterbar" xmlns:l="sap.ui.layout"
-	xmlns:custom="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
-	xmlns:ui  ="sap.ui.table">
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m" 
+	xmlns:custom="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1" xmlns:ui="sap.ui.table">
 	<Dialog title="{i18n>lblTitleMateriales}" contentHeight="auto" contentWidth="auto" afterOpen="_afterOpenAddPedido">
-        <content>
-            <VBox class="sapUiSmallMargin">
-                <ui:Table
-					rows="{path:'oModel>/oEntregasNoCitaMateriales'}"
-					selectionMode="MultiToggle"
-					enableSelectAll="false"
-					ariaLabelledBy="title">
+		<content>
+			<VBox class="sapUiSmallMargin">
+				<ui:Table rows="{path:'oModel>/oEntregasNoCitaMateriales'}" selectionMode="MultiToggle" enableSelectAll="false" ariaLabelledBy="title">
 					<ui:columns>
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>lblOrdenCompraBotonVer}"/>
 							<ui:template>
-								<Text text="{path:'oModel>EbelnD',formatter:'.formatInteger'}" wrapping="false" />
+								<Text text="{path:'oModel>EbelnD',formatter:'.formatInteger'}" wrapping="false"/>
 							</ui:template>
 						</ui:Column>
-
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>lblPosicionBotonVer}"/>
 							<ui:template>
-								<Text text="{path:'oModel>PosnrD'}" wrapping="false" />
+								<Text text="{path:'oModel>PosnrD'}" wrapping="false"/>
 							</ui:template>
 						</ui:Column>
-
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>lblCodigoMaterialBotonVer}"/>
 							<ui:template>
-								<Text text="{path:'oModel>MatnrD',formatter:'.formatInteger'}" wrapping="false" />
+								<Text text="{path:'oModel>MatnrD',formatter:'.formatInteger'}" wrapping="false"/>
 							</ui:template>
 						</ui:Column>
-
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>lblDescripcionBotonVer}"/>
 							<ui:template>
-								<Text text="{path:'oModel>MaktxD'}" wrapping="false" />
+								<Text text="{path:'oModel>MaktxD'}" wrapping="false"/>
 							</ui:template>
 						</ui:Column>
-
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>lblCantidadMaterialesBotonVer}"/>
 							<ui:template>
-								<Text text="{path:'oModel>VemngD',formatter:'.currencyFormat'}" wrapping="false" />
+								<Text text="{path:'oModel>VemngD',formatter:'.currencyFormat'}" wrapping="false"/>
 							</ui:template>
 						</ui:Column>
-
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>lblUnBotonVer}"/>
 							<ui:template>
-								<Text text="{path:'oModel>VrkmeD'}" wrapping="false" />
+								<Text text="{path:'oModel>VrkmeD'}" wrapping="false"/>
 							</ui:template>
 						</ui:Column>
 					</ui:columns>
-    			</ui:Table>
-            </VBox>
-        </content>
+				</ui:Table>
+			</VBox>
+		</content>
 		<buttons>
 			<Button text="{i18n>textbtnConfirm}" press="_onAcceptProductEan" custom:custom="default" type="Accept"/>
 			<Button text="{i18n>cancelText}" press="_onPressClose" custom:custom="AddEanProduct" type="Default"/>

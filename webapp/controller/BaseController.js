@@ -539,6 +539,13 @@ sap.ui.define([
 			var joinArray = reverseArray.join(variable);
 			return joinArray;
 		},
+		replaceNotAll: function(value){
+			var sReplace = 0;
+			if(!this.isEmpty(value)){
+				sReplace = value.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",","");
+			}
+			return sReplace;
+		},
 		currencyFormat: function (value) {
 			if (value) {
 				var sNumberReplace = value.replaceAll(",", "");
@@ -632,6 +639,22 @@ sap.ui.define([
 
 			oTable.getBinding("items").filter(aFilter);
 		},
+		changeFormatIntegerString: function (oEvent) {
+			var oSource = oEvent.getSource();
+			var values = oSource.getValue();
+			var regex = /[^\d]/g;
+			var x = values.replace(/[^\d]/g, '');
+
+			if (values.match(regex)) {
+				var x = values;
+			} else {
+				var x = '';
+			}
+			var x = parseInt(values);
+			var sValueUsed = isNaN(x) ? 0 : values;
+
+			oSource.setValue(sValueUsed.toString());
+		},
 		liveChangeFormatInteger: function (oEvent) {
 			var oSource = oEvent.getSource();
 			var values = oSource.getValue();
@@ -679,14 +702,28 @@ sap.ui.define([
 			var oSource = oEvent.getSource();
 			var sCustom = oSource.data("custom");
 			switch (sCustom) {
-			case "DetailClient":
-				this._onClearComponentDetailClient();
-				this._onClearDataDetailClient();
-				oSource.getParent().close();
-				break;
-			default:
-				oSource.getParent().close();
+				case "PackingOC":
+					this._onClearComponentDetailPacking(oSource.getParent().getContent());
+					this._onClearDataDetailPacking();
+					oSource.getParent().close();
+					break;
+				case "DetailClient":
+					this._onClearComponentDetailClient();
+					this._onClearDataDetailClient();
+					oSource.getParent().close();
+					break;
+				default:
+					oSource.getParent().close();
 			}
+		},
+		_onClearDataDetailPacking: function(){
+			this.getModel("oModel").setProperty("/oEmbalajeEntregaconOC", []);
+			this.getModel("oModel").setProperty("/oEmbalajeItemsconOC", []);
+		},
+		_onClearComponentDetailPacking: function(oComponent){
+			oComponent.forEach(function(value){
+				value.clearSelection(true);
+			});
 		},
 		_onClearComponentDetailClient: function () {
 			this._byId("frgIdDetailCliente--slDirecciones").setSelectedKey("");
@@ -880,7 +917,12 @@ sap.ui.define([
 			parse(root, json);
 			console.log(json);
 		},
-
+		addZero :function (i) {
+		    if (i < 10) {
+		        i = "0" + i;
+		    }
+		    return i;
+		},
 		getYYYYMMDD: function (e) {
 			var t = e.getDate();
 			var n = e.getMonth() + 1;
@@ -892,6 +934,36 @@ sap.ui.define([
 				n = "0" + n
 			}
 			var o = r + "/" + n + "/" + t;
+			return o
+		},
+		getYYYYMMDDGUION: function (e) {
+			var t = e.getDate();
+			var n = e.getMonth() + 1;
+			var r = e.getFullYear();
+			if (t < 10) {
+				t = "0" + t
+			}
+			if (n < 10) {
+				n = "0" + n
+			}
+			var o = r + "-" + n + "-" + t;
+			return o
+		},
+		formatDateAbapInDateGuion: function (e) {
+			var FechaSap  =(e.replace("/Date(","")).replace(")/","");
+			var Fecha = new Date(FechaSap*1);
+			Fecha.setHours(Fecha.getHours() + 24);
+			
+			var t = Fecha.getDate();
+			var n = Fecha.getMonth() + 1;
+			var r = Fecha.getFullYear();
+			if (t < 10) {
+				t = "0" + t
+			}
+			if (n < 10) {
+				n = "0" + n
+			}
+			var o = r + "-" + n + "-" + t;
 			return o
 		},
 		getYYYYMMDDHHMMSS: function (e) {
@@ -1233,27 +1305,27 @@ sap.ui.define([
 				}
 			}
 		},
-		validateInputs:function(id,value, parameter){
-				if(	this.getView().byId(id).getValueState() == "None"){
-					
-					if(value == "" || value == undefined){
-						utilUI.onMessageErrorDialogPress2("Campo vacio "+ parameter);
-						this.getView().byId(id).setValueState("Error");
-						this.getView().byId(id).setValueStateText("Campo Vacio");
-						return true;
-					}else{
-						this.getView().byId(id).setValueState("Success");
-						return false;
-					}
-					
-				}else if(this.getView().byId(id).getValueState() == "Error"){
-					utilUI.onMessageErrorDialogPress2("Campo incorrecto "+ parameter);
+		validateInputs: function (id, value, parameter) {
+			if (this.getView().byId(id).getValueState() == "None") {
+
+				if (value == "" || value == undefined) {
+					utilUI.onMessageErrorDialogPress2("Campo vacio " + parameter);
 					this.getView().byId(id).setValueState("Error");
+					this.getView().byId(id).setValueStateText("Campo Vacio");
 					return true;
-				}else if(this.getView().byId(id).getValueState() == "Success"){
+				} else {
+					this.getView().byId(id).setValueState("Success");
 					return false;
 				}
-			},
+
+			} else if (this.getView().byId(id).getValueState() == "Error") {
+				utilUI.onMessageErrorDialogPress2("Campo incorrecto " + parameter);
+				this.getView().byId(id).setValueState("Error");
+				return true;
+			} else if (this.getView().byId(id).getValueState() == "Success") {
+				return false;
+			}
+		},
 
 		//onMethodsGetStandard
 		getRuc: function () {
@@ -1297,12 +1369,13 @@ sap.ui.define([
 				that.getMessageBox("error", that.getI18nText("sErrorTry"));
 			}
 		},
-		getDataMaestro: function () {
+		getDataMaestro: function (oCodigoTable) {
 			try {
 				that = this;
 				return new Promise(function (resolve, reject) {
-					var oCodigoTable = ["T_ERP_STATUS","T_ERP_AREA","T_ERP_LUMP_TYPE","T_ERP_UNIDADES","T_ERP_MOTIVE",
-					"T_ERP_COND","T_ERP_SOC","T_ERP_DEST"];
+					// var oCodigoTable = ["T_ERP_STATUS", "T_ERP_AREA", "T_ERP_LUMP_TYPE", "T_ERP_UNIDADES", "T_ERP_MOTIVE",
+					// 	"T_ERP_COND", "T_ERP_SOC", "T_ERP_DEST"
+					// ];
 					var oFiltro = [];
 					oCodigoTable.forEach(function (codigo) {
 						oFiltro.push(new Filter("CodigoTabla", "EQ", codigo));

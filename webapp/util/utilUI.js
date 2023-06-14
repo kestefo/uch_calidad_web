@@ -392,7 +392,7 @@ sap.ui.define([
 				content: new sap.ui.layout.VerticalLayout({
 					//id: 'idVertical',
 					content: [new sap.m.Text({
-							text: mensaje + '\n' + '\n',
+							text: mensaje + '\n' ,
 							textAlign: 'Center'
 								//id: 'txtMensaje'
 						}),

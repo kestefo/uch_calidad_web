@@ -39,5 +39,11 @@ sap.ui.define([
 		consultarHana: function (context, oResults, callback) {
 			utilHttp.Post(constantes.services.consultarHana, oResults, callback, context);
 		},
+		RegistrarEntregaConOC: function (context, oResults, callback) {
+			utilHttp.Post(constantes.services.registrarEntregasConOC, oResults, callback, context);
+		},
+		RegistrarEntregaSinOC: function (context, oResults, callback) {
+			utilHttp.Post(constantes.services.registrarEntregasSinOC, oResults, callback, context);
+		},
 	};
 });

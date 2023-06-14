@@ -1,98 +1,78 @@
-<mvc:View controllerName="solicitarcitapr.controller.OrderOC"
-    xmlns:mvc="sap.ui.core.mvc" displayBlock="true"
-    xmlns="sap.m"
-    xmlns:f="sap.ui.layout.form"
-	xmlns:core="sap.ui.core"
-    xmlns:ui="sap.ui.table">
-    <Page id="pageOrderOC" title="{i18n>titleOrderNoOC}">
-        <content >
-            <VBox class="sapUiSmallMargin"> 
-                <ui:Table visibleRowCount="4">
-                    <ui:extension>
-                        <OverflowToolbar style="Clear">
-                        <content>
-                            <ToolbarSpacer width=""/>
-                            <!-- <Button id="idbtnTableModificar" text="{i18n>btnModificar}" press="_onPressUpdateCondEnt" icon="" type="Emphasized"/> -->
-                            <Button id="idbtnTableEmbalar" text="{i18n>btnEmbalar}" icon="sap-icon://product" type="Emphasized"/>
-                            <Button id="idbtnTableCerrar" press="_onPressCancel" text="{i18n>btnCerrar}" icon="sap-icon://decline" type="Reject"/>
-                        </content>
-                        </OverflowToolbar>
-                    </ui:extension>
-                    <ui:columns>
-                        <ui:Column width="10rem" hAlign="Center" >
-                            <Label text="Cond. Entrega"/>
-                            <ui:template>
-                                    <Text text="{i18n>lblDescCond }"/>
-                                    
-                            </ui:template>
-                        </ui:Column>
-                                                            
-                        <ui:Column width="8.2rem" hAlign="Center">
-                            <Label text="Orden de Compra" />
-                            <ui:template>
-                            
-                                <ObjectNumber
-                                    textAlign="Center"
-                                    number="{i18n>lblEbeln}" />
-                                
-                            </ui:template>
-                        </ui:Column>
-                            
-                        <ui:Column width="4.5rem" hAlign="Center">
-                            <Label text="Posición" />
-                            <ui:template>
-                                <Text text="{i18n>lblEbelpD}"/>
-                            </ui:template>
-                        </ui:Column>
-                                                            
-                        <ui:Column width="6rem" hAlign="Center">
-                            <Label text="Material"  />
-                            <ui:template>
-                                <Text text="{i18n>lblMatnrD}"/> 
-                            </ui:template>
-                        </ui:Column>
-                                                            
-                        <ui:Column width="auto" hAlign="Center">
-                            <Label text="Denominación" />
-                            <ui:template> 
-                                <Text text="{i18n>lblTxz01D}"/>
-                            </ui:template>
-                        </ui:Column>
-
-                        <ui:Column width="8.5rem" hAlign="Center">
-                            <Label text="Fecha Entrega OC" />
-                            <ui:template>
-                                <Text text="{i18n>lblEindtD}"/>
-                            </ui:template>
-                        </ui:Column>
-                    
-                        <ui:Column width="9rem" hAlign="Center" >
-                            <Label text="Pendiente de Envio" />
-                            <ui:template>
-                                <ObjectNumber
-                                    textAlign="Right"
-                                    number="{i18n>ObmngD}" />
-                            </ui:template>
-                        </ui:Column> 
-                            
-                        <ui:Column width="10rem" hAlign="Center">
-                            <Label text="Cantidad a Enviar" />
-                            <ui:template>
-                                <Input id="regiscantidad" value="{i18n>MengezuD}" textAlign="Right" enabled="true" placeholder="Ingresar"/>
-                            </ui:template>
-                        </ui:Column>
-                            
-                        <ui:Column width="3rem" hAlign="Center">
-                            <Label text="UM" />
-                            <ui:template>
-                                    <ObjectNumber
-                                    textAlign="Center"
-                                    unit="{i18n>lblMeinsD}" />
-                            </ui:template>
-                        </ui:Column>                              
-                    </ui:columns>
-                </ui:Table>           
-            </VBox>
-        </content>
-    </Page>
+<mvc:View controllerName="solicitarcitapr.controller.OrderOC" xmlns:mvc="sap.ui.core.mvc" displayBlock="true" xmlns="sap.m"
+	xmlns:f="sap.ui.layout.form" xmlns:core="sap.ui.core" xmlns:ui="sap.ui.table">
+	<Page id="pageOrderOC" title="{i18n>titleOrderNoOC}">
+		<content >
+			<VBox class="sapUiSmallMargin">
+				<ui:Table id="tbOrderMaterial" rows="{path:'oModel>/oDataEntregaOC'}">
+					<ui:extension>
+						<OverflowToolbar style="Clear">
+							<content>
+								<ToolbarSpacer width=""/>
+								<!-- <Button id="idbtnTableModificar" text="{i18n>btnModificar}" press="_onPressUpdateCondEnt" icon="" type="Emphasized"/> -->
+								<Button press="_onPressPackingOC" text="{i18n>btnEmbalar}" icon="sap-icon://product" type="Emphasized"/>
+								<Button press="_onPressCancel" text="{i18n>btnCerrar}" icon="sap-icon://decline" type="Reject"/>
+							</content>
+						</OverflowToolbar>
+					</ui:extension>
+					<ui:columns>
+						<ui:Column width="10rem" hAlign="Center">
+							<Label text="{i18n>lblDescCond}"/>
+							<ui:template>
+								<Text text="{oModel>DescCond}" wrapping="false"/>
+							</ui:template>
+						</ui:Column>
+						<ui:Column width="8.2rem" hAlign="Center">
+							<Label text="{i18n>lblEbeln}"/>
+							<ui:template>
+								<ObjectNumber textAlign="Center" number="{oModel>Ebeln}"/>
+							</ui:template>
+						</ui:Column>
+						<ui:Column width="4.5rem" hAlign="Center">
+							<Label text="{i18n>lblEbelpD}"/>
+							<ui:template>
+								<Text text="{oModel>EbelpD}" wrapping="false"/>
+							</ui:template>
+						</ui:Column>
+						<ui:Column width="6rem" hAlign="Center">
+							<Label text="{i18n>lblMatnrD}"/>
+							<ui:template>
+								<Text text="{oModel>MatnrD}" wrapping="false"/>
+							</ui:template>
+						</ui:Column>
+						<ui:Column width="auto" hAlign="Center">
+							<Label text="{i18n>lblTxz01D}"/>
+							<ui:template>
+								<Text text="{oModel>Txz01D}" wrapping="false"/>
+							</ui:template>
+						</ui:Column>
+						<ui:Column width="8.5rem" hAlign="Center">
+							<Label text="{i18n>lblEindtD}"/>
+							<ui:template>
+								<Text text="{path: 'oModel>EindtD', formatter:'.formatYYYYMMDDAbapStringDate'}" wrapping="false"/>
+							</ui:template>
+						</ui:Column>
+						<ui:Column width="9rem" hAlign="Center">
+							<Label text="{i18n>ObmngD}"/>
+							<ui:template>
+								<ObjectNumber textAlign="Right" number="{path: 'oModel>ObmngD', formatter:'.currencyFormat'}"/>
+							</ui:template>
+						</ui:Column>
+						<ui:Column width="10rem" hAlign="Center">
+							<Label text="{i18n>MengezuD}"/>
+							<ui:template>
+								<Input id="regiscantidad" value="{path: 'oModel>MengezuD', formatter:'.currencyFormat'}" textAlign="Right" enabled="true"
+									placeholder="Ingresar"/>
+							</ui:template>
+						</ui:Column>
+						<ui:Column width="3rem" hAlign="Center">
+							<Label text="{i18n>lblMeinsD}"/>
+							<ui:template>
+								<ObjectNumber textAlign="Center" unit="{oModel>MeinsD}"/>
+							</ui:template>
+						</ui:Column>
+					</ui:columns>
+				</ui:Table>
+			</VBox>
+		</content>
+	</Page>
 </mvc:View>

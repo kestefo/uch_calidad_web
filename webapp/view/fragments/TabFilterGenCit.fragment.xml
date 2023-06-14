@@ -1,64 +1,50 @@
-<core:FragmentDefinition 
-    xmlns="sap.m" 
-    xmlns:core="sap.ui.core"
-    xmlns:ui  ="sap.ui.table"
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:ui="sap.ui.table"
 	xmlns:custom="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
-    <ui:TreeTable
-            id="TreeTableBasic"
-            rows="{path:'oModel>/oEntregasNoCita', parameters: {arrayNames:['ArrayGeneral']}}"
-            selectionMode="MultiToggle"
-            enableSelectAll="false"
-            ariaLabelledBy="title">
-        <ui:columns>
-            <ui:Column width="auto">
-                <Label text="{i18n>lblcolumnnumentrega}"/>
-                <ui:template>
-                    <Text text="{path:'oModel>Vbeln',formatter:'.formatInteger'}" wrapping="false" />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="auto">
-                <Label text="{i18n>lblcolumnalmdes}"/>
-                <ui:template>
-                    <Text text="{oModel>Namew} - {oModel>Namel}" wrapping="false" />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="auto">
-                <Label text="{i18n>lblcolumnconentrega}"/>
-                <ui:template>
-                    <Text text="{oModel>Desc_cond}" wrapping="false" />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="auto" hAlign="Center">
-                <Label text="{i18n>lblcolumncantembalaje}"/>
-                <ui:template>
-                    <Text text="{path:'oModel>Anzpk',formatter:'.formatInteger'}" wrapping="false" />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="auto" hAlign="End">
-                <Label text="{i18n>lblcolumnpeso}"/>
-                <ui:template>
-                    <Text text="{path:'oModel>Btgew',formatter:'.currencyFormat'}" wrapping="false" />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="auto">
-                <Label text="{i18n>lblcolumnestatus}"/>
-                <ui:template>
-                    <Text text="{oModel>descEstatusSinOC}" wrapping="false" />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="auto">
-                <Label text="{i18n>lblcolumnresumen}"/>
-                <ui:template>
-                    <Button text="{i18n>textButtonVer}" press="_onPressShowMaterials" icon="sap-icon://key-user-settings"/>
-                </ui:template>
-            </ui:Column>
-            
-        </ui:columns>
-    </ui:TreeTable>
+	<ui:TreeTable id="TreeTableBasic" rows="{path:'oModel>/oEntregasNoCita', parameters: {arrayNames:['ArrayGeneral']}}"
+		selectionMode="MultiToggle" enableSelectAll="false" ariaLabelledBy="title">
+		<ui:columns>
+			<ui:Column width="auto">
+				<Label text="{i18n>lblcolumnnumentrega}"/>
+				<ui:template>
+					<Text text="{path:'oModel>Vbeln',formatter:'.formatInteger'}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="auto">
+				<Label text="{i18n>lblcolumnalmdes}"/>
+				<ui:template>
+					<Text text="{oModel>Namew} - {oModel>Namel}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="auto">
+				<Label text="{i18n>lblcolumnconentrega}"/>
+				<ui:template>
+					<Text text="{oModel>Desc_cond}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="auto" hAlign="Center">
+				<Label text="{i18n>lblcolumncantembalaje}"/>
+				<ui:template>
+					<Text text="{path:'oModel>Anzpk',formatter:'.formatInteger'}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="auto" hAlign="End">
+				<Label text="{i18n>lblcolumnpeso}"/>
+				<ui:template>
+					<Text text="{path:'oModel>Btgew',formatter:'.currencyFormat'}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="auto">
+				<Label text="{i18n>lblcolumnestatus}"/>
+				<ui:template>
+					<Text text="{oModel>descEstatusSinOC}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="auto">
+				<Label text="{i18n>lblcolumnresumen}"/>
+				<ui:template>
+					<Button text="{i18n>textButtonVer}" press="_onPressShowMaterials" icon="sap-icon://key-user-settings"/>
+				</ui:template>
+			</ui:Column>
+		</ui:columns>
+	</ui:TreeTable>
 </core:FragmentDefinition>

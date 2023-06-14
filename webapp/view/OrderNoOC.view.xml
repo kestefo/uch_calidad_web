@@ -45,7 +45,8 @@
 										<Select id="slMotivoSinOC" forceSelection="false" items="{ path: 'oModelGet>/oMotivo' }">
 											<core:Item key="{oModelGet>Campo}" text="{oModelGet>DescripcionCampo}"/>
 										</Select>
-										<Input id="otrosid" type="Text" showValueHelp="false" enabled="true" visible="false" width="auto" valueHelpOnly="false" required="false" valueStateText="Invalid entry" maxLength="40"/>
+										<Input id="otrosid" type="Text" showValueHelp="false" enabled="true" visible="false" width="auto" valueHelpOnly="false" required="false"
+											valueStateText="Invalid entry" maxLength="40"/>
 									</f:fields>
 								</f:FormElement>
 							</f:formElements>
@@ -174,7 +175,7 @@
 							<Label text="{i18n>titleUNMMaterial}"/>
 							<ui:template>
 								<Select change="fnSelectedUnmMaterial" forceSelection="false" columnRatio="5:2" selectedKey="{oModel>unmMaterial}"
-									items="{ path:'oModelGet>/oUnidades' , templateShareable:false }" showSecondaryValues= "true" wrapItemsText="true">
+									items="{ path:'oModelGet>/oUnidades' , templateShareable:false }" showSecondaryValues="true" wrapItemsText="true">
 									<core:ListItem key="{oModelGet>Campo}" text="{oModelGet>DescripcionCampo}" additionalText="{oModelGet>Campo}"/>
 								</Select>
 							</ui:template>
@@ -182,7 +183,7 @@
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>titleObservacion}"/>
 							<ui:template>
-								<Input type="Text" value="{oModel>obsMaterial}"  maxLength="40"/>
+								<Input type="Text" value="{oModel>obsMaterial}" maxLength="40"/>
 							</ui:template>
 						</ui:Column>
 					</ui:columns>

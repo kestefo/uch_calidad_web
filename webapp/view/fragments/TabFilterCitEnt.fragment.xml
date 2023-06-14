@@ -1,99 +1,80 @@
-<core:FragmentDefinition 
-    xmlns="sap.m" 
-    xmlns:core="sap.ui.core" 
-    xmlns:ui  ="sap.ui.table"
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:ui="sap.ui.table"
 	xmlns:custom="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
-    <ui:TreeTable
-            id="TreeTableBasic2"
-            rows="{path:'oModel>/oEntregasConCita', parameters: {arrayNames:['ArrayGeneral2']}}"
-            selectionMode="MultiToggle"
-            enableSelectAll="false"
-            ariaLabelledBy="title">
-        <ui:columns>
-            <ui:Column width="10rem">
-                <Label text="{i18n>lblcolumnCita}"/>
-                <ui:template>
-                    <Text text="{oModel>ZcitaNp}" wrapping="false" />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="12rem" hAlign="Center">
-                <Label text="{i18n>lblcolumnEstatusCita}"/>
-                <ui:template>
-                    <Text text="{oModel>Zzlfstkdesc}" wrapping="false" />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="6rem" hAlign="Center">
-                <Label text="{i18n>lblcolumnNumCita}" wrapping="true"/>
-                <ui:template>
-                    <Text text="{oModel>Zcita}" wrapping="false" />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="6rem">
-                <Label text="{i18n>lblcolumnNumEntregaCita}" wrapping="true"/>
-                <ui:template>
-                    <Text text="{path:'oModel>Zvbeln',formatter:'.formatInteger'}" wrapping="false" />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="11rem">
-                <Label text="{i18n>lblcolumnAlmDesCita}"/>
-                <ui:template>
-                    <Text text="{oModel>Zgort} - {oModel>Zlgobe}" wrapping="false" />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="9rem">
-                <Label text="{i18n>lblcolumnNumGuiaCita}"/>
-                <ui:template>
-                    <Text text="{oModel>Zbolnr}" wrapping="false" />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="11rem">
-                <Label text="{i18n>lblcolumnCondEntregaCita}"/>
-                <ui:template>
-                    <Text text="{oModel>ZdescCond}" wrapping="false" />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="10rem" hAlign="Center">
-                <Label text="{i18n>lblcolumnFechaCita}"/>
-                <ui:template>
-                    <Text text="{path:'oModel>Zlfdat',formatter:'.formatYYYYMMDDAbap'}" wrapping="false" />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="7rem" hAlign="Center">
-                <Label text="{i18n>lblcolumnHoraCita}"/>
-                <ui:template>
-                    <Text text="{path:'oModel>Zlfuhr',formatter:'.formatHHMMSSAbap'}" wrapping="false" />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="10rem" hAlign="End">
-                <Label text="{i18n>lblcolumnPesoCita}"/>
-                <ui:template>
-                    <Text text="{path:'oModel>Zbtgew',formatter:'.currencyFormat'}" wrapping="false"  />
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="10rem" hAlign="Center">
-                <Label text="{i18n>lblcolumnResumenMatCita}"/>
-                <ui:template>
-                    <Button text="{i18n>textButtonVer}" press="_onPressShowMaterials2" icon="sap-icon://show"/>
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width="10rem" hAlign="Center">
-                <Label text="{i18n>lblcolumnDescargarDocCita}"/>
-                <ui:template>
-                    <Button text="{i18n>textButtonVer}" icon="sap-icon://download"/>
-                </ui:template>
-            </ui:Column>
-            
-        </ui:columns>
-    </ui:TreeTable>
+	<ui:TreeTable id="TreeTableBasic2" rows="{path:'oModel>/oEntregasConCita', parameters: {arrayNames:['ArrayGeneral2']}}"
+		selectionMode="MultiToggle" enableSelectAll="false" ariaLabelledBy="title">
+		<ui:columns>
+			<ui:Column width="10rem">
+				<Label text="{i18n>lblcolumnCita}"/>
+				<ui:template>
+					<Text text="{oModel>ZcitaNp}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="12rem" hAlign="Center">
+				<Label text="{i18n>lblcolumnEstatusCita}"/>
+				<ui:template>
+					<Text text="{oModel>Zzlfstkdesc}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="6rem" hAlign="Center">
+				<Label text="{i18n>lblcolumnNumCita}" wrapping="true"/>
+				<ui:template>
+					<Text text="{oModel>Zcita}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="6rem">
+				<Label text="{i18n>lblcolumnNumEntregaCita}" wrapping="true"/>
+				<ui:template>
+					<Text text="{path:'oModel>Zvbeln',formatter:'.formatInteger'}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="11rem">
+				<Label text="{i18n>lblcolumnAlmDesCita}"/>
+				<ui:template>
+					<Text text="{oModel>Zgort} - {oModel>Zlgobe}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="9rem">
+				<Label text="{i18n>lblcolumnNumGuiaCita}"/>
+				<ui:template>
+					<Text text="{oModel>Zbolnr}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="11rem">
+				<Label text="{i18n>lblcolumnCondEntregaCita}"/>
+				<ui:template>
+					<Text text="{oModel>ZdescCond}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="10rem" hAlign="Center">
+				<Label text="{i18n>lblcolumnFechaCita}"/>
+				<ui:template>
+					<Text text="{path:'oModel>Zlfdat',formatter:'.formatYYYYMMDDAbap'}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="7rem" hAlign="Center">
+				<Label text="{i18n>lblcolumnHoraCita}"/>
+				<ui:template>
+					<Text text="{path:'oModel>Zlfuhr',formatter:'.formatHHMMSSAbap'}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="10rem" hAlign="End">
+				<Label text="{i18n>lblcolumnPesoCita}"/>
+				<ui:template>
+					<Text text="{path:'oModel>Zbtgew',formatter:'.currencyFormat'}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="10rem" hAlign="Center">
+				<Label text="{i18n>lblcolumnResumenMatCita}"/>
+				<ui:template>
+					<Button text="{i18n>textButtonVer}" press="_onPressShowMaterials2" icon="sap-icon://show"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="10rem" hAlign="Center">
+				<Label text="{i18n>lblcolumnDescargarDocCita}"/>
+				<ui:template>
+					<Button text="{i18n>textButtonVer}" icon="sap-icon://download"/>
+				</ui:template>
+			</ui:Column>
+		</ui:columns>
+	</ui:TreeTable>
 </core:FragmentDefinition>

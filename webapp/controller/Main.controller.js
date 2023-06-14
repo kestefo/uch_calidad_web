@@ -30,16 +30,13 @@ sap.ui.define([
             
             that.oModel.setSizeLimit(99999999);
             that.oModelGet.setSizeLimit(99999999);
-            
-            that.oModel.setProperty("/", models.oDataGeneralModel());
-            that.oModelGet.setProperty("/", models.oDataGeneralGetModel());
 			
 			sap.ui.core.BusyIndicator.show(0);
-            Promise.all([this.getDataMaestro(),this.getDataHana()
-            	// ,this.getERPStatus(),this.getERPArea(),this.getERPLumpType(),
-             //   this.getERPMeasurementUnits(),
-             //   this.getERPOrdersToBePackaged(),this.getERPWalInOrders(),this.getHanaWalInOrders(), this.getERPOrdersByAppointment(),
+            Promise.all([this.getDataMaestro(["T_ERP_STATUS", "T_ERP_AREA", "T_ERP_LUMP_TYPE", "T_ERP_UNIDADES"]),this.getDataHana()
             ]).then(async values => {
+            	this.fnClearComponent();
+				this.fnClearData();
+				
 				var oDataHana = values[1].oResults;
                 //angellyn get data table 1
                 var oDataPedEmb = oDataHana.OrdersToBePackaged;
@@ -53,13 +50,25 @@ sap.ui.define([
                 var oDataPedConCita = values[8].data;
                 this._onEstructurePedConCita(oDataPedConCita);
 
-                //angelly 06/06/2023
-                this._onCasoUso();
 				sap.ui.core.BusyIndicator.hide(0);
             }).catch(function (oError) {
                 sap.ui.core.BusyIndicator.hide(0);
             });
         },
+        fnClearData: function () {
+			that.oModel.setProperty("/oEntregasConCita", []);
+			that.oModel.setProperty("/oEntregasNoCita", []);
+			that.oModel.setProperty("/DataPedidosEmbalar", []);
+		},
+		fnClearComponent: function () {
+			that._byId("TreeTableBasic2").clearSelection(true);
+			that._byId("TreeTableBasic").clearSelection(true);
+			that._byId("TreeTable").clearSelection(true);
+			
+			that._byId("TreeTable").collapseAll();
+			that._byId("TreeTableBasic").collapseAll();
+			that._byId("TreeTableBasic2").collapseAll();
+		},
         getERPWalInOrders:function(){
             try{
                 return new Promise(function (resolve, reject) {
@@ -277,12 +286,6 @@ sap.ui.define([
             });
             that.oModel.setProperty("/oEntregasConCita", oResults2);
         },
-        _onPressOrderNoOC: function(){
-            that.oRouter.navTo("RouteOrderNoOC");
-        },
-        _onPressOrderOC: function(){
-            that.oRouter.navTo("RouteOrderOC");
-        },
         _onSelectPlan: function(oEvent){
             var oSource = oEvent.getSource();
             var selectkey = oSource.getSelectedKey();
@@ -356,6 +359,29 @@ sap.ui.define([
             });
             this.setFragment("_dialogShowMaterials", this.frgIdShowMaterials, "ShowMaterials", this);
             that.oModel.setProperty("/oEntregasNoCitaMateriales", oResults);
+        },
+        _onPressOrderNoOC: function(){
+            that.oRouter.navTo("RouteOrderNoOC");
+        },
+        _onPressOrderOC: function(){
+        	var oTable = that.byId("TreeTable");
+            var oIndeces = oTable.getSelectedIndices();
+            var oMaterials = [];
+            oIndeces.forEach(function(value){
+                var oOrdeneSelect = oTable.getContextByIndex(value).getObject();
+                var oMaterialSelect = oOrdeneSelect.ArrayMaterial;
+                oMaterialSelect.forEach(function(value2){
+                    oMaterials.push(value2);
+                })
+            });
+            
+            if(oIndeces.length > 0){
+				this.getModel("oModel").setProperty("/oDataEntregaOCPrev", oMaterials);
+				that.oRouter.navTo("RouteOrderOC");
+            }else{
+            	utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorSelectOrden"));
+				return;
+            }
         },
     });
 });

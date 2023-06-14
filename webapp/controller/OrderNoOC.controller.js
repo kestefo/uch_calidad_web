@@ -27,7 +27,8 @@ sap.ui.define([
 			that.oModelGet.setSizeLimit(99999999);
 
 			sap.ui.core.BusyIndicator.show(0);
-			Promise.all([this.getDataMaestro()
+			Promise.all([this.getDataMaestro(["T_ERP_STATUS", "T_ERP_AREA", "T_ERP_LUMP_TYPE", "T_ERP_UNIDADES", "T_ERP_MOTIVE",
+				"T_ERP_COND", "T_ERP_SOC", "T_ERP_DEST"])
 			]).then(async values => {
 				this.fnClearComponent();
 				this.fnClearData();
@@ -247,8 +248,7 @@ sap.ui.define([
 			}
 
 			items.push(obj);
-			that.oModel.setProperty("/oEmbalajeEntregasinOC", items);
-			this._byId("textCantEnt").setText(items.length);
+			that.oModel.setProperty("/oEmbalajeEntregaconOC", items);
 		},
 		fnPressDeleteEmbalajes: function () {
 			var that = this;

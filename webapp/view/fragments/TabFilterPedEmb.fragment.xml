@@ -1,40 +1,32 @@
-<core:FragmentDefinition 
-    xmlns="sap.m" 
-    xmlns:core="sap.ui.core" 
-    xmlns:ui  ="sap.ui.table"
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:ui="sap.ui.table"
 	xmlns:custom="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
-   
-    <ui:TreeTable id	="TreeTable"
-        rows  ="{path:'oModel>/DataPedidosEmbalar', parameters: {arrayNames:['ArrayGeneral']} , 
-                                sorter : {path : 'Ebeln' , descending: true }}">
-        <ui:columns>
-            <ui:Column width="24rem" hAlign="Center">
-                <Label text="{i18n>lblcolumnsociedad}" />
-                <ui:template>
-                    <Text text="{oModel>DescripcionGeneral}"  wrapping="false"/>
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column  width="10rem" hAlign="Center" >
-                <Label text="{i18n>lblcolumnordencompra}"/>
-                <ui:template>
-                    <Text text="{oModel>Ebeln}"  wrapping="false"/>
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column  width ="16rem" hAlign ="Center" >
-                <Label text="{i18n>lblcolumnfechaordencompra}"/>
-                <ui:template>
-                    <Text text="{path: 'oModel>Bedat', formatter:'.formatYYYYMMDDAbapStringDate'}"  wrapping="false"/>
-                </ui:template>
-            </ui:Column>
-
-            <ui:Column width ="16rem" hAlign ="Center" >
-                <Label text="{i18n>lblcolumncomprador}"/>
-                <ui:template>
-                    <Text text="{oModel>NameTextc}"  wrapping="false"/>
-                </ui:template>
-            </ui:Column>
-        </ui:columns>
-    </ui:TreeTable>                      
+	<ui:TreeTable id="TreeTable"
+		rows="{path:'oModel>/DataPedidosEmbalar', parameters: {arrayNames:['ArrayGeneral']} , sorter : {path : 'Ebeln' , descending: true }}">
+		<ui:columns>
+			<ui:Column width="24rem" hAlign="Center">
+				<Label text="{i18n>lblcolumnsociedad}"/>
+				<ui:template>
+					<Text text="{oModel>DescripcionGeneral}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="10rem" hAlign="Center">
+				<Label text="{i18n>lblcolumnordencompra}"/>
+				<ui:template>
+					<Text text="{oModel>Ebeln}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="16rem" hAlign="Center">
+				<Label text="{i18n>lblcolumnfechaordencompra}"/>
+				<ui:template>
+					<Text text="{path: 'oModel>Bedat', formatter:'.formatYYYYMMDDAbapStringDate'}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+			<ui:Column width="16rem" hAlign="Center">
+				<Label text="{i18n>lblcolumncomprador}"/>
+				<ui:template>
+					<Text text="{oModel>NameTextc}" wrapping="false"/>
+				</ui:template>
+			</ui:Column>
+		</ui:columns>
+	</ui:TreeTable>
 </core:FragmentDefinition>
