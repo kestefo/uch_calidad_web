@@ -19,6 +19,7 @@ sap.ui.define([
             
             this.frgIdAddProduct = "frgIdAddProduct";
             this.frgIdShowMaterials = "frgIdShowMaterials";
+            this.frgIdFechaPlan = "frgIdFechaPlan";
         },
         _onPressRefresh: function(){
             this.handleRouteMatched();
@@ -381,6 +382,18 @@ sap.ui.define([
             }else{
             	utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorSelectOrden"));
 				return;
+            }
+        },
+        _onPressFechaPlan: function(oEvent){
+            var oSource = oEvent.getSource();
+            var oRow = oSource.getParent();
+            var oTable = that.byId("TreeTableBasic");
+            var oIndeces = oTable.getSelectedIndices();
+            if(oIndeces.length===0){
+                utilUI.onMessageErrorDialogPress2(that.getI18nText("ErrorNoSeleccionCita"));
+			    return;
+            }else{
+                this.setFragment("_dialogFechaPlan", this.frgIdFechaPlan, "FechaPlan", this);
             }
         },
     });

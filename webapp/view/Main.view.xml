@@ -69,7 +69,7 @@
                     <ToolbarSpacer width=""/>
                     <Button id="btOrderNoOC" text="{i18n>textButtonOrderNoOC}" press="_onPressOrderNoOC" type="Emphasized" visible="true"/>
                     <Button id="btOrderOC" text="{i18n>textButtonOrdenOC}" press="_onPressOrderOC" type="Accept" visible="true"/>
-                    <Button id="btMakeAppointment" text="{i18n>textButtonMakeAppointment}" press="" type="Accept" icon="sap-icon://timesheet" visible="false"/>
+                    <Button id="btMakeAppointment" text="{i18n>textButtonMakeAppointment}" press="_onPressFechaPlan" type="Accept" icon="sap-icon://timesheet" visible="false"/>
                     
 
                     <Button id="btUpdateRegister" text="{i18n>textButtonUpdateRegister}" press="" type="Accept" icon="sap-icon://edit" visible="false"/>
