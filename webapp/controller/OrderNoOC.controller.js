@@ -792,7 +792,7 @@ sap.ui.define([
 					var obj = {
 						"oResults" : total
 					}
-					
+					return;
 					that.RegistrarEntregaSinOC(obj);
 				}
 			});
