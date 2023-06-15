@@ -70,72 +70,6 @@ sap.ui.define([
 			that._byId("TreeTableBasic").collapseAll();
 			that._byId("TreeTableBasic2").collapseAll();
 		},
-        getERPWalInOrders:function(){
-            try{
-                return new Promise(function (resolve, reject) {
-                    var sRuc = "";
-                    sRuc = that.getRuc();
-                    var respuestaService = {
-                        iCode:1,
-                        c: "suc",
-                        u: constantes.services.getERPWalInOrders+"filter=IRuc eq '" + sRuc  +"'&$format=json",
-                        m: "Exito HTTP - GET",
-                        data: models.JsonGetERPWalInOrders().d.results 
-                    };
-                    util.response.validateAjaxGetERPNotMessage(respuestaService, {
-                        success: function (oData, message) {
-                            resolve(oData);
-                        },
-                        error: function (message) {
-                            reject(message);
-                        }
-                    });
-                });
-            }catch(oError){
-                that.getMessageBox("error", that.getI18nText("sErrorTry"));
-            }
-        },
-        getHanaWalInOrders: function(){
-            try{
-                return new Promise(function (resolve, reject) {
-                    util.response.validateAjaxGetHana(models.JsonGetHanaWalInOrders(), {
-                        success: function (oData, message) {
-                            resolve(oData);
-                        },
-                        error: function (message) {
-                            reject(message);
-                        }
-                    });
-                });
-            }catch(oError){
-                that.getMessageBox("error", that.getI18nText("sErrorTry"));
-            }
-        },
-        getERPOrdersByAppointment:function(){
-            try{
-                return new Promise(function (resolve, reject) {
-                    var sProveedor = "";
-                    sProveedor = that.getProveedor();
-                    var respuestaService = {
-                        iCode:1,
-                        c: "suc",
-                        u: constantes.services.OrdersByAppointment+"filter=EstatusIni eq '01' and EstatusFin eq '07' and Provee eq '" + sProveedor  +"'&$format=json",
-                        m: "Exito HTTP - GET",
-                        data: models.JsonGetERPOrdersByAppointment().d.results 
-                    };
-                    util.response.validateAjaxGetERPNotMessage(respuestaService, {
-                        success: function (oData, message) {
-                            resolve(oData);
-                        },
-                        error: function (message) {
-                            reject(message);
-                        }
-                    });
-                });
-            }catch(oError){
-                that.getMessageBox("error", that.getI18nText("sErrorTry"));
-            }
-        },
 
         _onEstructurePedEmb: function(oData){
             var oResults = [];
@@ -230,7 +164,16 @@ sap.ui.define([
                 var oDataNew = value.ArrayGeneral;
                 if(value.DescripcionGeneral === "04"){
                     $.each(that._groupBy(oDataNew,'Vbeln'), function (x, y) {
+                    	if(y[0].COD != "02"){
+                    		y[0].COD = "01";
+                    		y[0].COD_DESC = "ERP";
+                    	}
+                    	
+                    	
                         var jResults = {
+                        	"Zzlfstk": y[0].Zzlfstk,
+                        	"Werks": y[0].Werks,
+                        	"Lifnr": y[0].Lifnr,
                             "Vbeln": y[0].Vbeln,
                             "Namew": y[0].Namew,
                             "Namel": y[0].Namel,
@@ -238,6 +181,11 @@ sap.ui.define([
                             "Anzpk": y[0].Anzpk,
                             "Btgew": y[0].Btgew,
                             "descEstatusSinOC": "Ent. Por Generar Cita",
+                            "codtipoData": y[0].COD,
+                            "desctipoData": y[0].COD_DESC,
+                            "direccionModificacion": y[0].DIRECCION,
+                            "entprogramadas": y[0].Entprog,
+                            "Lgort": y[0].Lgort,
                             "materiales": y
                         }
         
