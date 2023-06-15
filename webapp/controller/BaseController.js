@@ -1351,6 +1351,7 @@ sap.ui.define([
 						"oResults": {
 							"MODULO": "MM",
 							"APLICATIVO": "SOLICITAR_CITA",
+							"sProv":that.getModel("oModelUser").getData().oDataAditional[0].Lifnr
 						}
 					};
 					Services.consultarHana(that, oFiltro, function (result) {

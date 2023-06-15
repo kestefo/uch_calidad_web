@@ -1,23 +1,23 @@
 <core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m" 
 	xmlns:custom="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1" xmlns:ui="sap.ui.table">
-	<Dialog title="{i18n>lblTitleMateriales}" contentHeight="auto" contentWidth="auto" afterOpen="_afterOpenAddPedido">
+	<Dialog title="{i18n>lblTitleMateriales}" contentHeight="auto" contentWidth="70%" afterOpen="_afterOpenAddPedido">
 		<content>
 			<VBox class="sapUiSmallMargin">
-				<ui:Table rows="{path:'oModel>/oEntregasNoCitaMateriales'}" selectionMode="MultiToggle" enableSelectAll="false" ariaLabelledBy="title">
+				<ui:Table visibleRowCountMode="Auto" rows="{path:'oModel>/oEntregasNoCitaMateriales'}" selectionMode="None" enableSelectAll="false" ariaLabelledBy="title">
 					<ui:columns>
-						<ui:Column width="auto" hAlign="Center">
+						<ui:Column width="auto" hAlign="Center" visible="{=${oModel>/oEntregasNoCitaMateriales/0/COD}==='02'?false:true}">
 							<Label text="{i18n>lblOrdenCompraBotonVer}"/>
 							<ui:template>
 								<Text text="{path:'oModel>EbelnD',formatter:'.formatInteger'}" wrapping="false"/>
 							</ui:template>
 						</ui:Column>
-						<ui:Column width="auto" hAlign="Center">
+						<ui:Column width="auto" hAlign="Center" visible="{=${oModel>/oEntregasNoCitaMateriales/0/COD}==='02'?false:true}">
 							<Label text="{i18n>lblPosicionBotonVer}"/>
 							<ui:template>
-								<Text text="{path:'oModel>PosnrD'}" wrapping="false"/>
+								<Text text="{path:'oModel>Ebelp'}" wrapping="false"/>
 							</ui:template>
 						</ui:Column>
-						<ui:Column width="auto" hAlign="Center">
+						<ui:Column width="auto" hAlign="Center" visible="{=${oModel>/oEntregasNoCitaMateriales/0/COD}==='02'?false:true}">
 							<Label text="{i18n>lblCodigoMaterialBotonVer}"/>
 							<ui:template>
 								<Text text="{path:'oModel>MatnrD',formatter:'.formatInteger'}" wrapping="false"/>
@@ -38,7 +38,7 @@
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>lblUnBotonVer}"/>
 							<ui:template>
-								<Text text="{path:'oModel>VrkmeD'}" wrapping="false"/>
+								<Text text="{path:'oModel>Vegr2D'}" wrapping="false"/>
 							</ui:template>
 						</ui:Column>
 					</ui:columns>
@@ -46,8 +46,7 @@
 			</VBox>
 		</content>
 		<buttons>
-			<Button text="{i18n>textbtnConfirm}" press="_onAcceptProductEan" custom:custom="default" type="Accept"/>
-			<Button text="{i18n>cancelText}" press="_onPressClose" custom:custom="AddEanProduct" type="Default"/>
+			<Button text="{i18n>btnCerrar}" press="_onPressClose" custom:custom="ShowMaterials" type="Default"/>
 		</buttons>
 	</Dialog>
 </core:FragmentDefinition>

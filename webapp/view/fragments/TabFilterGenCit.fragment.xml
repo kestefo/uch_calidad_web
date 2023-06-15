@@ -39,10 +39,10 @@
 					<Text text="{oModel>descEstatusSinOC}" wrapping="false"/>
 				</ui:template>
 			</ui:Column>
-			<ui:Column width="auto">
-				<Label text="{i18n>lblcolumnresumen}"/>
+			<ui:Column width="10rem" hAlign="Center">
+				<Label text="{i18n>lblcolumnResumenMatCita}"/>
 				<ui:template>
-					<Button text="{i18n>textButtonVer}" press="_onPressShowMaterials" icon="sap-icon://key-user-settings"/>
+					<Button text="{i18n>textButtonVer}" press="_onPressShowMaterials" icon="sap-icon://show"/>
 				</ui:template>
 			</ui:Column>
 		</ui:columns>

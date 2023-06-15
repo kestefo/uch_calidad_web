@@ -234,10 +234,10 @@ sap.ui.define([
                             "Vbeln": y[0].Vbeln,
                             "Namew": y[0].Namew,
                             "Namel": y[0].Namel,
-                            "Desc_cond": y[0].Desc_cond,
+                            "Desc_cond": y[0].DescCond,
                             "Anzpk": y[0].Anzpk,
                             "Btgew": y[0].Btgew,
-                            "descEstatusSinOC": "",
+                            "descEstatusSinOC": "Ent. Por Generar Cita",
                             "materiales": y
                         }
         

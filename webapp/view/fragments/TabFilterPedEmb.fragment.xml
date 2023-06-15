@@ -1,6 +1,6 @@
 <core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core" xmlns:ui="sap.ui.table"
 	xmlns:custom="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
-	<ui:TreeTable id="TreeTable"
+	<ui:TreeTable id="TreeTable" 
 		rows="{path:'oModel>/DataPedidosEmbalar', parameters: {arrayNames:['ArrayGeneral']} , sorter : {path : 'Ebeln' , descending: true }}">
 		<ui:columns>
 			<ui:Column width="24rem" hAlign="Center">

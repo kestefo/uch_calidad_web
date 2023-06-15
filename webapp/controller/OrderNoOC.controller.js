@@ -694,7 +694,7 @@ sap.ui.define([
 			var oEstatus=that.oModelGet.getProperty("/oEstado");
 			var estatus;
 			oEstatus.forEach(function(value){
-				if(value.Campo === "01"){
+				if(value.Campo === "04"){
 					estatus = value
 				}
 			});
