@@ -22,7 +22,7 @@ sap.ui.define([
 			getERPOrdersToBePackaged: "/ERP/sap/opu/odata/sap/ZBVMM_WEB_OC_REL_PEDC_XCONF_SRV/RelacionPedProvSet?$expand=Zet_textospedidoSet&$",
 			getERPWalInOrders: "/ERP/sap/opu/odata/sap/ZBVMM_WEB_OC_REL_PEDC_XCONF_SRV/RelacionPedEntSet?$expand=ZET_EMB_COMPLSet&$",
 			OrdersByAppointment: "/ERP/sap/opu/odata/sap/ZBVMM_WEB_OC_REGISTRO_ENTRE_SRV/ZET_ENTREGA_RESet?$expand=ZET_EMB_COMPLSet&$",
-			registrarEntregasConOC: "/Entrega/Service/RegistrarEntregasConnOC/",
+			registrarEntregasConOC: "/Entrega/Service/RegistrarEntregasConOC/",
 			registrarEntregasSinOC: "/Entrega/Service/RegistrarEntregasSinOC/",
 			
 		}

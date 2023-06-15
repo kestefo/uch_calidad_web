@@ -43,7 +43,7 @@ sap.ui.define([
                 this._onEstructurePedEmb(oDataPedEmb);
 
                 //jose get data table 1
-                var oDataPedSinCita = values[6].data;
+                var oDataPedSinCita = oDataHana.WalInOrders;
                 this._onEstructurePedSinCita(oDataPedSinCita);
                 
                 //jose get data table 2

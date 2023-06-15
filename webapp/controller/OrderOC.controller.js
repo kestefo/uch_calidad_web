@@ -361,20 +361,23 @@ sap.ui.define([
 					}
 				});
 			});
-
+			
+			var pesoTotal = 0;
 			Bultos.forEach(function (a) {
 				a.Array.forEach(function (d) {
 					var newtdline = "";
 					if (d.booleanComp) {
+						pesoTotal += d.PesoBulto;
 						var ob = {
 							VhilmKu: d.Num.toString(),
 							Lfdat: that.formatDateAbapInDateGuion(d.EindtpD) + "T00:00:00",
-							Laeng: that.replaceNotAll(d.Longitud),
-							Breit: that.replaceNotAll(d.Ancho),
-							Hoehe: that.replaceNotAll(d.Altura),
+							Laeng: that.currencyFormat(that.replaceNotAll(d.Longitud)),
+							Breit: that.currencyFormat(that.replaceNotAll(d.Ancho)),
+							Hoehe: that.currencyFormat(that.replaceNotAll(d.Altura)),
 							Inhalt: d.Observacion,
-							Brgew: that.replaceNotAll(d.PesoBulto),
+							Brgew: that.currencyFormat(that.replaceNotAll(d.PesoBulto)),
 							Vegr2: d.TipoBulto,
+							Vegr2Desc: a.TipoBultoDesc,
 							Ebeln: "",
 							Ebelp: "",
 							zul_aufpl: "0",
@@ -387,23 +390,24 @@ sap.ui.define([
 						array.push(ob);
 					} else {
 						newtdline = "";
-
+						pesoTotal += parseFloat(a.PesoBulto);
 						var ob = {
 							VhilmKu: a.Num.toString(),
 							Lfdat: that.formatDateAbapInDateGuion(d.EindtpD) + "T00:00:00",
-							Laeng: that.replaceNotAll(a.Longitud),
-							Breit: that.replaceNotAll(a.Ancho),
-							Hoehe: that.replaceNotAll(a.Altura),
+							Laeng: that.currencyFormat(that.replaceNotAll(a.Longitud)),
+							Breit: that.currencyFormat(that.replaceNotAll(a.Ancho)),
+							Hoehe: that.currencyFormat(that.replaceNotAll(a.Altura)),
 							Inhalt: a.Observacion,
-							Brgew: that.replaceNotAll(a.PesoBulto),
+							Brgew: that.currencyFormat(that.replaceNotAll(a.PesoBulto)),
 							Vegr2: a.TipoBulto,
+							Vegr2Desc: a.TipoBultoDesc,
 							Ebeln: d.EbelnD,
 							Ebelp: d.EbelpD,
 							zul_aufpl: "0",
 							Tdline: newtdline,
 							Matnr: d.MatnrD,
 							eindt: that.formatDateAbapInDateGuion(d.EindtpD) + "T00:00:00",
-							Menge: that.replaceNotAll(d.MengezuD),
+							Menge: that.currencyFormat(that.replaceNotAll(d.MengezuD)),
 							Meins: d.MeinsD
 						}
 						array.push(ob);
@@ -428,9 +432,10 @@ sap.ui.define([
 			
 			var data2 = {
 				"Zflag": "X",
-				"Lfdat": that.getYYYYMMDDGUION(today) + "T00:00:00",
-				"Lfuhr": "PT" + hours + "H" + min + "M",
-				"Anzpk": arrCont.toString(),
+				"Lfdat": that.getYYYYMMDDGUION(today) + "",
+				"Lfuhr": hours+min+"00",
+				"Anzpk": that.zfill(arrCont,5) ,
+				"Btgew" : that.currencyFormat(pesoTotal.toString()),
 				"ZDETALLE": array,
 				"ZETPEDIDOTEXTSet": ara,
 				"ZETRESULTADOSet": [{
@@ -440,6 +445,7 @@ sap.ui.define([
 				}]
 			};
 			
+			return;
 			sap.ui.core.BusyIndicator.show(0);
 			var oResults = {
 				"oResults" : data2
