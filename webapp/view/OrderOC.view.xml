@@ -3,10 +3,8 @@
 	<Page id="pageOrderOC" title="{i18n>titleOrderNoOC}">
 		<content >
 			<VBox class="sapUiSmallMargin">
-				<ui:Table id="tbOrderMaterial" rows="{path:'oModel>/oDataEntregaOC'}" 			selectionMode		="Multi"
-			visibleRowCount		="11"
-			rowSelectionChange	="onSelectionChange"
-			ariaLabelledBy		="title">
+				<ui:Table id="tbOrderMaterial" rows="{path:'oModel>/oDataEntregaOC'}" selectionMode="Multi" visibleRowCount="11"
+					rowSelectionChange="onSelectionChange" ariaLabelledBy="title">
 					<ui:extension>
 						<OverflowToolbar style="Clear">
 							<content>
@@ -63,8 +61,8 @@
 						<ui:Column width="10rem" hAlign="Center">
 							<Label text="{i18n>MengezuD}"/>
 							<ui:template>
-								<Input id="regiscantidad" value="{path: 'oModel>MengezuD', formatter:'.currencyFormat'}" change="fnreemLetrasCant" textAlign="Right" enabled="true"
-									placeholder="Ingresar1"/>
+								<Input id="regiscantidad" value="{path: 'oModel>MengezuD', formatter:'.currencyFormat'}" change="fnreemLetrasCant" textAlign="Right"
+									enabled="true" placeholder="Ingresar1"/>
 							</ui:template>
 						</ui:Column>
 						<ui:Column width="3rem" hAlign="Center">
