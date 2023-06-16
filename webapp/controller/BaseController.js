@@ -539,10 +539,10 @@ sap.ui.define([
 			var joinArray = reverseArray.join(variable);
 			return joinArray;
 		},
-		replaceNotAll: function(value){
+		replaceNotAll: function (value) {
 			var sReplace = 0;
-			if(!this.isEmpty(value)){
-				sReplace = value.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",","");
+			if (!this.isEmpty(value)) {
+				sReplace = value.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "");
 			}
 			return sReplace;
 		},
@@ -702,26 +702,26 @@ sap.ui.define([
 			var oSource = oEvent.getSource();
 			var sCustom = oSource.data("custom");
 			switch (sCustom) {
-				case "PackingOC":
-					this._onClearComponentDetailPacking(oSource.getParent().getContent());
-					this._onClearDataDetailPacking();
-					oSource.getParent().close();
-					break;
-				case "DetailClient":
-					this._onClearComponentDetailClient();
-					this._onClearDataDetailClient();
-					oSource.getParent().close();
-					break;
-				default:
-					oSource.getParent().close();
+			case "PackingOC":
+				this._onClearComponentDetailPacking(oSource.getParent().getContent());
+				this._onClearDataDetailPacking();
+				oSource.getParent().close();
+				break;
+			case "DetailClient":
+				this._onClearComponentDetailClient();
+				this._onClearDataDetailClient();
+				oSource.getParent().close();
+				break;
+			default:
+				oSource.getParent().close();
 			}
 		},
-		_onClearDataDetailPacking: function(){
+		_onClearDataDetailPacking: function () {
 			this.getModel("oModel").setProperty("/oEmbalajeEntregaconOC", []);
 			this.getModel("oModel").setProperty("/oEmbalajeItemsconOC", []);
 		},
-		_onClearComponentDetailPacking: function(oComponent){
-			oComponent.forEach(function(value){
+		_onClearComponentDetailPacking: function (oComponent) {
+			oComponent.forEach(function (value) {
 				value.clearSelection(true);
 			});
 		},
@@ -917,17 +917,16 @@ sap.ui.define([
 			parse(root, json);
 			console.log(json);
 		},
-		addZero :function (i) {
-		    if (i < 10) {
-		        i = "0" + i;
-		    }
-		    return i;
+		addZero: function (i) {
+			if (i < 10) {
+				i = "0" + i;
+			}
+			return i;
 		},
-		formatosFilterDate:function(sValue,sValue2){
+		formatosFilterDate: function (sValue, sValue2) {
 			var nuevo;
-			if(sValue==null){
-			}else{
-				var fecha=sValue.split(".")[2]+ "-" +sValue.split(".")[1]+ "-" +sValue.split(".")[0];
+			if (sValue == null) {} else {
+				var fecha = sValue.split(".")[2] + "-" + sValue.split(".")[1] + "-" + sValue.split(".")[0];
 				var fechatotal = fecha + " " + sValue2
 				return new Date(fechatotal);
 			}
@@ -973,10 +972,10 @@ sap.ui.define([
 			return o
 		},
 		formatDateAbapInDateGuion: function (e) {
-			var FechaSap  =(e.replace("/Date(","")).replace(")/","");
-			var Fecha = new Date(FechaSap*1);
+			var FechaSap = (e.replace("/Date(", "")).replace(")/", "");
+			var Fecha = new Date(FechaSap * 1);
 			Fecha.setHours(Fecha.getHours() + 24);
-			
+
 			var t = Fecha.getDate();
 			var n = Fecha.getMonth() + 1;
 			var r = Fecha.getFullYear();
@@ -1013,12 +1012,12 @@ sap.ui.define([
 			}
 			return t
 		},
-		formatosFechasHoras:function(sValue){
+		formatosFechasHoras: function (sValue) {
 			var nuevo;
 			var sValue = sValue.toString();
-			if(sValue.length == 1){
-				nuevo = "0"+sValue
-			}else{
+			if (sValue.length == 1) {
+				nuevo = "0" + sValue
+			} else {
 				nuevo = sValue
 			}
 			var fecha = nuevo + ":00"
@@ -1066,7 +1065,7 @@ sap.ui.define([
 				return sHourf;
 			}
 		},
-		
+
 		formatYYYYMMDDNotDayAbapStringDate: function (e) {
 			if (this.isEmpty(e)) {
 				return "";
@@ -1077,7 +1076,7 @@ sap.ui.define([
 				return fechaOC;
 			}
 		},
-		
+
 		formatYYYYMMDDAbapStringDate: function (e) {
 			if (this.isEmpty(e)) {
 				return "";
@@ -1396,7 +1395,7 @@ sap.ui.define([
 						"oResults": {
 							"MODULO": "MM",
 							"APLICATIVO": "SOLICITAR_CITA",
-							"sProv":that.getModel("oModelUser").getData().oDataAditional[0].Lifnr
+							"sProv": that.getModel("oModelUser").getData().oDataAditional[0].Lifnr
 						}
 					};
 					Services.consultarHana(that, oFiltro, function (result) {
@@ -1533,8 +1532,65 @@ sap.ui.define([
 				that.getMessageBox("error", that.getI18nText("sErrorTry"));
 			}
 		},
-		_onCasoUso: function () {
-			//en caso de usar el main
-		}
+		//PARA LOS DECIMALES 15/06/2023
+		fnreemLetrasCant: function (oEvent) {
+			var Objeto = oEvent.getSource();
+			var val = Objeto.getValue();
+			val = val.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "");
+			val = val.replace(/[^0-9,.]/g, '').replace(/,/g, '.');
+			val = parseFloat(val).toFixed(2);
+			val = val.toString();
+			// val.indexOf();
+			if (val === "NaN") {
+				val = "0.00";
+			}
+
+			val = parseFloat(val);
+
+			if (isNaN(val) || val === 0) {
+				val = parseFloat(0).toFixed(2);
+			} else {
+				val = val.toFixed(2);
+
+				var val_parts = val.split('.'),
+					regexp = /(\d+)(\d{3})/;
+
+				while (regexp.test(val_parts[0]))
+					val_parts[0] = val_parts[0].replace(regexp, '$1' + ',' + '$2');
+
+				val = val_parts.join('.');
+			}
+
+			Objeto.setValue(val);
+		},
+		fnreemLetrasCant: function (oEvent) {
+			var Objeto = oEvent.getSource();
+			var val = Objeto.getValue();
+			val = val.replace(/[^0-9,.]/g, '').replace(/,/g, '.');
+			val = parseFloat(val).toFixed(2);
+			val = val.toString();
+			// val.indexOf();
+			if (val === "NaN") {
+				val = "0.00";
+			}
+
+			val = parseFloat(val);
+
+			if (isNaN(val) || val === 0) {
+				val = parseFloat(0).toFixed(2);
+			} else {
+				val = val.toFixed(2);
+
+				var val_parts = val.split('.'),
+					regexp = /(\d+)(\d{3})/;
+
+				while (regexp.test(val_parts[0]))
+					val_parts[0] = val_parts[0].replace(regexp, '$1' + ',' + '$2');
+
+				val = val_parts.join('.');
+			}
+
+			Objeto.setValue(val);
+		},
 	});
 });
