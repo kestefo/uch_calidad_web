@@ -811,5 +811,88 @@ sap.ui.define([
 				}
 			});
 		},
+		ValidarCamposPendientes : function (oEvent){
+			var contador=0;
+			var contador2=0;
+			var contador3=0;
+			var contador4=0;
+			var table = that._byId("TreeTableBasic");
+			var context = oEvent.getParameter("rowContext");
+			if(context != null){
+				var object = that.oModel.getProperty(context.sPath);
+				var oIndex = oEvent.getParameter('rowIndex');
+			
+				var Selecciones =table.getSelectedIndices();
+				var selectedEntries = [];
+				for(var i=0; i<Selecciones.length; i++){
+					var oData = table.getContextByIndex(Selecciones[i]);
+					selectedEntries.push(oData.getProperty(oData.getPath ()));
+				}
+				if(Selecciones.length>1){
+					if(selectedEntries.length >0){
+						for(var i=0; i<selectedEntries.length; i++){
+							if(selectedEntries[i].Desc_cond == object.Desc_cond){
+								contador3++;
+							}
+							
+						}
+						if(contador3==0){}
+						else if(contador3 != Selecciones.length){
+							utilUI.onMessageErrorDialogPress2("Solo es posible seleccionar entregas de una misma condición");
+							table.removeSelectionInterval(oIndex,oIndex);
+							var i = selectedEntries.indexOf(object);
+							if ( i !== -1 ) {
+								selectedEntries.splice( i, 1 );
+							}
+							return;
+						}
+					}
+					if(Object.keys(oDataCond).length >0){
+						for(var j=0;j<Object.keys(oDataCond).length;j++){
+							for(var i=0; i<selectedEntries.length; i++){
+								if(oDataCond[j].DESCRIPCION == selectedEntries[i].desclugardestino){
+									contador++;
+								}
+							}
+						}
+						if(contador==0){
+							
+						}
+						else if(contador != Selecciones.length){
+							table.removeSelectionInterval(oIndex,oIndex);
+							var i = selectedEntries.indexOf(object);
+							if ( i !== -1 ) {
+								selectedEntries.splice( i, 1 );
+							}
+							return;
+						}
+					}
+					
+					if(Object.keys(oDataCentro).length >0){
+						for(var j=0;j<Object.keys(oDataCentro).length;j++){
+							for(var i=0; i<selectedEntries.length; i++){
+								if(oDataCentro[j].CENTRO == selectedEntries[i].Centro){
+									contador2++;
+								}
+							}
+						}
+						if(contador2==0){
+							
+						}
+						else if(contador2 != Selecciones.length){
+							table.removeSelectionInterval(oIndex,oIndex);
+							var i = selectedEntries.indexOf(object);
+							if ( i !== -1 ) {
+								selectedEntries.splice( i, 1 );
+							}
+							return;
+						}
+					}
+				}
+				if(!object.Vbeln.toString()){
+					table.removeSelectionInterval(oIndex,oIndex);
+				}
+			}
+		},
     });
 });
