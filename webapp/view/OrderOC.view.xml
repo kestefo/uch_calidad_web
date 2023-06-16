@@ -60,7 +60,7 @@
 						<ui:Column width="10rem" hAlign="Center">
 							<Label text="{i18n>MengezuD}"/>
 							<ui:template>
-								<Input id="regiscantidad" value="{path: 'oModel>MengezuD', formatter:'.currencyFormat'}" textAlign="Right" enabled="true"
+								<Input id="regiscantidad" value="{path: 'oModel>MengezuD', formatter:'.currencyFormat'}" change="changeFormatIntegerToDigitsString" textAlign="Right" enabled="true"
 									placeholder="Ingresar"/>
 							</ui:template>
 						</ui:Column>

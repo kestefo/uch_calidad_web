@@ -1102,7 +1102,39 @@ sap.ui.define([
 				});	
 			}
 		},
-		
+		ValidarCamposEmbalar: function (oEvent) {
+			var table = this.byId("TreeTable");
+			var context = oEvent.getParameter("rowContext");
+			if (context != null) {
+				var path = context.sPath;
+				var Object = that.oModel.getProperty(path);
+			}
+			var oIndex = oEvent.getParameter('rowIndex');
+			var Selecciones = table.getSelectedIndices();
+			var selectedEntriesProvi = [];
+			var selectedEntries = [];
+
+			for (var i = 0; i < Selecciones.length; i++) {
+				var oData = table.getContextByIndex(Selecciones[i]);
+				selectedEntries.push(oData.getProperty(oData.getPath()));
+			}
+			if (Selecciones.length > 1) {
+				if (selectedEntries[0].Xhupf != selectedEntries[Selecciones.length - 1].Xhupf || selectedEntries[0].PstypD != selectedEntries[
+						Selecciones.length - 1].PstypD || selectedEntries[0].NamelD != selectedEntries[Selecciones.length - 1].NamelD) {
+					utilUI.onMessageErrorDialogPress2(that.getI18nText("sErroCamposEmbalar"));
+					table.removeSelectionInterval(oIndex, oIndex);
+					var i = selectedEntries.indexOf(Object);
+					if (i !== -1) {
+						selectedEntries.splice(i, 1);
+					}
+				}
+			}
+			if (Object !== undefined) {
+				if (!Object.Ebeln) {
+					table.removeSelectionInterval(oIndex, oIndex);
+				}
+			}
+		},
 		
     });
 });

@@ -651,9 +651,25 @@ sap.ui.define([
 				var x = '';
 			}
 			var x = parseInt(values);
-			var sValueUsed = isNaN(x) ? 0 : values;
+			var sValueUsed = isNaN(x) ? 0 : x;
 
 			oSource.setValue(sValueUsed.toString());
+		},
+		changeFormatIntegerToDigitsString: function (oEvent) {
+			var oSource = oEvent.getSource();
+			var values = oSource.getValue();
+			var regex = /[^\d]/g;
+			var x = values.replace(/[^\d]/g, '');
+
+			if (values.match(regex)) {
+				var x = values;
+			} else {
+				var x = '';
+			}
+			var x = parseInt(values);
+			var sValueUsed = isNaN(x) ? 0 : x;
+
+			oSource.setValue(that.currencyFormat(sValueUsed.toString()));
 		},
 		liveChangeFormatInteger: function (oEvent) {
 			var oSource = oEvent.getSource();
@@ -1533,8 +1549,36 @@ sap.ui.define([
 				that.getMessageBox("error", that.getI18nText("sErrorTry"));
 			}
 		},
-		_onCasoUso: function () {
-			//en caso de usar el main
-		}
+		//PARA LOS DECIMALES 15/06/2023
+		fnreemLetrasCant: function (oEvent) {
+			var Objeto = oEvent.getSource();
+			var val = Objeto.getValue();
+			val = val.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "");
+			val = val.replace(/[^0-9,.]/g, '').replace(/,/g, '.');
+			val = parseFloat(val).toFixed(2);
+			val = val.toString();
+			// val.indexOf();
+			if (val === "NaN") {
+				val = "0.00";
+			}
+
+			val = parseFloat(val);
+
+			if (isNaN(val) || val === 0) {
+				val = parseFloat(0).toFixed(2);
+			} else {
+				val = val.toFixed(2);
+
+				var val_parts = val.split('.'),
+					regexp = /(\d+)(\d{3})/;
+
+				while (regexp.test(val_parts[0]))
+					val_parts[0] = val_parts[0].replace(regexp, '$1' + ',' + '$2');
+
+				val = val_parts.join('.');
+			}
+
+			Objeto.setValue(val);
+		},
 	});
 });
