@@ -25,6 +25,8 @@ sap.ui.define([
 			registrarEntregasConOC: "/Entrega/Service/RegistrarEntregasConOC/",
 			registrarEntregasSinOC: "/Entrega/Service/RegistrarEntregasSinOC/",
 			consultarHorarioPorCentro: "/Entrega/Service/ConsultarHorarioPorCentro/",
+			deleteEntregaConOC: "/Entrega/Service/DeleteEntregaConOC/",
+			EliminarEntregaTarget2:"/Entrega/Service/EliminarCitaEntrega/",
 		}
 	};
 });

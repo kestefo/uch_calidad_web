@@ -586,6 +586,7 @@ sap.ui.define([
 
 			if (tipo.toUpperCase() === "S") {
 				MessageBox.success(mensaje, {
+					actions: [MessageBox.Action.YES],
 					onClose: function (sAnswer) {
 						return callback(sAnswer === MessageBox.Action.YES);
 					}

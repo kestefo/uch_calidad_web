@@ -51,5 +51,11 @@ sap.ui.define([
 		ConsultarEntregaHorariosPorCentro:function(context, oResults, callback){
 			utilHttp.Post(constantes.services.consultarHorarioPorCentro, oResults, callback, context);
 		},
+		DeleteEntregaConOC:function(context, oResults, callback){
+			utilHttp.Post(constantes.services.deleteEntregaConOC, oResults, callback, context);
+		},
+		EliminarEntregaTarget2: function (context, oResults, callback) {
+			utilHttp.Post(constantes.services.EliminarEntregaTarget2, oResults, callback, context);
+		},
 	};
 });

@@ -69,14 +69,14 @@ sap.ui.define([
 			that.oModel.setProperty("/oEntregasConCita", []);
 			that.oModel.setProperty("/oEntregasNoCita", []);
 			that.oModel.setProperty("/DataPedidosEmbalar", []);
-			that.oModel.setProperty("/oEntregaSelect", []);
 			
+			that.oModel.setProperty("/oEntregaSelect", []);
 			that.oModel.setProperty("/DataConstanteContadorRecuertoPen", []);
 			that.oModel.setProperty("/DataConstanteFechaInicialPen", "");
 			that.oModel.setProperty("/DataPedidosEmbalar", []);
 			that.oModel.setProperty("/oDataHorarioValidatePen", "");
 			that.oModel.setProperty("/oRangoFecha", []);
-			that.oModel.setProperty("/sConstanteContadorPen", 2);
+			that.oModel.setProperty("/sConstanteContadorPen", 0);
 			that.oModel.setProperty("/DataConstante",[]);
 		},
 		fnClearComponent: function () {
@@ -281,8 +281,8 @@ sap.ui.define([
                     this._byId("btUpdateDate").setVisible(false);
                     this._byId("btDeleteAppointment").setVisible(false);
 
-                    this._byId("btDeleteOrder").setEnabled(false);
-                    this._byId("btChangeOrder").setEnabled(false);
+                    this._byId("btDeleteOrder").setEnabled(true);
+                    this._byId("btChangeOrder").setEnabled(true);
                     break;
                 case "keyTabFilterCitEnt" :
                 	sTarget="03";
@@ -414,7 +414,6 @@ sap.ui.define([
 			that._byId(this.frgIdFechaPlan+"--nEntregaPlan").setValue(arrayOrdenes.length);
 			
 			this.getFilterConstantCentro("MM","SOLICITAR_CITA","CENTRO",arrcontador,true);
-			that.oModel.setProperty("/oModel")
         },
         fnDateNotProgram: function(oEntrega){
         	
@@ -530,6 +529,7 @@ sap.ui.define([
 							var data = oData.oResults.oData.Constante.oData;
 							var dataHoraTrabajada = that.oModelGet.getProperty("/oHorasTrabajadas");//2
 							if(data.length>0){
+								data.sort(function(x,y) {return x.DESDE-y.DESDE})
 								if(dataHoraTrabajada.length > 0){
 									if(dataHoraTrabajada[0].CONTADOR != "0"){
 										that._byId(that.frgIdFechaPlan+"--fecharangoInicialPlan").setEnabled(true);
@@ -811,6 +811,31 @@ sap.ui.define([
 				}
 			});
 		},
+		_onPressCloseFechaPlan: function (oEvent){
+			var oSource = oEvent.getSource();
+			var sCustom = oSource.data("custom");
+			clearTimeout(timeOutFecha);
+			this.fnClearDataFechaPlan();
+			this.fnClearComponentFechaPlan();
+			oSource.getParent().close();
+		},
+		fnClearDataFechaPlan: function () {
+			that.oModel.setProperty("/oEntregaSelect", []);
+			that.oModel.setProperty("/DataConstanteContadorRecuertoPen", []);
+			that.oModel.setProperty("/DataConstanteFechaInicialPen", "");
+			that.oModel.setProperty("/DataPedidosEmbalar", []);
+			that.oModel.setProperty("/oDataHorarioValidatePen", "");
+			that.oModel.setProperty("/oRangoFecha", []);
+			that.oModel.setProperty("/sConstanteContadorPen", 0);
+			that.oModel.setProperty("/DataConstante",[]);
+		},
+		fnClearComponentFechaPlan: function () {
+			that._byId(this.frgIdFechaPlan+"--tbRegistroDisponible").clearSelection(true);
+			that._byId(this.frgIdFechaPlan+"--fecharangoInicialPlan").setValue("");
+			that._byId(this.frgIdFechaPlan+"--fecharangoFinalPlan").setValue("");
+			that._byId(this.frgIdFechaPlan+"--nEntregaPlan").setValue("");
+		},
+		
 		ValidarCamposPendientes : function (oEvent){
 			var contador=0;
 			var contador2=0;
@@ -894,5 +919,190 @@ sap.ui.define([
 				}
 			}
 		},
+		_onPressDeleteEnt: function (oEvent){
+			var oSource = oEvent.getSource();
+            var oRow = oSource.getParent();
+            var sTable = "";
+            var oEntregaSelect = [];
+            if(sTarget == "02"){
+            	sTable = "TreeTableBasic";
+            }else{
+            	sTable = "TreeTableBasic2";
+            }
+            var oTable = that.byId(sTable);
+            var oIndeces = oTable.getSelectedIndices();
+			
+			if(oIndeces.length===0){
+                utilUI.onMessageErrorDialogPress2(that.getI18nText("ErrorNoSeleccionCita"));
+			    return;
+            }else{
+				oIndeces.forEach(function(value){
+					var jEntSelect = oTable.getContextByIndex(value).getObject();
+					oEntregaSelect.push(jEntSelect);
+				});
+				if(sTarget === "02"){
+					if(oIndeces.length===0){
+						utilUI.onMessageErrorDialogPress2(that.getI18nText("ErrorNoSeleccionCita"));
+				    	return;
+					}
+					if(oEntregaSelect.length > 1){
+						utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorDeleteOneEnt"));
+				    	return;
+					}
+					utilUI.messageBox(this.getI18nText("sConfirmDeleteEnt"), "C", function (value) {
+						if (value) {
+							that.fnOperacionEliminarEntregaTarget2(oEntregaSelect);
+						}
+					});
+				}else if(target==="03"){
+					
+					if (EntregasSelecionadas.length === 0){
+						MessageToast.show("Seleccione una Entrega");
+						return;
+					}	
+					
+					if (EntregasSelecionadas.length > 1){
+						MessageToast.show("Solo se puede eliminar una Entrega");
+						return;
+					}
+					
+					var validateCita=[];
+					validateCita = that.validateCita();
+					
+					var validateHorario=[];
+					validateHorario = that.validateHorario();
+					if(EntregasSelecionadas[0].numCitas){
+						if(validateCita.entregas.length == 1){
+							utilUI.onMessageErrorDialogPress2("Para eliminar la entrega primero se debe eliminar la Cita");
+							return ;
+						}
+					}
+							
+					if(validateHorario.validate){
+						var condicion = true;
+						if(EntregasSelecionadas[0].codtipoData == '01'){
+							condicion = true;
+						}else{
+							condicion = false;
+						}
+						sap.m.MessageBox.warning("¿Desea eliminar la Entrega? ", {
+										title: "Mensaje",
+										actions: [
+											"Si",
+											"Cancelar"
+										],
+										onClose: function (sActionClicked) {
+											if(sActionClicked==="Si"){
+												Busy.open();
+												
+												var dataOrdenesERP = [];
+												var dataOrdenesSCP = [];
+												
+												for(var i = 0; i < arrayOrdenes.length ; i++){
+													var Ordenes = arrayOrdenes[i];
+													if(Ordenes.codtipoData == "01"){
+														dataOrdenesERP.push(Ordenes);
+													}else if(Ordenes.codtipoData == "02"){
+														dataOrdenesSCP.push(Ordenes);
+													}
+												}
+												
+												if(dataOrdenesERP.length>0){
+													that.OperacionEliminarEntregaERP(dataOrdenesERP,dataOrdenesSCP,true);
+												}else{
+													that.OperacionEliminarEntregaSCP(dataOrdenesSCP,"La entrega " + dataOrdenesSCP[0].DescripcionGeneralEntrega+" ha sido eliminada");
+												}
+												
+											
+											}
+										}
+									});	
+					}else{
+						utilUI.onMessageErrorDialogPress2(validateHorario.msj);
+					}
+				}
+			}
+		},
+		fnOperacionEliminarEntregaTarget2 : function (arrayOrdenes){
+			var EntregasERP	=[];
+			var EntregaSCP	=[];
+			EntregaSCP = arrayOrdenes.filter(function(obj){
+				return	obj.codtipoData === "02" ;
+			});
+			EntregasERP = arrayOrdenes.filter(function(obj){
+				return	obj.codtipoData === "01" ;
+			});
+			
+			if(EntregasERP.length > 0) {
+				var Entregas_a_Eliminar = [];
+				var EntregaSap ;	
+					
+				EntregasERP.map(function(obj){
+					 EntregaSap = {
+						"Cont":"1",
+						"Vbeln":obj.Vbeln.toString(),//Entrega a Eliminar al Sap
+						"Cita":"",
+						"Message":""
+					}
+					Entregas_a_Eliminar.push(EntregaSap);
+				});
+				
+				var dataE = {
+					"Eliminar":"X",
+					"ItemEntSet":Entregas_a_Eliminar,
+					"NAVRESULT":[
+						{
+							"Mensaje2":"",
+							"Mensaje":""
+						}
+					]
+				};
+				var oResults = {
+					"oResults" : dataE
+				};
+				sap.ui.core.BusyIndicator.show(0);
+				Services.DeleteEntregaConOC(this, oResults, function (result) {
+					util.response.validateFunctionSingleEnd(result, {
+						success: function (data, message) {
+							utilUI.messageBox(that.getI18nText("sSuccessDeleteEnt"), "S", function (value) {
+								if (value) {
+									that.handleRouteMatched();	
+								}
+							});
+						},
+						error: function (message) {
+							sap.ui.core.BusyIndicator.hide(0);
+						}
+					});
+				});
+			}else if (EntregaSCP.length > 0){
+				var EntregaEliminar=[];
+				EntregaSCP.map(function(obj){
+					EntregaEliminar.push(obj.Vbeln.toString());
+				});
+				var dataSinOCHanna = {
+					"oResults" : {
+						"ENTREGA" : EntregaEliminar
+					}
+				};
+				sap.ui.core.BusyIndicator.show(0);
+				Services.EliminarEntregaTarget2(that, dataSinOCHanna, function (result) {
+					util.response.validateFunctionSingleEnd(result, {
+						success: function (data, message) {
+							utilUI.messageBox(that.getI18nText("sSuccessDeleteEnt") , "S", function (value) {
+								if (value) {
+									that.handleRouteMatched();	
+								}
+							});
+						},
+						error: function (jqXHR,textStatus,errorThrown ) {
+							sap.ui.core.BusyIndicator.hide(0);
+						}
+					});
+				});	
+			}
+		},
+		
+		
     });
 });
