@@ -24,7 +24,7 @@ sap.ui.define([
 			OrdersByAppointment: "/ERP/sap/opu/odata/sap/ZBVMM_WEB_OC_REGISTRO_ENTRE_SRV/ZET_ENTREGA_RESet?$expand=ZET_EMB_COMPLSet&$",
 			registrarEntregasConOC: "/Entrega/Service/RegistrarEntregasConOC/",
 			registrarEntregasSinOC: "/Entrega/Service/RegistrarEntregasSinOC/",
-			
+			consultarHorarioPorCentro: "/Entrega/Service/ConsultarHorarioPorCentro/",
 		}
 	};
 });

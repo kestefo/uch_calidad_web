@@ -45,5 +45,11 @@ sap.ui.define([
 		RegistrarEntregaSinOC: function (context, oResults, callback) {
 			utilHttp.Post(constantes.services.registrarEntregasSinOC, oResults, callback, context);
 		},
+		postDataHanaURL: function (context,urlpost, oResults, callback) {
+			utilHttp.Post(urlpost, oResults, callback, context);
+		},
+		ConsultarEntregaHorariosPorCentro:function(context, oResults, callback){
+			utilHttp.Post(constantes.services.consultarHorarioPorCentro, oResults, callback, context);
+		},
 	};
 });

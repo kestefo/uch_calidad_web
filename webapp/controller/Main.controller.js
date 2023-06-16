@@ -11,6 +11,8 @@ sap.ui.define([
 
     var that; 
     var iCont = 0; 
+    var sTarget = "01";
+    var timeOutFecha;
     return BaseController.extend("solicitarcitapr.controller.Main", {
         onInit: function () {
             that = this;
@@ -39,10 +41,13 @@ sap.ui.define([
 				this.fnClearData();
 				
 				var oDataHana = values[1].oResults;
+				that.oModelGet.setProperty("/oCentro", oDataHana.consultarCenter);
+				that.oModelGet.setProperty("/oFeriados", oDataHana.consultarFeriados);
+				that.oModelGet.setProperty("/oHorasTrabajadas", oDataHana.consultarHorasTrabajadas);
                 //angellyn get data table 1
                 var oDataPedEmb = oDataHana.OrdersToBePackaged;
                 this._onEstructurePedEmb(oDataPedEmb);
-
+				
                 //jose get data table 1
                 var oDataPedSinCita = oDataHana.WalInOrders;
                 this._onEstructurePedSinCita(oDataPedSinCita);
@@ -57,9 +62,22 @@ sap.ui.define([
             });
         },
         fnClearData: function () {
+        	that.oModelGet.setProperty("/oCentro", []);
+			that.oModelGet.setProperty("/oFeriados", []);
+			that.oModelGet.setProperty("/oHorasTrabajadas", []);
+			
 			that.oModel.setProperty("/oEntregasConCita", []);
 			that.oModel.setProperty("/oEntregasNoCita", []);
 			that.oModel.setProperty("/DataPedidosEmbalar", []);
+			that.oModel.setProperty("/oEntregaSelect", []);
+			
+			that.oModel.setProperty("/DataConstanteContadorRecuertoPen", []);
+			that.oModel.setProperty("/DataConstanteFechaInicialPen", "");
+			that.oModel.setProperty("/DataPedidosEmbalar", []);
+			that.oModel.setProperty("/oDataHorarioValidatePen", "");
+			that.oModel.setProperty("/oRangoFecha", []);
+			that.oModel.setProperty("/sConstanteContadorPen", 2);
+			that.oModel.setProperty("/DataConstante",[]);
 		},
 		fnClearComponent: function () {
 			that._byId("TreeTableBasic2").clearSelection(true);
@@ -143,7 +161,6 @@ sap.ui.define([
             });   
 
 			this.getView().getModel("oModel").setProperty("/DataPedidosEmbalar", oResults);
-			console.log(this.getView().getModel("oModel").getData());
         },
         _onEstructurePedSinCita: function(oDataPedSinCita){
             var oResults = [];
@@ -169,7 +186,6 @@ sap.ui.define([
                     		y[0].COD_DESC = "ERP";
                     	}
                     	
-                    	
                         var jResults = {
                         	"Zzlfstk": y[0].Zzlfstk,
                         	"Werks": y[0].Werks,
@@ -177,6 +193,7 @@ sap.ui.define([
                             "Vbeln": y[0].Vbeln,
                             "Namew": y[0].Namew,
                             "Namel": y[0].Namel,
+                            "LugEntD": y[0].LugEntD,
                             "Desc_cond": y[0].DescCond,
                             "Anzpk": y[0].Anzpk,
                             "Btgew": y[0].Btgew,
@@ -241,6 +258,7 @@ sap.ui.define([
 
             switch(selectkey){
                 case "keyTabFilterPedEmb" :
+                	sTarget="01";
                     this._byId("btOrderNoOC").setVisible(true);
                     this._byId("btOrderOC").setVisible(true);
 
@@ -252,6 +270,7 @@ sap.ui.define([
                     this._byId("btDeleteAppointment").setVisible(false);
                     break;
                 case "keyTabFilterGenCit" :
+                	sTarget="02";
                     this._byId("btMakeAppointment").setVisible(true);
                     this._byId("btChangeOrder").setVisible(true);
                     this._byId("btDeleteOrder").setVisible(true);
@@ -266,6 +285,7 @@ sap.ui.define([
                     this._byId("btChangeOrder").setEnabled(false);
                     break;
                 case "keyTabFilterCitEnt" :
+                	sTarget="03";
                     this._byId("btChangeOrder").setVisible(true);
                     this._byId("btDeleteOrder").setVisible(true);
                     this._byId("btUpdateRegister").setVisible(true);
@@ -335,14 +355,461 @@ sap.ui.define([
         _onPressFechaPlan: function(oEvent){
             var oSource = oEvent.getSource();
             var oRow = oSource.getParent();
-            var oTable = that.byId("TreeTableBasic");
+            var sTable = "";
+            var oEntregaSelect = [];
+            if(sTarget == "02"){
+            	sTable = "TreeTableBasic";
+            }else{
+            	sTable = "TreeTableBasic2";
+            }
+            var oTable = that.byId(sTable);
             var oIndeces = oTable.getSelectedIndices();
             if(oIndeces.length===0){
                 utilUI.onMessageErrorDialogPress2(that.getI18nText("ErrorNoSeleccionCita"));
 			    return;
             }else{
-                this.setFragment("_dialogFechaPlan", this.frgIdFechaPlan, "FechaPlan", this);
+            	oIndeces.forEach(function(value){
+					var jEntSelect = oTable.getContextByIndex(value).getObject();
+					oEntregaSelect.push(jEntSelect);
+				});
+				
+				that.oModel.setProperty("/oEntregaSelect", oEntregaSelect);
+				if(oEntregaSelect[0].LugEntD === "01"){
+					this.fnDateProgram();
+				}else{
+					this.fnDateNotProgram(oEntregaSelect);
+				}
             }
         },
+        fnDateProgram: function(){
+        	var arrayOrdenes = that.oModel.getProperty("/oEntregaSelect");
+        	if(sTarget==="02"){
+        		that.oModel.setProperty("/sConstanteContadorPen" ,parseInt(that.oModelGet.getProperty("/oHorasTrabajadas")[0].CONTADOR) );
+        	}
+        	var fechas=[];
+			var fecha_max="";
+			var fecha_min="";
+			var arrcontador =[];
+			
+			var dateActual=new Date();
+			fechas.push(dateActual.getTime());
+			
+			var max = Math.max(...fechas);
+			var min = Math.min(...fechas);
+			if(max == min ){
+				fecha_max = "";
+				fecha_min = this.formatYYYYMMDDNotDayAbapStringDate("/Date("+fechas[0]+")/");
+			}else{
+				fecha_max=""
+				fecha_min = this.formatYYYYMMDDNotDayAbapStringDate("/Date("+fechas[0]+")/");
+			}
+			that.oModel.setProperty("/oRangoFecha",fechas);
+				
+            this.setFragment("_dialogFechaPlan", this.frgIdFechaPlan, "FechaPlan", this);
+            
+			sap.ui.core.BusyIndicator.show(0);
+            
+            that._byId(this.frgIdFechaPlan+"--fecharangoInicialPlan").setValue(fecha_min);
+            that._byId(this.frgIdFechaPlan+"--fecharangoFinalPlan").setValue(fecha_max);
+			that._byId(this.frgIdFechaPlan+"--nEntregaPlan").setValue(arrayOrdenes.length);
+			
+			this.getFilterConstantCentro("MM","SOLICITAR_CITA","CENTRO",arrcontador,true);
+			that.oModel.setProperty("/oModel")
+        },
+        fnDateNotProgram: function(oEntrega){
+        	
+        },
+        getFilterConstantCentro:function(modulo,aplicativo,funcion,arrcontador,ejecucion){
+        	var arrayOrdenes = that.oModel.getProperty("/oEntregaSelect");
+			that._byId(this.frgIdFechaPlan+"--tbRegistroDisponible").clearSelection();
+			var extra =1;
+			
+			var contador=0;
+			var data = that.oModelGet.getProperty("/oCentro");
+			var estatefecha = false;
+			if(data.length >0){
+				for(var i=0;i<data.length;i++){
+					for(var j=0;j<arrayOrdenes.length;j++){
+						if(data[i].CENTRO == arrayOrdenes[j].Werks){
+							contador++;
+						}
+					}
+				}
+			}
+			
+			if(contador==0){
+				that.getFilterConstant("MM","SOLICITAR_CITA","HORARIO",arrcontador,extra,estatefecha,ejecucion);
+			}else{
+				that.getFilterConstant("MM","SOLICITAR_CITA","HORARIO",arrcontador,extra,estatefecha,ejecucion);
+			}
+		},
+		getFilterConstant:function(modulo,aplicativo,funcion,arrcontador,extra,estatefecha,ejecucion){
+			var arrayOrdenes = that.oModel.getProperty("/oEntregaSelect");
+			var arrFeriados = that.oModelGet.getProperty("/oFeriados");
+			var contador="";
+			if(sTarget === "02"){
+				contador=that.oModel.getProperty("/sConstanteContadorPen");
+			}
+			
+			var fecha_rangfin=that._byId(this.frgIdFechaPlan+"--fecharangoFinalPlan").getValue();
+			var fecha_rangini=that._byId(this.frgIdFechaPlan+"--fecharangoInicialPlan").getValue();
+			var rangoFecha = that.oModel.getProperty("/oRangoFecha");
+			var dateActual=new Date(rangoFecha[0]);
+			var fechaDateActual= fecha_rangini+" "+
+					dateActual.getHours()+ ":" +
+					dateActual.getMinutes()+":"+
+					dateActual.getSeconds()
+			var fechaDateActual2=fecha_rangini;
+			var fecha_min = that._byId(this.frgIdFechaPlan+"--fecharangoInicialPlan").getValue();
+			var fecha_max = that._byId(this.frgIdFechaPlan+"--fecharangoFinalPlan").getValue();
+			var arrHorario = [];
+			var arrRangoFecha = [];
+			var arrRangoFechaValidacion = [];
+			var validateFeriado=true;
+			
+			if(fecha_max == ""){
+				for(var i=0;i<arrFeriados.length;i++){
+					if(fecha_min == that.getFormatPuntInYYYYMMDD(arrFeriados[i].DESCRIPCION)){
+						validateFeriado = false;
+					}
+				}
+					
+				if(validateFeriado){
+					arrRangoFecha.push(fecha_min);
+				}
+			}else{
+				var fechaInicio = this.formatosFilterDateRegistro(fecha_min);
+				var fechaFin    = this.formatosFilterDateRegistro(fecha_max);
+				
+				while(fechaFin.getTime() >= fechaInicio.getTime()){
+					validateFeriado = true;
+					fechaInicio.setDate(fechaInicio.getDate() + 1);
+					var date =  that.formatosCellValidateNumbers(fechaInicio.getDate())+ '.' + that.formatosCellValidateNumbers(fechaInicio.getMonth() + 1)+'.' +fechaInicio.getFullYear()  ;
+					
+					
+					for(var i=0;i<arrFeriados.length;i++){
+						if(date == arrFeriados[i].dateFormatter){
+							validateFeriado = false;
+						}
+					}
+					
+					if(validateFeriado){
+						if(fechaInicio.getDay() == 6 || fechaInicio.getDay() == 0){
+						}else{
+							arrRangoFechaValidacion.push(date);
+						}
+						arrRangoFecha.push(date);
+					}
+					
+				}
+			}
+			
+			var dataStandar =new Date(fechaDateActual)
+			dataStandar=that.getYYYYMMDD(dataStandar);
+			
+			var fechadiaSemana=new Date(fecha_min);		
+			that.oModel.setProperty("/oDataHorarioValidatePen" ,dataStandar);
+			
+			if(fechadiaSemana.getDay() == 6 || fechadiaSemana.getDay() == 0){
+				extra++;
+			}
+			
+			var Centro = arrayOrdenes[0].Werks;
+			if(arrRangoFechaValidacion.length<=7){
+				var filtro = {
+					"oResults": {
+						"MODULO": modulo,
+						"APLICATIVO": aplicativo,
+						"FUNCION": funcion,
+						"CENTRO": Centro
+					}
+				};
+				Services.ConsultarEntregaHorariosPorCentro(that, filtro, function (result) {
+					util.response.validateAjaxGetHana(result, {
+						success: function (oData, message) {
+							var data = oData.oResults.oData.Constante.oData;
+							var dataHoraTrabajada = that.oModelGet.getProperty("/oHorasTrabajadas");//2
+							if(data.length>0){
+								if(dataHoraTrabajada.length > 0){
+									if(dataHoraTrabajada[0].CONTADOR != "0"){
+										that._byId(that.frgIdFechaPlan+"--fecharangoInicialPlan").setEnabled(true);
+										that._byId(that.frgIdFechaPlan+"--fecharangoFinalPlan").setEnabled(true);
+										var primero = true;
+										for(var a = 0; a<arrRangoFecha.length;a++){
+											var FECHAS = arrRangoFecha[a];
+											for(var i=0;i<data.length;i++){
+												var desde = parseInt(data[i].DESDE);
+												var hasta = parseInt(data[i].HASTA);
+												var nEntregas = data[i].NUMERO_ENTREGA;
+												var cantProveedores = data[i].CONTADOR;
+												var rango_horas = hasta - desde;
+												var fechacompobj2=FECHAS;
+												if(new Date(fechacompobj2).getDay() == 6 || new Date(fechacompobj2).getDay() == 0){
+													estatefecha = true;
+													primero = false;
+												}else{
+													for(var k = 0;k < rango_horas ;k++){
+														var obj={};
+														obj.NUMERO_ENTREGA = nEntregas;
+														obj.FECHAS = FECHAS;
+														obj.STATUS = "No Disponible";
+														obj.HORARIOS = that.formatosFechasHoras(desde+k);
+														obj.PROVEEDORES = cantProveedores;
+														var fechacompobj=obj.FECHAS+" "+obj.HORARIOS;
+														if(fechadiaSemana.getDay() == 6 || fechadiaSemana.getDay() == 0){
+															estatefecha = true;
+															primero = false;
+															arrHorario=[];
+														}else{
+															estatefecha = false;
+															if( ( new Date(fechaDateActual2).getTime()+ extra * 24  * 60  * 60 * 1000) == new Date(obj.FECHAS).getTime() ){
+																primero = false;
+															}	
+															if(	dateActual.getTime() <= new Date(fechacompobj).getTime() ){
+																arrHorario.push(obj);
+															}
+														}
+													}
+												}
+											}
+										}
+										
+										console.log(arrHorario)
+										
+										var fechavalidate =new Date(fechaDateActual)
+										fechavalidate=that.getYYYYMMDD(fechavalidate);
+										
+										if(arrHorario.length >contador){
+											if(fecha_max == ""){
+												if(that.oModel.getProperty("/DataConstanteFechaInicialPen")){
+													if(that.oModel.getProperty("/DataConstanteFechaInicialPen") == that._byId(that.frgIdFechaPlan+"--fecharangoInicialPlan").getValue()){
+														for(var i=0;i<contador;i++){
+															arrHorario.shift();
+														} 
+													}
+												}else{
+													for(var i=0;i<contador;i++){
+														arrHorario.shift();
+													} 
+													var newFecha=that.getYYYYMMDD(new Date());
+													that.oModel.setProperty("/DataConstanteFechaInicialPen" ,newFecha);
+													arrcontador.push(contador)
+													that.oModel.setProperty("/DataConstanteContadorRecuertoPen" ,arrcontador);
+												}
+												that.oModel.setProperty("/DataConstante" ,arrHorario);
+												sap.ui.core.BusyIndicator.hide(0);
+												that.getFilterTableFechaWhere(ejecucion);
+											}else{
+												var cant = arrHorario.length;
+												const myObj = {}
+												
+												for ( var i=0, len=arrHorario.length; i < len; i++ )
+											    myObj[arrHorario[i]['FECHAS']] = arrHorario[i].FECHAS;
+												
+												var arrHorario2 = new Array();
+												for ( var key in myObj )
+												arrHorario2.push(myObj[key]);
+												var contador2 =contador*(arrHorario2.length)
+												if(contador== parseInt(dataHoraTrabajada[0].CONTADOR) && fecha_min!=(fechavalidate)){
+													that.oModel.setProperty("/DataConstante" ,arrHorario);
+													sap.ui.core.BusyIndicator.hide(0);
+													that.getFilterTableFechaWhere(ejecucion);
+												}else if(fecha_min==fechavalidate ) {
+													if(arrHorario.length < contador2){
+														contador = contador2-arrHorario.length;
+														that.oModel.setProperty("/DataConstanteContadorPen" ,contador);
+														arrcontador.push(contador)
+														that.oModel.setProperty("/DataConstanteContadorRecuertoPen" ,arrcontador);
+														var nuevaFecha=(arrHorario[0].FECHAS).split(".");
+														var newdia=nuevaFecha[0];
+														var newmes=nuevaFecha[1];
+														var newanio=nuevaFecha[2];
+														var newFecha=arrHorario[0].FECHAS;
+														
+														that.oModel.setProperty("/DataConstanteFechaInicialPen" ,newFecha);
+														that._byId(that.frgIdFechaPlan+"--fecharangoInicialPlan").setValue(newFecha)
+														that.getFilterConstant("MM","SOLICITAR_CITA","CENTRO",arrcontador,extra,ejecucion);
+													}else{
+														for(var i=0;i<contador;i++){
+															arrHorario.shift();
+														} 
+														that.oModel.setProperty("/DataConstante" ,arrHorario);
+														sap.ui.core.BusyIndicator.hide(0);
+														that.getFilterTableFechaWhere(ejecucion);
+													}
+												}else{
+													for(var i=0;i<contador;i++){
+														arrHorario.shift();
+													} 
+													that.oModel.setProperty("/DataConstante" ,arrHorario);
+													sap.ui.core.BusyIndicator.hide(0);
+													that.getFilterTableFechaWhere(ejecucion);
+												}
+											}
+										}else if( contador==parseInt(dataHoraTrabajada[0].CONTADOR) && fecha_min!=(fechavalidate) && primero){
+											if(estatefecha){
+		                                        contador = contador - arrHorario.length;
+		                                        ModeloProyect.setProperty("/DataConstanteContadorPen" ,contador);
+												arrcontador.push(contador)
+												ModeloProyect.setProperty("/DataConstanteContadorRecuertoPen" ,arrcontador);
+												var nuevaFecha=fecha_min
+		
+												var newFecha=new Date( (new Date(fecha_min)).getTime()+(1 *24  * 60  * 60 * 1000) );
+												newFecha =that.getYYYYMMDD(newFecha);
+		
+												ModeloProyect.setProperty("/DataConstanteFechaInicialPen" ,newFecha);
+												that._byId(that.frgIdFechaPlan+"--fecharangoInicialPlan").setValue(newFecha)
+												that.getFilterConstant("MM","SOLICITAR_CITA","HORARIO",arrcontador,extra,estatefecha,ejecucion);
+											}
+											else{
+												that.oModel.setProperty("/DataConstante" ,arrHorario);
+												sap.ui.core.BusyIndicator.hide(0);
+												that.getFilterTableFechaWhere(ejecucion);
+											}
+										}else{
+											contador = contador - arrHorario.length;
+											that.oModel.setProperty("/sConstanteContadorPen" ,contador);
+											arrcontador.push(contador)
+											that.oModel.setProperty("/DataConstanteContadorRecuertoPen" ,arrcontador);
+											var nuevaFecha=(fecha_min)
+											
+											var newFecha=new Date( (new Date(nuevaFecha)).getTime()+(1 *24  * 60  * 60 * 1000) );
+											newFecha =that.getYYYYMMDD(newFecha);
+											
+											that.oModel.setProperty("/DataConstanteFechaInicialPen" ,newFecha);
+											that._byId(that.frgIdFechaPlan+"--fecharangoInicialPlan").setValue(newFecha)
+											that.getFilterConstant("MM","SOLICITAR_CITA","HORARIO",arrcontador,extra,estatefecha,ejecucion);
+										}
+									}else{
+										that._byId(that.frgIdFechaPlan+"--fecharangoInicialPlan").setEnabled(false);
+										that._byId(that.frgIdFechaPlan+"--fecharangoFinalPlan").setEnabled(false);
+										that.oModel.setProperty("/oFechasDisponibles", [] );
+										that.oModel.setProperty("/oFechasDisponiblesNoProg", [] );
+										utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorHorasTrabMayor0"));
+										sap.ui.core.BusyIndicator.hide(0);
+									}
+								}else{
+									that._byId(that.frgIdFechaPlan+"--fecharangoInicialPlan").setEnabled(false);
+									that._byId(that.frgIdFechaPlan+"--fecharangoFinalPlan").setEnabled(false);
+									that.oModel.setProperty("/oFechasDisponibles", [] );
+									that.oModel.setProperty("/oFechasDisponiblesNoProg", [] );
+									utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorHoraTrabajadas"));
+									sap.ui.core.BusyIndicator.hide(0);
+								}
+							}else{
+								that._byId(that.frgIdFechaPlan+"--fecharangoInicialPlan").setEnabled(false);
+								that._byId(that.frgIdFechaPlan+"--fecharangoFinalPlan").setEnabled(false);
+								that.oModel.setProperty("/oFechasDisponibles", [] );
+								that.oModel.setProperty("/oFechasDisponiblesNoProg", [] );
+								utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorHorarioCentro"));
+								sap.ui.core.BusyIndicator.hide(0);
+							}
+						},
+						error: function (message) {
+							sap.ui.core.BusyIndicator.hide(0);
+						}
+					});
+				});
+			}else{
+				utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorRangoMenorFecha"));
+				sap.ui.core.BusyIndicator.hide(0);
+			}
+		},
+		getFilterTableFechaWhere:function(ejecucion){
+			var arrayOrdenes = that.oModel.getProperty("/oEntregaSelect");
+			var DataConstanteCentro=that.oModelGet.getProperty("/oCentro")
+			var dataConsta=that.oModel.getProperty("/DataConstante");
+			
+			var fecha_max=that._byId(this.frgIdFechaPlan+"--fecharangoFinalPlan").getValue();
+			var fecha_min=that._byId(this.frgIdFechaPlan+"--fecharangoInicialPlan").getValue();
+			var oData=[]
+			DataConstanteCentro.forEach(function(value){
+				oData.push(value.CENTRO)
+			});
+                   
+			var sURL = "/hana/IPROVIDER_ENTREGA/REGISTRO_FECHA/RegistroFechaTotalFiltar.xsjs?fecha_min="+this.reverseStringForParameter(fecha_min.replaceAll("/","."), ".")+"&fecha_max="+this.reverseStringForParameter(fecha_max.replaceAll("/","."), ".");
+			$.ajax({
+				url: sURL,
+				method: "POST",
+				contentType: 'application/json',
+				data		:JSON.stringify(oData),
+				success: function (data) {
+					var arr = [];
+					for(var i=0;i<Object.keys(data).length;i++){
+						data[i].FECHA=(data[i].FECHA).split("T")[0]
+						data[i].HORA=(data[i].HORA).split("T")[1].split(".")[0]
+						arr.push(data[i]);
+					}
+					
+					var totalEntregaRegistrados=0;
+					var totalProvRegistrados = 0;
+					
+					//Adicionar Proveedor
+					var arrProveedor=[];
+					var arrProv=[];
+					for(var i=0;i<dataConsta.length;i++){
+						var dateConst = that.formatosFilterDate(dataConsta[i].FECHAS,dataConsta[i].HORARIOS).getTime();
+						dataConsta[i].STATUS = "No Disponible"
+						totalEntregaRegistrados = 0;
+						totalProvRegistrados = 0;
+						arrProveedor=[];
+						arrProv=[];
+						for(var k=0;k<arr.length;k++){
+							var dateFecha = new Date(arr[k].FECHA+" "+arr[k].HORA).getTime();
+							if(dateConst === dateFecha){
+								var entRegistrada = parseInt(arr[k].ENTREGAS_REGISTRADAS)
+								var provRegistrada = 1
+								totalEntregaRegistrados += entRegistrada;
+								arrProv.push(arr[k]);
+							}
+						}
+						
+						arrProveedor = arrProv;
+						var cantProveedor = arrProveedor.length;
+						const myObj2 = {};
+						
+						for ( var l=0, len=arrProveedor.length; l < len; l++ )
+					    myObj2[arrProveedor[l]['PROVEEDOR']] = arrProveedor[l].PROVEEDOR;
+						
+						arrProveedor = new Array();
+						for ( var key2 in myObj2 )
+						arrProveedor.push(myObj2[key2]);
+						
+						totalProvRegistrados = arrProveedor.length;
+						
+						if(totalEntregaRegistrados<parseInt(dataConsta[i].NUMERO_ENTREGA)){
+							if(parseInt(dataConsta[i].PROVEEDORES) > totalProvRegistrados){
+								dataConsta[i].STATUS = "Disponible"
+							}else{
+								dataConsta[i].STATUS = "No Disponible"
+							}
+						}else{
+							dataConsta[i].STATUS = "No Disponible"
+						}
+						
+					}
+					
+					that.oModel.setProperty("/DataFecha" ,dataConsta);
+					
+					if(ejecucion){
+						timeOutFecha = setTimeout(
+							function(){
+								that.getFilterTableFechaWhere(true);
+								console.log("timeOut");
+							}
+						, 1000);
+					}
+				},error: function (e) {
+					if(ejecucion){
+						timeOutFecha = setTimeout(
+							function(){
+								that.getFilterTableFechaWhere(true);
+								console.log("timeOut");
+							}
+						, 1000);
+					}
+				}
+			});
+		},
     });
 });

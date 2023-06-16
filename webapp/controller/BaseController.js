@@ -923,6 +923,29 @@ sap.ui.define([
 		    }
 		    return i;
 		},
+		formatosFilterDate:function(sValue,sValue2){
+			var nuevo;
+			if(sValue==null){
+			}else{
+				var fecha=sValue.split(".")[2]+ "-" +sValue.split(".")[1]+ "-" +sValue.split(".")[0];
+				var fechatotal = fecha + " " + sValue2
+				return new Date(fechatotal);
+			}
+		},
+		getFormatPuntInYYYYMMDD: function (e) {
+			var d = new Date();
+			var t = parseInt(e.split(".")[0]);
+			var n = parseInt(e.split(".")[1]);
+			var r = d.getFullYear();
+			if (t < 10) {
+				t = "0" + t
+			}
+			if (n < 10) {
+				n = "0" + n
+			}
+			var o = r + "/" + n + "/" + t;
+			return o
+		},
 		getYYYYMMDD: function (e) {
 			var t = e.getDate();
 			var n = e.getMonth() + 1;
@@ -990,11 +1013,22 @@ sap.ui.define([
 			}
 			return t
 		},
+		formatosFechasHoras:function(sValue){
+			var nuevo;
+			var sValue = sValue.toString();
+			if(sValue.length == 1){
+				nuevo = "0"+sValue
+			}else{
+				nuevo = sValue
+			}
+			var fecha = nuevo + ":00"
+			return fecha;
+		},
 		formatDayDateHana: function (e) {
 			if (e) {
 				var split = e.split("T");
 				var date = split[0].replaceAll("-", "/");
-				var fechaf = this.reverseStringForParameter(date, "/");;
+				var fechaf = this.reverseStringForParameter(date, "/");
 				return fechaf;
 			}
 		},
@@ -1032,7 +1066,18 @@ sap.ui.define([
 				return sHourf;
 			}
 		},
-
+		
+		formatYYYYMMDDNotDayAbapStringDate: function (e) {
+			if (this.isEmpty(e)) {
+				return "";
+			} else {
+				var fecha = new Date(parseInt(e.split("(")[1].split(")")[0]));
+				fecha.setHours(fecha.getHours());
+				var fechaOC = this.getYYYYMMDD(fecha);
+				return fechaOC;
+			}
+		},
+		
 		formatYYYYMMDDAbapStringDate: function (e) {
 			if (this.isEmpty(e)) {
 				return "";

@@ -7,16 +7,17 @@
             <VBox class="sapUiSmallMargin">
 				<HBox alignItems="Center" direction="Row" fitContainer="false" width="auto" height="auto" justifyContent="Start" renderType="Div" visible="true" displayInline="false">
 					<items>
-						<Label hAlign="Center" text="Ingrese Fecha" design="Standard" width="auto" required="true" textAlign="Begin" textDirection="Inherit" visible="true"/>
-						<DatePicker id="fecharangoInicialPlanNoProg" change="eventchangeFechainicialPlanNoProg" navigate="cambioRangoInicialPlanNoProg" placeholder="DD.MM.YYYY" width="auto" required="false" valueStateText="Invalid entry" enabled="true" visible="true" valueFormat="dd.MM.yyyy" displayFormat = "dd.MM.yyyy"/>
+						<Label text="Ingrese Fecha" design="Standard" width="auto" required="true" textAlign="Begin" textDirection="Inherit" visible="true"/>
+						<DatePicker id="fecharangoInicialPlan" change="eventchangeFechainicialPlanNoProg" navigate="cambioRangoInicialPlanNoProg" placeholder="{i18n>phFormatFecha}" valueFormat="yyyy/MM/dd" displayFormat = "yyyy/MM/dd"/>
 						<Label text="Hasta" design="Standard" width="auto" required="true" textAlign="Begin" textDirection="Inherit" visible="true"/>
-						<DatePicker id="fecharangoFinalPlanNoProg" change="eventchangeFechaFinalPlanNoProg" navigate="cambioRangoPlanNoProg" placeholder="DD.MM.YYYY" width="auto" required="false" valueStateText="Invalid entry" enabled="true" visible="true" valueFormat="dd.MM.yyyy" displayFormat = "dd.MM.yyyy"/>
+						<DatePicker id="fecharangoFinalPlan" change="eventchangeFechaFinalPlanNoProg" navigate="cambioRangoPlanNoProg" placeholder="{i18n>phFormatFecha}" valueFormat="yyyy/MM/dd" displayFormat = "yyyy/MM/dd"/>
 						<Label text="Nº Entrega" design="Standard" width="auto" required="false" textAlign="Begin" textDirection="Inherit" visible="true" class="sapUiLargeMarginBegin"/>
-						<Input id="nEntregaPlanNoProg" type="Text" value=""  showValueHelp="false" enabled="false" visible="true" width="auto" valueHelpOnly="false" required="false" valueStateText="Invalid entry" maxLength="0" class="sapUiSmallMarginBegin"/>
+						<Input id="nEntregaPlan" type="Text" value=""  showValueHelp="false" enabled="false" visible="true" width="auto" valueHelpOnly="false" required="false" valueStateText="Invalid entry" maxLength="0" class="sapUiSmallMarginBegin"/>
 					</items>
 				</HBox>
                 <ui:Table
-					rows="{path:'oModel>/CreerNombreMainController'}"
+                	id="tbRegistroDisponible"
+					rows="{path:'oModel>/DataFecha'}"
 					selectionMode="MultiToggle"
 					enableSelectAll="false"
 					ariaLabelledBy="title">
@@ -24,21 +25,25 @@
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>lblFechaBotonPlanificarCita}"/>
 							<ui:template>
-								<Text text="{path:'oModel>CambiarDato'}" wrapping="false" />
+								<Text text="{path:'oModel>FECHAS'}" wrapping="false" />
 							</ui:template>
 						</ui:Column>
 
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>lblHoraBotonPlanificarCita}"/>
 							<ui:template>
-								<Text text="{path:'oModel>MaktxD'}" wrapping="false" />
+								<Text text="{path: 'oModel>HORARIOS'}"/>
 							</ui:template>
 						</ui:Column>
 
                         <ui:Column width="auto" hAlign="Center" >
 							<Label text="{i18n>lblStatusBotonPlanificarCita}"/>
 							<ui:template>
-								<Text text="{path:'oModel>MaktxD'}" wrapping="false" />
+								<ObjectStatus
+									text="{oModel>STATUS}"
+									class="sapUiSmallMarginBottom"
+									icon="{= ${oModel>STATUS}==='Disponible'?'sap-icon://accept':'sap-icon://decline'}"
+									state="{= ${oModel>STATUS}==='Disponible'?'Success':'Error'}" />
 							</ui:template>
 						</ui:Column>
 					</ui:columns>
@@ -46,7 +51,7 @@
             </VBox>
         </content>
 		<buttons>
-			<Button text="{i18n>lblNoProgramados}" press="_onAcceptProductEan" custom:custom="default" type="Emphasized"/>
+			<!--<Button text="{i18n>lblNoProgramados}" press="_onAcceptProductEan" custom:custom="default" type="Emphasized"/>-->
 			<Button text="{i18n>continueText}" press="_onAcceptProductEan" custom:custom="default" type="Accept"/>
 			<Button text="{i18n>btnCerrar}" press="_onPressClose" custom:custom="AddEanProduct" type="Reject"/>
 		</buttons>

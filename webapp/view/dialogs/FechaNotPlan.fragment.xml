@@ -1,0 +1,31 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" xmlns="sap.m" xmlns:fb="sap.ui.comp.filterbar" xmlns:l="sap.ui.layout"
+	xmlns:custom="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1" xmlns:ui="sap.ui.table">
+	<Dialog title="{i18n>lblSeleccionFechaBotonPlanificarCita}" afterOpen="_afterOpenAddPedido" contentHeight="60%" contentWidth="55%">
+		<content>
+			<VBox class="sapUiSmallMargin">
+				<HBox alignItems="Center" direction="Row" fitContainer="false" width="auto" height="auto" justifyContent="Start" renderType="Div"
+					visible="true" displayInline="false">
+					<items>
+						<Label hAlign="Center" text="Ingrese Fecha" design="Standard" width="auto" required="true" textAlign="Begin" textDirection="Inherit"
+							visible="true"/>
+						<DatePicker id="fecharangoInicialPlanNoProg" change="eventchangeFechainicialPlanNoProg" navigate="cambioRangoInicialPlanNoProg"
+							placeholder="DD.MM.YYYY" width="auto" required="false" valueStateText="Invalid entry" enabled="true" visible="true" valueFormat="dd.MM.yyyy"
+							displayFormat="dd.MM.yyyy"/>
+						<Label text="Hasta" design="Standard" width="auto" required="true" textAlign="Begin" textDirection="Inherit" visible="true"/>
+						<DatePicker id="fecharangoFinalPlanNoProg" change="eventchangeFechaFinalPlanNoProg" navigate="cambioRangoPlanNoProg"
+							placeholder="DD.MM.YYYY" width="auto" required="false" valueStateText="Invalid entry" enabled="true" visible="true" valueFormat="dd.MM.yyyy"
+							displayFormat="dd.MM.yyyy"/>
+						<Label text="Nº Entrega" design="Standard" width="auto" required="false" textAlign="Begin" textDirection="Inherit" visible="true"
+							class="sapUiLargeMarginBegin"/>
+						<Input id="nEntregaPlanNoProg" type="Text" value="" showValueHelp="false" enabled="false" visible="true" width="auto" valueHelpOnly="false"
+							required="false" valueStateText="Invalid entry" maxLength="0" class="sapUiSmallMarginBegin"/>
+					</items>
+				</HBox>
+			</VBox>
+		</content>
+		<buttons>
+			<Button text="{i18n>continueText}" press="_onAcceptProductEan" custom:custom="default" type="Accept"/>
+			<Button text="{i18n>btnCerrar}" press="_onPressClose" custom:custom="AddEanProduct" type="Reject"/>
+		</buttons>
+	</Dialog>
+</core:FragmentDefinition>
