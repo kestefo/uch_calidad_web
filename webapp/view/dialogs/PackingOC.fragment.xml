@@ -11,7 +11,7 @@
 						<ToolbarSpacer/>
 						<Button text="{i18n>btnEmbalajesCopy}" icon="sap-icon://copy" type="Emphasized"/>
 						<Button text="{i18n>btnEmbalajesAdd}" icon="sap-icon://add" type="Accept" press="fnPressAddEmbalajes"/>
-						<Button text="{i18n>btnEmbalajesDelete}" icon="sap-icon://delete" type="Reject"/>
+						<Button text="{i18n>btnEmbalajesDelete}" icon="sap-icon://delete" type="Reject" press="fnPressDeleteEmbalajes"/>
 					</OverflowToolbar>
 				</ui:extension>
 				<ui:columns>
@@ -40,28 +40,28 @@
 						<Label text="{i18n>titlePeso}"/>
 						<ui:template >
 							<Input type="Text" textAlign="Right" visible="{= !!${oModel>Num}}" value="{oModel>PesoBulto}" width="auto"
-								 placeholder="{i18n>phPeso}"/>
+								 placeholder="{i18n>phPeso}" change="fnreemLetrasCant"/>
 						</ui:template>
 					</ui:Column>
 					<ui:Column width="7rem">
 						<Label text="{i18n>titleLongitud}"/>
 						<ui:template>
 							<Input type="Text" textAlign="Right" value="{oModel>Longitud}" width="auto" visible="{= !!${oModel>Num}}"
-								placeholder="{i18n>phLonguitud}"/>
+								placeholder="{i18n>phLonguitud}" change="fnreemLetrasCant"/>
 						</ui:template>
 					</ui:Column>
 					<ui:Column width="7rem">
 						<Label text="{i18n>titleAncho}"/>
 						<ui:template>
 							<Input type="Text" textAlign="Right" visible="{= !!${oModel>Num}}" value="{oModel>Ancho}" width="auto"
-								placeholder="{i18n>phAncho}"/>
+								placeholder="{i18n>phAncho}" change="fnreemLetrasCant"/>
 						</ui:template>
 					</ui:Column>
 					<ui:Column width="7rem">
 						<Label  text="{i18n>titleAltura}"/>
 						<ui:template>
 							<Input textAlign="Right" type="Text" visible="{= !!${oModel>Num}}" value="{oModel>Altura}" width="auto"
-								placeholder="{i18n>phAltura}"/>
+								placeholder="{i18n>phAltura}" change="fnreemLetrasCant"/>
 						</ui:template>
 					</ui:Column>
 					<ui:Column width="9rem" hAlign="Center">
@@ -126,14 +126,14 @@
 					<ui:Column width="6rem" hAlign="Center">
 						<Label text="{i18n>titlecolumnMat}"/>
 						<ui:template>
-							<ObjectNumber textAlign="Center" number="{oModel>MatnrD}"/>
+							<ObjectNumber textAlign="Center" number="{oModel>MatnrD}" />
 						</ui:template>
 					</ui:Column>
 					<ui:Column width="10rem" hAlign="Center">
 						<Label text="{i18n>titlecolumnCantEmb}"/>
 						<ui:template>
-							<Input textAlign="Right" change="changeFormatFloatString" value="{oModel>MengezuD}" type="Text" showValueHelp="false"
-								enabled="true" placeholder="Ingresar"/>
+							<Input textAlign="Right" value="{oModel>MengezuD}" type="Text" showValueHelp="false"
+								enabled="true" placeholder="Ingresar" change="fnreemLetrasCant"/>
 						</ui:template>
 					</ui:Column>
 					<ui:Column width="10rem" hAlign="Right">

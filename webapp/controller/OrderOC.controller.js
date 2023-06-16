@@ -80,7 +80,12 @@ sap.ui.define([
 				}
 				oResults.push(jVariable);
 			}
-
+			
+			if (oResults.length === 0){
+				utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorNotSelectMat"));
+				return;
+			}
+			
 			oResults.forEach(function (value) {
 				value.MengezuD = that.formatInteger(value.MengezuD);
 				value.CantTotal = that.currencyFormat(value.CantTotal);
@@ -297,7 +302,8 @@ sap.ui.define([
 			}
 
 			Bultos.forEach(function (ab) {
-				if (that.isEmpty(ab.Altura) || that.isEmpty(ab.Ancho) || that.isEmpty(ab.Longitud) || that.isEmpty(ab.Observacion) || that.isEmpty(ab.PesoBulto) || that.isEmpty(ab.TipoBulto)) {
+				if (that.isEmpty(ab.Altura) || that.isEmpty(ab.Ancho) || that.isEmpty(ab.Longitud) || that.isEmpty(ab.Observacion) || that.isEmpty(
+						ab.PesoBulto) || that.isEmpty(ab.TipoBulto)) {
 					validarBulto = true;
 				}
 
@@ -308,7 +314,8 @@ sap.ui.define([
 
 				ab.Array.forEach(function (cd) {
 					if (cd.booleanComp) {
-						if (that.isEmpty(cd.Altura) || that.isEmpty(cd.Ancho) || that.isEmpty(cd.Longitud) || that.isEmpty(cd.Observacion) || that.isEmpty(cd.PesoBulto) || that.isEmpty(cd.TipoBulto)) {
+						if (that.isEmpty(cd.Altura) || that.isEmpty(cd.Ancho) || that.isEmpty(cd.Longitud) || that.isEmpty(cd.Observacion) || that.isEmpty(
+								cd.PesoBulto) || that.isEmpty(cd.TipoBulto)) {
 							validarBultoComplementario = true;
 						}
 						if (parseInt(cd.Altura) === 0 || parseInt(cd.Ancho) === 0 || parseInt(cd.Longitud) === 0 || parseInt(cd.Observacion) === 0 ||
@@ -361,7 +368,7 @@ sap.ui.define([
 					}
 				});
 			});
-			
+
 			var pesoTotal = 0;
 			Bultos.forEach(function (a) {
 				a.Array.forEach(function (d) {
@@ -425,17 +432,17 @@ sap.ui.define([
 			});
 			var ara = TextosPedidos[0].results.filter((arr, index, self) =>
 				index === self.findIndex((t) => (t.Ebeln === arr.Ebeln && t.Ebelp === arr.Ebelp && t.Tdline === arr.Tdline)))
-			
+
 			var today = new Date();
 			var hours = this.addZero(today.getHours());
 			var min = this.addZero(today.getMinutes());
-			
+
 			var data2 = {
 				"Zflag": "X",
 				"Lfdat": that.getYYYYMMDDGUION(today) + "",
-				"Lfuhr": hours+min+"00",
-				"Anzpk": that.zfill(arrCont,5) ,
-				"Btgew" : that.currencyFormat(pesoTotal.toString()),
+				"Lfuhr": hours + min + "00",
+				"Anzpk": that.zfill(arrCont, 5),
+				"Btgew": that.currencyFormat(pesoTotal.toString()),
 				"ZDETALLE": array,
 				"ZETPEDIDOTEXTSet": ara,
 				"ZETRESULTADOSet": [{
@@ -444,11 +451,11 @@ sap.ui.define([
 					"Type": ""
 				}]
 			};
-			
+
 			return;
 			sap.ui.core.BusyIndicator.show(0);
 			var oResults = {
-				"oResults" : data2
+				"oResults": data2
 			};
 			Services.RegistrarEntregaConOC(that, oResults, function (result) {
 				util.response.validateFunctionEndButton(result, {
@@ -461,12 +468,12 @@ sap.ui.define([
 					}
 				});
 			});
-			
+
 		},
-		_onPressCancelDialog: function(){
+		_onPressCancelDialog: function () {
 			this.getModel("oModel").setProperty("/oEmbalajeEntregaconOC", []);
 			this.getModel("oModel").setProperty("/oEmbalajeItemsconOC", []);
-			that["_dialogPackingOC"].getContent().forEach(function(value){
+			that["_dialogPackingOC"].getContent().forEach(function (value) {
 				value.clearSelection(true);
 			});
 			that["_dialogPackingOC"].close();
@@ -476,5 +483,73 @@ sap.ui.define([
 			this.fnClearData();
 			that.oRouter.navTo("RouteMain");
 		},
+
+		//BTON ELIMINAR
+		fnPressDeleteEmbalajes: function (oEvent) {
+			var tablaBultos = that._byId(this.frgIdPackingOC + "--tbEntConOC")
+			var oIndeces = tablaBultos.getSelectedIndices();
+			var oDataBultos = that.oModel.getProperty(tablaBultos.getBinding().sPath);
+
+			if (oIndeces.length === 0) {
+				utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorNotSelectEmbSin"));
+				return;
+			}
+			var context = tablaBultos.getContextByIndex(oIndeces[0]);
+			var oBjeto = context.getObject();
+
+			var arrValidate = [];
+			oBjeto.Array.forEach(function (a) {
+				if (!a.booleanComp) {
+					arrValidate.push(a);
+				}
+			})
+			if (arrValidate.length > 0) {
+				utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorMaterialesEmbalados"));
+				return;
+			}
+			var indice = 0;
+			oDataBultos.forEach(function (a) {
+				if (a.Num === oBjeto.Num) {
+					oDataBultos.splice(indice, 1);
+				}
+				indice++;
+			});
+
+			var cantidad = 1;
+			oDataBultos.forEach(function (a) {
+				a.Num = cantidad;
+				cantidad++;
+				var cantidadComp = 1;
+				a.Array.forEach(function (b) {
+					if (b.booleanComp) {
+						b.NumCom = cantidadComp;
+						b.Num = a.Num.toString() + "." + cantidadComp.toString();
+						cantidadComp++;
+					}
+				});
+			});
+			that.oModel.setProperty("/oEmbalajeEntregaconOC", oDataBultos);
+			tablaBultos.clearSelection(true);
+		},
+
+		// valida onclick en campos
+		ValidarCamposBultos: function (oEvent) {
+			var table =  that._byId(this.frgIdPackingOC + "--tbEntConOC");
+			var oIndeces = table.getSelectedIndices();
+			var context = oEvent.getParameter("rowContext");
+			if (context === null) {
+				return;
+			}
+			var Object = that.oModel.getProperty(context.sPath);
+			var oIndex = oEvent.getParameter('rowIndex')
+			if (!Object.Num) {
+				table.removeSelectionInterval(oIndex, oIndex);
+			} else {
+				if(oIndeces.length>1){
+					table.removeSelectionInterval(oIndex, oIndex);
+				}
+			}
+		},
+
 	});
 });
