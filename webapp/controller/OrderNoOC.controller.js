@@ -69,6 +69,8 @@ sap.ui.define([
 
 			that.oModel.setProperty("/oEmbalajeEntregasinOC", []);
 			that.oModel.setProperty("/oEmbalajeItemssinOC", []);
+			that.oModel.setProperty("OneDataTreeTableEntregaSinOCEmbalaje","");
+			that.oModel.setProperty("OneDataTreeTableEntregaSinOCEmbalaje","");
 
 			this._byId("textCantEnt").setText("0");
 			this._byId("inputEmail").setValue("");
@@ -181,17 +183,16 @@ sap.ui.define([
 		//AGREGADO ERICK
 		fnSelectionEmbalajes: function (oEvent) {
 			var oView = this.getView();
-			var table = oView.byId("tableEmbalajes");
+			var table = this.byId("tableEmbalajes");
 			var context = oEvent.getParameter("rowContext");
-			var ModeloProyect = oView.getModel("Proyect");
-			var DatoAnterior = ModeloProyect.getProperty("/OneDataTreeTableEntregaSinOCEmbalaje");
+			var DatoAnterior = that.oModel.getProperty("/OneDataTreeTableEntregaSinOCEmbalaje");
 			if (context === null) {
 				return;
 			}
 
 			if (context != null) {
 				var path = context.sPath;
-				var Object = this.getView().getModel("EntregaSinOC").getProperty(path);
+				var Object = that.oModel.getProperty(path);
 			}
 
 			var oIndex = oEvent.getParameter('rowIndex');
@@ -200,13 +201,13 @@ sap.ui.define([
 			var selectedEntries = [];
 
 			if (table.getSelectedIndices().length === 1) {
-				ModeloProyect.setProperty("/OneDataTreeTableEntregaSinOCEmbalaje", oIndex);
+				that.oModel.setProperty("/OneDataTreeTableEntregaSinOCEmbalaje", oIndex);
 				for (var i = 0; i < Selecciones.length; i++) {
 					var oData = table.getContextByIndex(Selecciones[i]);
 					selectedEntries.push(oData.getProperty(oData.getPath()));
 				}
 			} else if (table.getSelectedIndices().length === 0) {
-				ModeloProyect.setProperty("/OneDataTreeTableEntregaSinOCEmbalaje", "");
+				that.oModel.setProperty("/OneDataTreeTableEntregaSinOCEmbalaje", "");
 			} else {
 				if (DatoAnterior !== oIndex) {
 					table.removeSelectionInterval(DatoAnterior, DatoAnterior);
@@ -249,7 +250,7 @@ sap.ui.define([
 
 			items.push(obj);
 			that.oModel.setProperty("/oEmbalajeEntregasinOC", items);
-			this.getView().byId("textCantEnt").setText(items.length)
+			this.getView().byId("textCantEnt").setText(items.length);
 		},
 		fnPressDeleteEmbalajes: function () {
 			var tablaEmbalajes = that.byId("tableEmbalajes");
@@ -258,6 +259,7 @@ sap.ui.define([
 				utilUI.messageBox(this.getI18nText("sConfirmDeleteEmb"), "C", function (value) {
 					if (value) {
 						that.fnDeleteEmbalajes();
+						that.getView().byId("textCantEnt").setText(that.oModel.getProperty("/oEmbalajeEntregasinOC").length);
 					}
 				});
 			} else {
@@ -273,7 +275,11 @@ sap.ui.define([
 			tableItems.removeSelectionInterval(indexItems, indexItems);
 
 			var sPath = "/oEmbalajeEntregasinOC/" + (index).toString();
-			var objTabla = that.oModel.getProperty("/oEmbalajeEntregasinOC");
+			var arrayMometn =  that.oModel.getProperty("/oEmbalajeEntregasinOC");
+			var objTabla = [];
+			arrayMometn.forEach(function(value){
+				objTabla.push(value);
+			});
 			var objSelected = that.oModel.getProperty(sPath);
 
 			var objectItem = that.oModel.getProperty("/oEmbalajeItemssinOC");
@@ -302,18 +308,15 @@ sap.ui.define([
 
 			this.reestruccturacionTabla(objTabla, 0, "/oEmbalajeEntregasinOC", objectItemMoment, "/oEmbalajeItemssinOC");
 			table.removeSelectionInterval(index, index);
-			that.oModel.setProperty("/oEmbalajeEntregasinOC", objTabla);
 		},
 		fnSelectionItems: function (oEvent) {
-			var oView = this.getView();
-			var table = oView.byId("tableItems");
+			var table = that.byId("tableItems");
 			var context = oEvent.getParameter("rowContext");
-			var ModeloProyect = oView.getModel("Proyect");
-			var DatoAnterior = ModeloProyect.getProperty("/OneDataTreeTableEntregaSinOCItems");
+			var DatoAnterior = that.oModel.getProperty("/OneDataTreeTableEntregaSinOCItems");
 
 			if (context != null) {
 				var path = context.sPath;
-				var Object = this.getView().getModel("ItemsSinOC").getProperty(path);
+				var Object = that.oModel.getProperty(path);
 			}
 
 			var oIndex = oEvent.getParameter('rowIndex');
@@ -322,13 +325,13 @@ sap.ui.define([
 			var selectedEntries = [];
 
 			if (table.getSelectedIndices().length === 1) {
-				ModeloProyect.setProperty("/OneDataTreeTableEntregaSinOCItems", oIndex);
+				that.oModel.setProperty("/OneDataTreeTableEntregaSinOCItems", oIndex);
 				for (var i = 0; i < Selecciones.length; i++) {
 					var oData = table.getContextByIndex(Selecciones[i]);
 					selectedEntries.push(oData.getProperty(oData.getPath()));
 				}
 			} else if (table.getSelectedIndices().length === 0) {
-				ModeloProyect.setProperty("/OneDataTreeTableEntregaSinOCItems", "");
+				that.oModel.setProperty("/OneDataTreeTableEntregaSinOCItems", "");
 			} else {
 				if (DatoAnterior !== oIndex) {
 					table.removeSelectionInterval(DatoAnterior, DatoAnterior);
@@ -402,10 +405,13 @@ sap.ui.define([
 			var table = that.byId("tableItems");
 			var index = that.byId("tableItems").getSelectedIndices()[0];
 			var sPath = "/oEmbalajeItemssinOC/" + (index).toString();
-			var objTabla = that.oModel.getProperty("/oEmbalajeItemssinOC");
+			var arrMoment = that.oModel.getProperty("/oEmbalajeItemssinOC");
 			var objSelected = that.oModel.getProperty(sPath);
 
-			var arrmoment = [];
+			var objTabla = [];
+			arrMoment.forEach(function(value){
+				objTabla.push(value);
+			});
 
 			for (var i = 0; i < objTabla.length; i++) {
 				var indice = objTabla.indexOf(objSelected);
@@ -415,7 +421,6 @@ sap.ui.define([
 
 			this.reestruccturacionTabla(objTabla, 1, "/oEmbalajeItemssinOC");
 			table.removeSelectionInterval(index, index);
-			that.oModel.setProperty("/oEmbalajeItemssinOC", objTabla);
 		},
 		reestruccturacionTabla: function (obj, event, parameter, objItems, parameterItems) {
 			if (event == 0) {
@@ -762,7 +767,7 @@ sap.ui.define([
 					var obj = {
 						"oResults": total
 					}
-					return;
+					// return;
 					that.RegistrarEntregaSinOC(obj);
 				}
 			});

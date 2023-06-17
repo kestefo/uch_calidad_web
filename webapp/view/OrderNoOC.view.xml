@@ -61,7 +61,7 @@
 								</f:FormElement>
 								<f:FormElement label="{i18n>lbCantidadEmbalaje}">
 									<f:fields>
-										<Text id="textCantEnt" text="{= ${oModel>/oEmbalajeEntregasinOC}.length }"/>
+										<Text id="textCantEnt" text=""/>
 									</f:fields>
 								</f:FormElement>
 								<f:FormElement label="{i18n>lbAreaSolicitante}">
@@ -75,7 +75,7 @@
 						</f:FormContainer>
 					</f:formContainers>
 				</f:Form>
-				<ui:Table id="tableEmbalajes" visibleRowCount="4" rows="{path:'oModel>/oEmbalajeEntregasinOC'}">
+				<ui:Table id="tableEmbalajes" visibleRowCount="4" rows="{path:'oModel>/oEmbalajeEntregasinOC'}" rowSelectionChange="fnSelectionEmbalajes">
 					<ui:extension>
 						<OverflowToolbar style="Clear">
 							<content>
@@ -135,7 +135,7 @@
 						</ui:Column>
 					</ui:columns>
 				</ui:Table>
-				<ui:Table id="tableItems" visibleRowCount="4" class="sapUiLargeMarginTop" rows="{path:'oModel>/oEmbalajeItemssinOC'}">
+				<ui:Table id="tableItems" visibleRowCount="4" class="sapUiLargeMarginTop" rows="{path:'oModel>/oEmbalajeItemssinOC'}" rowSelectionChange="fnSelectionItems">
 					<ui:extension>
 						<OverflowToolbar style="Clear">
 							<content>

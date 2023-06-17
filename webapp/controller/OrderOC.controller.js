@@ -466,23 +466,26 @@ sap.ui.define([
 				}]
 			};
 
-			return;
-			sap.ui.core.BusyIndicator.show(0);
-			var oResults = {
-				"oResults": data2
-			};
-			Services.RegistrarEntregaConOC(that, oResults, function (result) {
-				util.response.validateFunctionEndButton(result, {
-					success: function (data, message) {
-						that._onPressCancelDialog();
-						that._onPressCancel();
-					},
-					error: function (message) {
-						Busy.close();
-					}
-				});
+			// return;
+			utilUI.messageBox(this.getI18nText("sTextSave"), "C", function (value) {
+				if (value) {
+					sap.ui.core.BusyIndicator.show(0);
+					var oResults = {
+						"oResults": data2
+					};
+					Services.RegistrarEntregaConOC(that, oResults, function (result) {
+						util.response.validateFunctionEndButton(result, {
+							success: function (data, message) {
+								that._onPressCancelDialog();
+								that._onPressCancel();
+							},
+							error: function (message) {
+								Busy.close();
+							}
+						});
+					});
+				}
 			});
-
 		},
 		_onPressCancelDialog: function () {
 			this.getModel("oModel").setProperty("/oEmbalajeEntregaconOC", []);
