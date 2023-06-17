@@ -2,8 +2,9 @@ sap.ui.define([
 	"sap/ui/core/UIComponent",
 	"sap/ui/Device",
 	"solicitarcitapr/model/models",
-    "sap/ui/model/json/JSONModel"
-], function (UIComponent, Device, models, JSONModel) {
+    "sap/ui/model/json/JSONModel",
+    "solicitarcitapr/libs/qrcode.min"
+], function (UIComponent, Device, models, JSONModel, QRCode) {
 	"use strict";
 
 	return UIComponent.extend("solicitarcitapr.Component", {

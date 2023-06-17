@@ -1583,5 +1583,315 @@ sap.ui.define([
 
 			Objeto.setValue(val);
 		},
+		formatAbapDate: function (sValue) {
+ 			if (sValue == null) {} else {
+ 				var año = sValue.split(".")[2];
+ 				var mes = sValue.split(".")[1];
+ 				var dia = sValue.split(".")[0];
+ 				var fechaSql = año + "" + mes + "" + dia;
+ 				return fechaSql;
+ 			}
+ 		},
+ 		formatAbapHours: function (sValue) {
+ 			if (sValue == null) {} else {
+ 				var hours = sValue.split(":")[0];
+ 				var min = sValue.split(":")[1];
+ 				var seconds = sValue.split(":")[2];
+ 				var horaSql = "PT" + hours + "H" + min + "M" + seconds + "S";
+ 				return horaSql;
+ 			}
+ 		},
+ 		formatAbapHoursTemp: function (sValue) {
+ 			if (sValue == null) {
+
+ 			} else {
+ 				var hours = sValue.split(":")[0];
+ 				var min = sValue.split(":")[1];
+ 				var horaSql = hours + "" + min + "" + "00";
+ 				return horaSql;
+ 			}
+ 		},
+ 		formatdigitosEntregas: function (sValue) {
+ 			if (sValue != null && sValue != "") {
+ 				var integer = parseInt(sValue.toString());
+
+ 				switch (integer.toString().length) {
+ 				case 9:
+ 					integer = "0" + integer;
+ 					break;
+ 				case 10:
+ 					integer = integer;
+ 					break;
+ 				default:
+ 					integer = integer;
+ 					break;
+ 				}
+ 				var newDecimal = integer.toString();
+ 				return newDecimal;
+ 			} else {
+ 				return sValue;
+ 			}
+ 		},
+ 		formaterxTemp: function (value) {
+			if (value) {
+				var myDater = value.substr(6,2) +"."+ value.substr(4,2) +"."+ value.substr(0,4);
+				return myDater;
+			} else {
+				return value;
+			}
+
+		},
+		formatHourTemp: function (param) {
+			var formatHour;
+			formatHour = param.substr(0,2) + ":"+ param.substr(2,2);
+
+			return formatHour;
+
+		},
+		formatHour2Temp: function (param) {
+			var formatHour;
+			var hora2an = (parseInt(param.substr(0,2))+1).toString();
+			var hora2;
+			if(hora2an.length === 1 ){
+				hora2 = "0" + hora2an;
+			}else{
+				hora2=hora2an;
+			}
+			
+			if(hora2)
+
+			formatHour = param.substr(0,2) + ":"+ param.substr(2,2) + "-" + hora2.toString() + ":" + param.substr(2,2);
+
+			return formatHour;
+
+		},
+		formatNoDecimal: function (sValue) {
+ 			if (sValue != null && sValue != "") {
+ 				var val;
+ 				sValue = parseFloat(sValue.replace(/[^0-9,.]/g, '').replace(/,/g, '')).toString();
+ 				val = sValue.replace(/[^0-9,.]/g, '').replace(/,/g, '.');
+ 				val = parseFloat(val).toFixed(2);
+ 				val = val.toString();
+ 				// val.indexOf();
+ 				if (val === "NaN") {
+ 					val = "0.00";
+ 				}
+
+ 				val = parseFloat(val);
+
+ 				if (isNaN(val) || val === 0) {
+ 					val = parseFloat(0).toFixed(0);
+ 				} else {
+ 					val = val.toFixed(0);
+
+ 					var val_parts = val.split('.'),
+ 						regexp = /(\d+)(\d{3})/;
+
+ 					while (regexp.test(val_parts[0]))
+ 						val_parts[0] = val_parts[0].replace(regexp, '$1' + ',' + '$2');
+
+ 					val = val_parts.join('.');
+ 				}
+
+ 				return val;
+ 			} else {
+ 				return sValue;
+ 			}
+
+ 		},
+		generarCita: function () {
+			var oControl = this;
+			var response;
+			var url = "/hana/IPROVIDER_ENTREGA/CITAS/GenerarCita.xsjs";
+			var aData = jQuery.ajax({
+				method: 'GET',
+				cache: false,
+				headers: {
+					"X-CSRF-Token": "Fetch"
+				},
+				async: false,
+				url: url
+			}).then(function successCallback(result, xhr, data) {
+				//token = data.getResponseHeader("X-CSRF-Token");
+				response = result;
+			}, function errorCallback(xhr, readyState) {
+				jQuery.sap.log.debug(xhr);
+			});
+			return response;
+		},
+		EstructuraInsertFechaReturn: function (arratotal, method, cita,target,validateTipoFecha) {
+ 			var centro;
+ 			var proveedor;
+ 			var entregasRegistradas;
+ 			var vbeln;
+ 			var arr = [];
+ 			var arr2 = [];
+ 			var arr3 = [];
+ 			var arr4 = [];
+ 			var tipoDato = "";
+ 			var entregasguias = "";
+
+ 			var codigoestatus = "";
+ 			var descestatus = "";
+
+ 			var direccion = "";
+ 			var correo = "";
+ 			var telefono = "";
+ 			var ModeloProyect2;
+ 			var estatus;
+			
+			var zcita_np = "";
+ 			if (target == "02") {
+ 				entregasguias = "";
+ 				correo = "";
+ 				telefono = "";
+ 				estatus = that.oModelGet.getProperty("/oEstado");
+ 				if (arratotal[0].Ordenes[0].LugEntD === "01") { //cede campoy
+ 					direccion = this.getModel("oModelUser").getData().oDataAditional[0].Zdireccion;
+ 					if (validateTipoFecha == "01") {
+ 						codigoestatus = estatus[4].Campo;
+ 						descestatus = estatus[4].DescripcionCampo;
+ 						zcita_np = "PROGRAMADA";
+ 					} else {
+ 						codigoestatus = estatus[1].Campo;
+ 						descestatus = estatus[1].DescripcionCampo;
+ 						zcita_np = "NO PROGRAMADA";
+ 					}
+ 				} else if (arratotal[0].Ordenes[0].LugEntD === "02") { //puesto en mina
+ 					direccion = this.getModel("oModelUser").getData().oDataAditional[0].Zdireccion;
+ 					codigoestatus = estatus[2].Campo;
+ 					descestatus = estatus[2].DescripcionCampo
+ 					zcita_np = "";
+ 				} else {
+ 					direccion = "";
+ 					codigoestatus = estatus[4].Campo;
+ 					descestatus = estatus[4].DescripcionCampo
+ 					zcita_np = "";
+ 				}
+
+ 			}
+
+ 			for (var i = 0; i < arratotal.length; i++) {
+ 				entregasRegistradas = 0
+ 				var split = arratotal[i].FechaDisponibles.FECHAS.split(".")
+ 				for (var l = 0; l < arratotal[i].Ordenes.length; l++) {
+ 					var obj = {};
+ 					var entrega;
+ 					if (target == "02") {
+ 						proveedor = arratotal[i].Ordenes[l].Lifnr;
+ 						entrega = arratotal[i].Ordenes[l].Vbeln.toString();
+ 						entregasRegistradas = arratotal[i].Ordenes[l].Enviar.toString();
+ 						centro = arratotal[i].Ordenes[l].Centro;
+ 						tipoDato = arratotal[i].Ordenes[l].codtipoData;
+ 						obj = {
+ 							"CENTRO": centro,
+ 							"PROVEEDOR": proveedor,
+ 							"ENTREGAS_REGISTRADAS": entregasRegistradas,
+ 							"FECHA": split[2] + "-" + split[1] + "-" + split[0],
+ 							"HORA": arratotal[i].FechaDisponibles.HORARIOS + ":00"
+ 						}
+ 						arr2.push(obj)
+ 					}
+ 					var objhana = {};
+ 					if (target == "02") {
+ 						for (var j = 0; j < entregasguias.length; j++) {
+ 							if (arratotal[i].Ordenes[l].DescripcionGeneralEntrega.toString() == entregasguias[j].DescripcionGeneralEntrega.toString()) {
+ 								arratotal[i].Ordenes[l].Zbolnr = entregasguias[j].Zbolnr;
+ 							}
+ 						}
+ 						objhana = {
+ 							"IDCITA": cita,
+ 							"DNI": "",
+ 							"DNI2": "",
+ 							"DNI3": "",
+ 							"DNI4": "",
+ 							"PLACA": "",
+ 							"PLACA2": "",
+ 							"PLACA3": "",
+ 							"PLACA4": "",
+ 							"CANTIDAD_ENTREGAS": arratotal[i].Ordenes.length,
+ 							"CITAN": zcita_np,
+ 							"CORREO": correo,
+ 							"DIRECCION": direccion,
+ 							"TELEFONO": telefono,
+ 							"ENTREGA": entrega,
+ 							"NUMERO_GUIA": "",
+ 							"ESTATUS_USUARIO": codigoestatus,
+ 							"DESCRIPCION_ESTATUS_USUARIO": descestatus,
+ 							"FECHACITA": split[2] + "-" + split[1] + "-" + split[0],
+ 							"HORACITA": arratotal[i].FechaDisponibles.HORARIOS + ":00"
+ 						}
+ 						if (arratotal[i].Ordenes[l].codtipoData == "02") {
+ 							if (arratotal[i].Ordenes[l].LugEntD == "01" || arratotal[i].Ordenes[l].LugEntD == "02") {
+ 								objhana.DIRECCION = arratotal[i].Ordenes[l].direccionModificacion;
+ 							}
+ 						}
+ 					}
+ 					arr4.push(objhana)
+ 				}
+ 				
+ 				for (var k = 0; k < arratotal[i].Ordenes.length; k++) {
+ 					var cita
+ 					vbeln = arratotal[i].Ordenes[k].Vbeln.toString()
+
+ 					var objSap = {};
+ 					if (target == "02") {
+ 						objSap = {
+ 							"Vbeln": this.formatdigitosEntregas(vbeln),
+ 							"Lfdat": this.formatAbapDate(arratotal[i].FechaDisponibles.FECHAS),
+ 							"Lfuhr": this.formatAbapHoursTemp(arratotal[i].FechaDisponibles.HORARIOS),
+ 						}
+ 						arr.push(objSap)
+
+ 					}
+
+ 					var objDelete = {};
+ 					if (target == "02") {
+ 						var fecha = arratotal[i].FechaDisponibles.FECHAS;
+ 						var horario = arratotal[i].FechaDisponibles.HORARIOS + ":00";
+ 						var id = arratotal[i].Ordenes[k].ID_Eliminar;
+ 						var centro = arratotal[i].Ordenes[k].Centro;
+ 						var proveedor = arratotal[i].Ordenes[k].materiales[0].Lifnr;
+ 						objDelete = {
+ 							"id": id,
+ 							"fecha": fecha,
+ 							"hora": horario,
+ 							"centro": centro,
+ 							"codprov": proveedor
+ 						}
+ 					}
+ 					arr3.push(objDelete)
+ 				}
+ 			}
+
+ 			let arr2New = arr2.filter((valorActual, indiceActual, arreglo) => {
+ 				//Podríamos omitir el return y hacerlo en una línea, pero se vería menos legible
+ 				return arreglo.findIndex(valorDelArreglo => JSON.stringify(valorDelArreglo) === JSON.stringify(valorActual)) === indiceActual
+ 			});
+
+ 			if (target == "02") {
+ 				var objEnvioSap = {
+ 					"Planificar": "X",
+ 					"ItemSet": arr,
+ 					"NAVRESULT": [{
+ 						"Vbeln": "",
+ 						"Codigo": "",
+ 						"Mensaje": "",
+ 						"Type": ""
+ 					}]
+ 				};
+
+ 				var objReturn = {
+ 					"arr2": arr2,
+ 					"arr2New": arr2New,
+ 					"objEnvioSap": objEnvioSap,
+ 					"arr3": arr3,
+ 					"arr4": arr4,
+ 					"arratotal": arratotal
+ 				}
+
+ 				return objReturn;
+ 			}
+ 		},
 	});
 });

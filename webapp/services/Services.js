@@ -57,5 +57,14 @@ sap.ui.define([
 		EliminarEntregaTarget2: function (context, oResults, callback) {
 			utilHttp.Post(constantes.services.EliminarEntregaTarget2, oResults, callback, context);
 		},
+		ValidacionConcurrenciaFecha: function (context, oResults, callback) {
+			utilHttp.Post(constantes.services.ValidacionConcurrenciaFecha, oResults, callback, context);
+		},
+		RegistrarEntregasAprobadas: function (context, oResults, callback) {
+			utilHttp.Post(constantes.services.RegistrarEntregasAprobadas, oResults, callback, context);
+		},
+		InsertarEntregasHana: function (context, oResults, callback) {
+			utilHttp.Post(constantes.services.InsertarEntregasHana, oResults, callback, context);
+		},
 	};
 });

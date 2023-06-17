@@ -92,7 +92,15 @@
 		"resources": {
 			"css": [{
 				"uri": "css/style.css"
-			}]
+			}],
+			"js": [
+				{
+					"uri": "./libs/FileSaver.js"
+				},
+				{
+					"uri": "./libs/jquery.wordexport.js"
+				}
+			]
 		},
 		"routing": {
 			"config": {

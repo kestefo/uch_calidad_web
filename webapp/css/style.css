@@ -38,3 +38,34 @@
     background-repeat: no-repeat;
     background-position: 40%;
 } */
+.entregaClase{
+		margin-top:10.7px;
+	}
+  .html2canvas-container { width: 3000px !important; height: 9000px !important; }
+
+  #infobar{
+    border: 1px solid black;
+    border-collapse: collapse;
+  }
+  .VBoxPrincipal{
+    padding: 10px;
+    border: 1px solid black;
+    border-collapse: collapse;
+  }
+  
+  .first {
+    border: 1px solid black;
+    border-collapse: collapse;
+    align-content: center;
+}
+.list-label{
+    font-size: 12px !important;
+}
+.tableMaterial {
+	border: 1px solid black;
+	border-collapse: collapse;
+}
+.colum {
+	border-right: 1px solid black;
+	border-collapse: collapse;
+}

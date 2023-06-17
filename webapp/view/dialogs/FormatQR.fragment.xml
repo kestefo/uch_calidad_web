@@ -1,0 +1,19 @@
+<core:FragmentDefinition xmlns:core="sap.ui.core" controllerName="com.rava.project.controller.Page1" xmlns="sap.m"
+	xmlns:form="sap.ui.layout.form" xmlns:ui="sap.ui.table" xmlns:html="http://www.w3.org/1999/xhtml">
+	<Dialog id="DialogFormatQR" contentHeight="auto" contentWidth="820px" horizontalScrolling="false" showHeader="false" state="None"
+		stretch="false" title="Detalle Recibo" type="Standard" verticalScrolling="true" class="sapUiResponsiveContentPadding">
+		<content>
+			
+			<VBox id="total"></VBox>
+		</content>
+		<beginButton>
+			<Button text="Descargar" icon="sap-icon://download" type="Accept" iconFirst="true" width="auto" enabled="true" visible="true"
+				iconDensityAware="false" press="downloadQr"/>
+			
+		</beginButton>
+		<endButton>
+			<!--<Button text="Cerrar" icon="sap-icon://decline" type="Reject" iconFirst="true" width="auto" enabled="true" visible="true"-->
+			<!--	iconDensityAware="false" press="CancelarQR"/>-->
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>
