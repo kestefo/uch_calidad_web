@@ -7,7 +7,7 @@
 					visible="true" displayInline="false">
 					<items>
 						<Label text="Ingrese Fecha" design="Standard" width="auto" required="true" textAlign="Begin" textDirection="Inherit" visible="true"/>
-						<DatePicker id="fecharangoInicialPlan" change="eventchangeFechainicialPlanNoProg" navigate="cambioRangoInicialPlanNoProg"
+						<DatePicker id="fecharangoInicialPlan" change="eventchangeFechainicialPlanNoProg" navigate="cambioRangoInicialProg"
 							placeholder="{i18n>phFormatFecha}" valueFormat="yyyy/MM/dd" displayFormat="yyyy/MM/dd"/>
 						<Label text="Hasta" design="Standard" width="auto" required="true" textAlign="Begin" textDirection="Inherit" visible="true"/>
 						<DatePicker id="fecharangoFinalPlan" change="eventchangeFechaFinalPlanNoProg" navigate="cambioRangoPlanNoProg"
