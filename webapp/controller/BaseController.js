@@ -735,8 +735,11 @@ sap.ui.define([
 		_onClearDataDetailPacking: function(){
 			this.getModel("oModel").setProperty("/oEmbalajeEntregaconOC", []);
 			this.getModel("oModel").setProperty("/oEmbalajeItemsconOC", []);
+			
+			this.getModel("oModel").setProperty("/DataMaterialesSeleccionadosInit", []);
 		},
 		_onClearComponentDetailPacking: function(oComponent){
+			that._byId("tbOrderMaterial").clearSelection(true);
 			oComponent.forEach(function(value){
 				value.clearSelection(true);
 			});

@@ -9,7 +9,7 @@
 					<OverflowToolbar>
 						<Title text="{i18n>titleEmbalajes} ({=${oModel>/oEmbalajeEntregaconOC}.length})"/>
 						<ToolbarSpacer/>
-						<Button text="{i18n>btnEmbalajesCopy}" icon="sap-icon://copy" type="Emphasized"/>
+						<!--<Button text="{i18n>btnEmbalajesCopy}" icon="sap-icon://copy" type="Emphasized"/>-->
 						<Button text="{i18n>btnEmbalajesAdd}" icon="sap-icon://add" type="Accept" press="fnPressAddEmbalajes"/>
 						<Button text="{i18n>btnEmbalajesDelete}" icon="sap-icon://delete" type="Reject" press="fnPressDeleteEmbalajes"/>
 					</OverflowToolbar>
@@ -165,7 +165,7 @@
 		</content>
 		<buttons>
 			<Button text="{i18n>btnEmbalar}" icon="sap-icon://product" type="Emphasized" press="fnPressEmbCantidadParcial"/>
-			<Button text="{i18n>btnVaciar}" icon="sap-icon://delete" type="Emphasized" press="desvincular"/>
+			<Button text="{i18n>btnVaciar}" icon="sap-icon://delete" type="Emphasized" press="_onPressVaciar"/>
 			<Button text="{i18n>btnGuardar}" icon="sap-icon://save" type="Accept" press="fnPressGuardarOC"/>
 			<Button text="{i18n>btnCancelar}" icon="sap-icon://decline" type="Reject" press="_onPressClose" custom:custom="PackingOC"/>
 		</buttons>

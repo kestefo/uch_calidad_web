@@ -48,6 +48,10 @@ sap.ui.define([
 		},
 		fnClearData: function () {
 			that.oModel.setProperty("/oDataEntregaOC", []);
+			
+			that.oModel.setProperty("/oEmbalajeEntregaconOC", []);
+			that.oModel.setProperty("/oEmbalajeItemsconOC", []);
+			that.oModel.setProperty("/DataMaterialesSeleccionadosInit", []);
 		},
 		fnClearComponent: function () {
 			that._byId("tbOrderMaterial").clearSelection(true);
@@ -80,17 +84,23 @@ sap.ui.define([
 				}
 				oResults.push(jVariable);
 			}
-			
-			if (oResults.length === 0){
+
+			if (oResults.length === 0) {
 				utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorNotSelectMat"));
 				return;
 			}
-			
+
 			oResults.forEach(function (value) {
 				value.MengezuD = that.formatInteger(value.MengezuD);
 				value.CantTotal = that.currencyFormat(value.CantTotal);
 			});
-
+			
+			var arrayInit = [];
+			oResults.forEach(function(x){
+				arrayInit.push(x);
+			});
+			that.oModel.setProperty("/DataMaterialesSeleccionadosInit" ,JSON.parse(JSON.stringify(oResults)));
+						
 			that.oModel.setProperty("/oEmbalajeEntregaconOC", []);
 			that.oModel.setProperty("/oEmbalajeItemsconOC", oResults);
 			this.setFragment("_dialogPackingOC", this.frgIdPackingOC, "PackingOC", this);
@@ -125,6 +135,8 @@ sap.ui.define([
 			};
 			DataBultos.push(obj);
 			that.oModel.setProperty("/oEmbalajeEntregaconOC", DataBultos);
+			that._byId(this.frgIdPackingOC + "--tbEntConOC").clearSelection(true);
+			that._byId(this.frgIdPackingOC + "--tbItemsConOC").clearSelection(true);
 		},
 		fnSelectedTipoBultoEntregaOC: function (oEvent) {
 			var oSource = oEvent.getSource();
@@ -246,8 +258,7 @@ sap.ui.define([
 				var validar = false;
 				oBjeto.Array.forEach(function (d) {
 					if (d.MatnrD === a.MatnrD && a.EbelnD === d.EbelnD && a.EbelpD === d.EbelpD) {
-						d.MengezuD = that.FormatterDinero(parseFloat(d.MengezuD.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(
-							",", "")) + parseFloat(a.MengezuD.replace(",", "").replace(",", "").replace(",", "").replace(",", "").replace(",", "")));
+						d.MengezuD = that.currencyFormat( ( parseFloat(that.replaceNotAll(d.MengezuD)) + parseFloat(that.replaceNotAll(a.MengezuD)) ).toString() );
 						validar = true;
 					}
 				});
@@ -269,6 +280,9 @@ sap.ui.define([
 
 			that.getMessageBox("success", that.getI18nText("sSuccessEmbalar") + " " + arrNumber.length.toString() + " " + that.getI18nText(
 				"sSuccessEmbalar2") + " " + oBjeto.Num);
+				
+			that._byId(this.frgIdPackingOC + "--tbEntConOC").clearSelection(true);
+			that._byId(this.frgIdPackingOC + "--tbItemsConOC").clearSelection(true);
 		},
 		fnPressGuardarOC: function (oEvent) {
 			var Bultos = that.oModel.getProperty("/oEmbalajeEntregaconOC");
@@ -531,10 +545,9 @@ sap.ui.define([
 			that.oModel.setProperty("/oEmbalajeEntregaconOC", oDataBultos);
 			tablaBultos.clearSelection(true);
 		},
-
 		// valida onclick en campos
 		ValidarCamposBultos: function (oEvent) {
-			var table =  that._byId(this.frgIdPackingOC + "--tbEntConOC");
+			var table = that._byId(this.frgIdPackingOC + "--tbEntConOC");
 			var oIndeces = table.getSelectedIndices();
 			var context = oEvent.getParameter("rowContext");
 			if (context === null) {
@@ -545,11 +558,91 @@ sap.ui.define([
 			if (!Object.Num) {
 				table.removeSelectionInterval(oIndex, oIndex);
 			} else {
-				if(oIndeces.length>1){
+				if (oIndeces.length > 1) {
 					table.removeSelectionInterval(oIndex, oIndex);
 				}
 			}
 		},
 
+		_onPressVaciar : function () {
+			var tabla1					=that._byId(this.frgIdPackingOC + "--tbEntConOC");
+			var SeleccionBultos			=tabla1.getSelectedIndices();
+			var Bultos					=that.oModel.getProperty("/oEmbalajeEntregaconOC");
+			var MaterialesEmbalar		=that.oModel.getProperty("/oEmbalajeItemsconOC");
+			var MaterialesEmbalarImit	=that.oModel.getProperty("/DataMaterialesSeleccionadosInit");
+			var array =[];
+			
+			if(SeleccionBultos.length===0){
+				utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorNotSelectEmbSin"));
+				return;
+			}
+			
+			var context =tabla1.getContextByIndex(SeleccionBultos[0]);
+			var oBjeto  =context.getObject();
+				
+			if(oBjeto.booleanComp){
+				utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorNoVaciarEmbComp"));
+				return ;
+			}
+				
+			if(oBjeto.Array.length ===  0){
+				utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorSelectEmbInMat"));
+				return;
+			}
+			
+			var obj={
+					Num			:1,
+					TipoBulto	:"0",
+					CantBulto	:"",
+					Observacion	:"",
+					PesoBulto	:"",
+					Longitud	:"",
+					Ancho		:"",
+					Altura		:"",
+					enabledTpB	:false,
+					Array :[]
+				};
+		
+			tabla1.clearSelection();
+			SeleccionBultos.reverse().forEach(function(a){
+				var context =tabla1.getContextByIndex(a);
+				var oBjeto  =context.getObject();
+				JSON.parse(JSON.stringify(oBjeto.Array)).forEach(function(k){
+					if(!k.booleanComp){
+						MaterialesEmbalar.forEach(function(r){
+							if (k.MatnrD === r.MatnrD && k.EbelnD === r.EbelnD  && k.EbelpD === r.EbelpD){
+								k.MengezuD = that.currencyFormat( ( parseFloat(that.replaceNotAll(r.MengezuD))+parseFloat(that.replaceNotAll(k.MengezuD)) ).toString()) ; 
+							}
+						});	
+						MaterialesEmbalar.unshift(k);
+					}
+				});
+				
+				var filtroMat = MaterialesEmbalar.filter((v,i,a)=>a.findIndex(t=>(t.MatnrD === v.MatnrD && t.EbelpD === v.EbelpD))===i);
+				that.oModel.setProperty("/oEmbalajeItemsconOC" , filtroMat);
+				var indice = 0 ;
+				Bultos.forEach(function (obj){
+					if(obj.Num === oBjeto.Num){
+						var contador = 0;
+						obj.Array.forEach(function (obj2){
+							if(!obj2.booleanComp){
+								contador++;
+							}
+						});
+						obj.Array.splice(0,contador);
+					}
+					indice++;
+				});
+				var cantidad = 1 ;
+				Bultos.forEach(function (a) {
+					a.Num = cantidad;
+					cantidad++;
+				});	
+			});
+			
+			that.oModel.setProperty("/oEmbalajeEntregaconOC" , Bultos);
+			that._byId(this.frgIdPackingOC + "--tbEntConOC").clearSelection(true);
+			that._byId(this.frgIdPackingOC + "--tbItemsConOC").clearSelection(true);
+		},
 	});
 });
