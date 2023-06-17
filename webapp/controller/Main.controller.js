@@ -852,22 +852,22 @@ sap.ui.define([
 
 					that.oModel.setProperty("/DataFecha", dataConsta);
 
-					// if (ejecucion) {
-					// 	timeOutFecha = setTimeout(
-					// 		function () {
-					// 			that.getFilterTableFechaWhere(true);
-					// 			console.log("timeOut");
-					// 		}, 1000);
-					// }
+					if (ejecucion) {
+						timeOutFecha = setTimeout(
+							function () {
+								that.getFilterTableFechaWhere(true);
+								console.log("timeOut");
+							}, 1000);
+					}
 				},
 				error: function (e) {
-					// if (ejecucion) {
-					// 	timeOutFecha = setTimeout(
-					// 		function () {
-					// 			that.getFilterTableFechaWhere(true);
-					// 			console.log("timeOut");
-					// 		}, 1000);
-					// }
+					if (ejecucion) {
+						timeOutFecha = setTimeout(
+							function () {
+								that.getFilterTableFechaWhere(true);
+								console.log("timeOut");
+							}, 1000);
+					}
 				}
 			});
 		},
