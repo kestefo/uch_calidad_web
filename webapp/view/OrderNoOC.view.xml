@@ -61,7 +61,7 @@
 								</f:FormElement>
 								<f:FormElement label="{i18n>lbCantidadEmbalaje}">
 									<f:fields>
-										<Text id="textCantEnt" text=""/>
+										<Text id="textCantEnt" text="{= ${oModel>/oEmbalajeEntregasinOC}.length }"/>
 									</f:fields>
 								</f:FormElement>
 								<f:FormElement label="{i18n>lbAreaSolicitante}">
@@ -81,9 +81,9 @@
 							<content>
 								<Title id="titleEmbalajes" text="{i18n>titleEmbalajes}"/>
 								<ToolbarSpacer width=""/>
-								<Button id="idbtnTableEmbalajesCopy" text="{i18n>btnEmbalajesCopy}" icon="sap-icon://copy" type="Emphasized"/>
+								<!--<Button id="idbtnTableEmbalajesCopy" text="{i18n>btnEmbalajesCopy}" icon="sap-icon://copy" type="Emphasized"/>-->
 								<Button id="idbtnTableEmbalajesAdd" press="fnPressAddEmbalajes" text="{i18n>btnEmbalajesAdd}" icon="sap-icon://add" type="Accept"/>
-								<Button id="idbtnTableEmbalajesDelete" text="{i18n>btnEmbalajesDelete}" icon="sap-icon://delete" type="Reject"/>
+								<Button id="idbtnTableEmbalajesDelete" press="fnPressDeleteEmbalajes" text="{i18n>btnEmbalajesDelete}" icon="sap-icon://delete" type="Reject"/>
 							</content>
 						</OverflowToolbar>
 					</ui:extension>
@@ -112,25 +112,25 @@
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>titlePeso}"/>
 							<ui:template>
-								<Input type="Text" value="{oModel>peso}" change="fnreemLetrasCant" maxLength="20"/>
+								<Input type="Text" textAlign="Right" value="{oModel>peso}" change="fnreemLetrasCant" maxLength="20"/>
 							</ui:template>
 						</ui:Column>
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>titleLongitud}"/>
 							<ui:template>
-								<Input type="Text" value="{oModel>longitud}" change="fnreemLetrasCant" maxLength="20"/>
+								<Input type="Text" textAlign="Right" value="{oModel>longitud}" change="fnreemLetrasCant" maxLength="20"/>
 							</ui:template>
 						</ui:Column>
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>titleAncho}"/>
 							<ui:template>
-								<Input type="Text" value="{oModel>ancho}" change="fnreemLetrasCant" maxLength="20"/>
+								<Input type="Text" textAlign="Right" value="{oModel>ancho}" change="fnreemLetrasCant" maxLength="20"/>
 							</ui:template>
 						</ui:Column>
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>titleAltura}"/>
 							<ui:template>
-								<Input type="Text" value="{oModel>altura}" change="fnreemLetrasCant" maxLength="20"/>
+								<Input type="Text" textAlign="Right" value="{oModel>altura}" change="fnreemLetrasCant" maxLength="20"/>
 							</ui:template>
 						</ui:Column>
 					</ui:columns>
@@ -141,8 +141,8 @@
 							<content>
 								<Title id="titleItems" text="{i18n>titleItems}"/>
 								<ToolbarSpacer width=""/>
-								<Button id="idbtnTableItemsAdd" text="{i18n>btnItemsAdd}" press="fnPressAddItems" icon="sap-icon://add" type="Accept"/>
-								<Button id="idbtnTableItemsDelete" text="{i18n>btnItemsDelete}" icon="sap-icon://delete" type="Reject"/>
+								<Button id="idbtnTableItemsAdd" press="fnPressAddItems" text="{i18n>btnItemsAdd}" icon="sap-icon://add" type="Accept"/>
+								<Button id="idbtnTableItemsDelete" press="fnPressDeleteItems" text="{i18n>btnItemsDelete}" icon="sap-icon://delete" type="Reject"/>
 							</content>
 						</OverflowToolbar>
 					</ui:extension>
@@ -168,7 +168,7 @@
 						<ui:Column width="auto" hAlign="Center">
 							<Label text="{i18n>titleCantidad}"/>
 							<ui:template>
-								<Input type="Text" value="{oModel>cantidad}" maxLength="20"/>
+								<Input type="Text" textAlign="Right" change="changeFormatIntegerToDigitsString" value="{oModel>cantidad}" maxLength="20"/>
 							</ui:template>
 						</ui:Column>
 						<ui:Column width="9rem" hAlign="Center">
