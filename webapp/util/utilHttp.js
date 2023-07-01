@@ -161,7 +161,7 @@ sap.ui.define([
 		},
 		generarHeaders: function (self, token) {
 			var that = this;
-			var userapi = self.getView().getModel("userapi");
+			var userapi = self.getView().getModel("oModelUser");
 			var request = {};
 			request.sIdTransaccion = this.generarIdTransaccion();
 			request.sAplicacion = constantes.IdApp;
@@ -169,7 +169,7 @@ sap.ui.define([
 			// 		request.sToken = that.tagAleatorio() + that.encode(result);
 			// 	})
 			if(userapi){
-				var name = userapi.getProperty("/name");
+				var name = userapi.getData().Resources[0].userName;
 				if(name){
 					
 				}else{

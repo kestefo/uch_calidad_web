@@ -1372,6 +1372,7 @@ sap.ui.define([
 				x.Zzlfstk	= codigoestatus;
 				x.Zcita = cita;
 			});
+			contentERP.objEnvioSap.user = that.getRuc();
 			var data = {
 				"oResults": contentERP.objEnvioSap
 			};
@@ -3011,6 +3012,7 @@ sap.ui.define([
 				var dataE = {
 					"Eliminar": "X",
 					"ItemEntSet": Entregas_a_Eliminar,
+					"user": that.getRuc(),
 					"NAVRESULT": [{
 						"Mensaje2": "",
 						"Mensaje": ""
@@ -3208,7 +3210,8 @@ sap.ui.define([
 			var dataSinOCHanna = {
 				"oResults": {
 					"EntregaEliminarSCP": EntregaEliminarSCP,
-					"EntregaEliminarERP": EntregaEliminarERP
+					"EntregaEliminarERP": EntregaEliminarERP,
+					"user": that.getRuc(),
 				}
 			};
 			// return;

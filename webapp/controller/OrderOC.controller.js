@@ -459,6 +459,7 @@ sap.ui.define([
 				"Btgew": that.currencyFormat(pesoTotal.toString()),
 				"ZDETALLE": array,
 				"ZETPEDIDOTEXTSet": ara,
+				"user": that.getRuc(),
 				"ZETRESULTADOSet": [{
 					"Codigo": "",
 					"Msg": "",
