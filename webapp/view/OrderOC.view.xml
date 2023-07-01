@@ -1,6 +1,6 @@
 <mvc:View controllerName="solicitarcitapr.controller.OrderOC" xmlns:mvc="sap.ui.core.mvc" displayBlock="true" xmlns="sap.m"
 	xmlns:f="sap.ui.layout.form" xmlns:core="sap.ui.core" xmlns:ui="sap.ui.table">
-	<Page id="pageOrderOC" title="{i18n>titleOrderNoOC}">
+	<Page id="pageOrderOC" title="{i18n>titleOrderNoOC2}">
 		<content >
 			<VBox class="sapUiSmallMargin">
 				<ui:Table id="tbOrderMaterial" rows="{path:'oModel>/oDataEntregaOC'}">
