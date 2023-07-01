@@ -1639,7 +1639,6 @@ sap.ui.define([
 			} else {
 				return value;
 			}
-
 		},
 		formatHourTemp: function (param) {
 			var formatHour;
@@ -1837,7 +1836,7 @@ sap.ui.define([
  					var objSap = {};
  					if (target == "02") {
  						objSap = {
- 							"Vbeln": this.formatdigitosEntregas(vbeln),
+ 							"Vbeln": parseInt(vbeln),
  							"Lfdat": this.formatAbapDate(arratotal[i].FechaDisponibles.FECHAS),
  							"Lfuhr": this.formatAbapHoursTemp(arratotal[i].FechaDisponibles.HORARIOS),
  						}

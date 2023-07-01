@@ -7,7 +7,7 @@ sap.ui.define([
 	'../util/util',
 	"../util/utilUI",
 	"sap/ui/core/Fragment",
-], function (Controller, BaseController, models, constantes, Services, util, utilUI,Fragment) {
+], function (Controller, BaseController, models, constantes, Services, util, utilUI, Fragment) {
 	"use strict";
 
 	var that;
@@ -48,21 +48,22 @@ sap.ui.define([
 					that.oModelGet.setProperty("/oCentro", oDataHana.consultarCenter);
 					that.oModelGet.setProperty("/oFeriados", oDataHana.consultarFeriados);
 					that.oModelGet.setProperty("/oHorasTrabajadas", oDataHana.consultarHorasTrabajadas);
+					that.oModelGet.setProperty("/oHorasTolerancia", oDataHana.consultarHorasTolerancia);
 					//angellyn get data table 1
 					var oDataPedEmb = oDataHana.OrdersToBePackaged;
 					this._onEstructurePedEmb(oDataPedEmb);
 
 					//jose get data table 1
 					var oDataPedSinCita = oDataHana.WalInOrders;
-					this._onEstructurePed(oDataPedSinCita, "04","/oEntregasNoCita");
-					
+					this._onEstructurePed(oDataPedSinCita, "04", "/oEntregasNoCita");
+
 					//Uso de estado
 					var oDataEstado = values[0].T_ERP_STATUS;
 					that.oModelGet.setProperty("/oEstado", oDataEstado);
 
 					//jose get data table 2
 					var oDataPedConCita = oDataHana.WalInOrdersCit;
-					this._onEstructurePedConCita(oDataPedConCita, "05","/oEntregasConCita");
+					this._onEstructurePedConCita(oDataPedConCita, "05", "/oEntregasConCita");
 					that.eliminarPendiente();
 					sap.ui.core.BusyIndicator.hide(0);
 				}).catch(function (oError) {
@@ -87,17 +88,21 @@ sap.ui.define([
 			that.oModel.setProperty("/sConstanteContadorPen", 0);
 			that.oModel.setProperty("/DataConstante", []);
 			that.oModel.setProperty("/DataFecha", []);
-			
+
 			that.oModel.setProperty("/fecha", {});
 			that.oModel.setProperty("/DataFechaNoProg", []);
 			that.oModel.setProperty("/dataConcurrencia", []);
+
+			that.oModel.setProperty("/LISTA_GENERAL_ERP", []);
+			that.oModel.setProperty("/DataqrCitaTotal", []);
+			that.oModel.setProperty("/DataarrCitaTotal", []);
+			that.oModel.setProperty("/DataarrCita", []);
+			that.oModel.setProperty("/DataarrQrBultos", []);
+			that.oModel.setProperty("/DataarrQrBultosComplementario", []);
 			
-			that.oModel.setProperty("/LISTA_GENERAL_ERP",[]);
-			that.oModel.setProperty("/DataqrCitaTotal",[]);
- 			that.oModel.setProperty("/DataarrCitaTotal",[]);
- 			that.oModel.setProperty("/DataarrCita",[]);
- 			that.oModel.setProperty("/DataarrQrBultos",[]);
- 			that.oModel.setProperty("/DataarrQrBultosComplementario",[]);
+			if(timeOutFecha){
+				clearTimeout(timeOutFecha);	
+			}
 		},
 		fnClearComponent: function () {
 			that._byId("TreeTableBasic2").clearSelection(true);
@@ -182,7 +187,7 @@ sap.ui.define([
 
 			this.getView().getModel("oModel").setProperty("/DataPedidosEmbalar", oResults);
 		},
-		_onEstructurePed: function (oDataPedSinCita, sFilter,sPropery) {
+		_onEstructurePed: function (oDataPedSinCita, sFilter, sPropery) {
 			var oResults = [];
 			$.each(that._groupBy(oDataPedSinCita, 'Zzlfstk'), function (x, y) {
 				var jEstado = {
@@ -254,8 +259,13 @@ sap.ui.define([
 					if (y[0].COD != "02") {
 						y[0].COD = "01";
 						y[0].COD_DESC = "ERP";
+						y[0].Zzlfstkdesc = "Ent. Aprobada";
+						y[0].ZcitaNp = "PROGRAMADA";
 					}
-						
+					
+					var lugardestino = y[0].ZzlugEnt;
+ 					var desclugardestino = y[0].ZdescCond;
+
 					var jResults = {
 						"codtipoData": y[0].COD,
 						"desctipoData": y[0].COD_DESC,
@@ -270,7 +280,10 @@ sap.ui.define([
 						"Zlfdat": y[0].Zlfdat,
 						"Zlfuhr": y[0].Zlfuhr,
 						"Zbtgew": y[0].Zbtgew,
-						"materiales": y,
+						"Zlifnr": y[0].Zlifnr,
+						"Zwerks": y[0].Zwerks,
+						"ZzlugEnt": y[0].ZzlugEnt,
+						"ZdescCond": y[0].ZdescCond,
 						"materiales": y,
 					}
 					oResults2.push(jResults);
@@ -279,41 +292,41 @@ sap.ui.define([
 			that.oModel.setProperty("/oEntregasConCita", oResults2);
 		},
 		eliminarPendiente: function () {
- 			var User = that.oModelUser.getData();
- 			var Proveedor = User.oDataAditional[0].Lifnr;
- 			if (Proveedor == undefined && Proveedor == "") {
- 				return;
- 			}
+			var User = that.oModelUser.getData();
+			var Proveedor = User.oDataAditional[0].Lifnr;
+			if (Proveedor == undefined && Proveedor == "") {
+				return;
+			}
 
- 			var headers = util.http.generarHeaders(that);
- 			var objEnvio = {
- 				"oResults": {
- 					"USUARIO_P": User.Resources[0].id,
- 					"COD_ESTATUS": "02",
- 					"user": User.oDataAditional[0].Stcd1,
- 					"Arr": {
- 						"USUARIO_P": User.Resources[0].id,
- 						"COD_ESTATUS": "02",
- 						"user": User.oDataAditional[0].Stcd1
- 					}
- 				}
- 			}
- 			$.ajax({
- 				url: "/hana/IPROVIDER_ENTREGA/Entrega/Service/EliminarEntregaHoras/",
- 				timeout: 0,
- 				headers: headers,
- 				data: JSON.stringify(objEnvio),
- 				contentType: "application/json; charset=utf-8",
- 				context: that,
- 				method: "POST",
- 				async: true,
- 				success: function (response) {},
- 				error: function (xhr) {
- 					MessageBox.error("Ocurrio un error al obtener los datos del usuario logueado");
- 				}
- 			});
+			var headers = util.http.generarHeaders(that);
+			var objEnvio = {
+				"oResults": {
+					"USUARIO_P": User.Resources[0].id,
+					"COD_ESTATUS": "02",
+					"user": User.oDataAditional[0].Stcd1,
+					"Arr": {
+						"USUARIO_P": User.Resources[0].id,
+						"COD_ESTATUS": "02",
+						"user": User.oDataAditional[0].Stcd1
+					}
+				}
+			}
+			$.ajax({
+				url: "/hana/IPROVIDER_ENTREGA/Entrega/Service/EliminarEntregaHoras/",
+				timeout: 0,
+				headers: headers,
+				data: JSON.stringify(objEnvio),
+				contentType: "application/json; charset=utf-8",
+				context: that,
+				method: "POST",
+				async: true,
+				success: function (response) {},
+				error: function (xhr) {
+					MessageBox.error("Ocurrio un error al obtener los datos del usuario logueado");
+				}
+			});
 
- 		},
+		},
 		_onSelectPlan: function (oEvent) {
 			var oSource = oEvent.getSource();
 			var selectkey = oSource.getSelectedKey();
@@ -346,8 +359,8 @@ sap.ui.define([
 				break;
 			case "keyTabFilterCitEnt":
 				sTarget = "03";
-				this._byId("btChangeOrder").setVisible(true);
-				this._byId("btDeleteOrder").setVisible(true);
+				this._byId("btChangeOrder").setVisible(false);
+				this._byId("btDeleteOrder").setVisible(false);
 				this._byId("btDeleteAppointment").setVisible(true);
 
 				this._byId("btUpdateRegister").setVisible(false);
@@ -382,6 +395,7 @@ sap.ui.define([
 					"MaktxD": value.Zmaktx,
 					"VemngD": value.Zvemng,
 					"Vegr2D": value.Zunmed,
+					"Ebelp": value.Zvgpos
 				};
 				oResults.push(jMaterial);
 			});
@@ -556,7 +570,7 @@ sap.ui.define([
 						}
 						arrRangoFecha.push(date);
 					}
-					
+
 					fechaInicio.setDate(fechaInicio.getDate() + 1);
 				}
 			}
@@ -986,7 +1000,7 @@ sap.ui.define([
 							}
 							this.getFilterConstantCentro("MM", "SOLICITAR_CITA", "CENTRO", contador, false);
 						} else {
-							utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorSelectDateEst")+fechaInicial2);
+							utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorSelectDateEst") + fechaInicial2);
 						}
 					} else {
 						utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorFormatIncorrect"));
@@ -995,213 +1009,221 @@ sap.ui.define([
 			}
 		},
 		//valida onclick en campos
- 		ValidarCamposFecha: function (oEvent) {
- 			var table = that._byId(this.frgIdFechaPlan+"--tbRegistroDisponible");
- 			var indece = table.getSelectedIndex()
- 			var context = oEvent.getParameter("rowContext");
- 			var context2 = "/DataFecha/" + indece.toString();
- 			var Object;
- 			if (context != null) {
- 				var oIndex = oEvent.getParameter('rowIndex');
- 				var Selecciones = table.getSelectedIndices();
- 				Object = that.oModel.getProperty(context2);
- 				if (Object != undefined) {
- 					if (Selecciones.length == 0) {
- 					} else if (Selecciones.length == 1) {
- 						if (Object.STATUS != "Disponible") {
- 							utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorFechaNoDisp"));
- 							table.removeSelectionInterval(oIndex, oIndex);
- 						}
- 					} else {
- 						table.removeSelectionInterval(oIndex, oIndex);
- 					}
- 				} else {
- 					if (Selecciones.length == 0) {
- 						table.removeSelectionInterval(oIndex, oIndex);
- 					} else if (Selecciones.length == 1) {
- 						table.removeSelectionInterval(oIndex, oIndex);
- 					} else {
- 						table.removeSelectionInterval(oIndex, oIndex);
- 					}
- 				}
- 			}
- 		},
+		ValidarCamposFecha: function (oEvent) {
+			var table = that._byId(this.frgIdFechaPlan + "--tbRegistroDisponible");
+			var indece = table.getSelectedIndex()
+			var context = oEvent.getParameter("rowContext");
+			var context2 = "/DataFecha/" + indece.toString();
+			var Object;
+			if (context != null) {
+				var oIndex = oEvent.getParameter('rowIndex');
+				var Selecciones = table.getSelectedIndices();
+				Object = that.oModel.getProperty(context2);
+				if (Object != undefined) {
+					if (Selecciones.length == 0) {} else if (Selecciones.length == 1) {
+						if (Object.STATUS != "Disponible") {
+							utilUI.onMessageErrorDialogPress2(that.getI18nText("sErrorFechaNoDisp"));
+							table.removeSelectionInterval(oIndex, oIndex);
+						}
+					} else {
+						table.removeSelectionInterval(oIndex, oIndex);
+					}
+				} else {
+					if (Selecciones.length == 0) {
+						table.removeSelectionInterval(oIndex, oIndex);
+					} else if (Selecciones.length == 1) {
+						table.removeSelectionInterval(oIndex, oIndex);
+					} else {
+						table.removeSelectionInterval(oIndex, oIndex);
+					}
+				}
+			}
+		},
 		_onPressContinuarCitaTemp: function () {
 			var oIndeces = that._byId(that.frgIdFechaPlan + "--tbRegistroDisponible").getSelectedIndices();
-			
-			
+
 			if (oIndeces.length === 0) {
 				utilUI.onMessageErrorDialogPress2(that.getI18nText("lblSeleccionFechaBotonPlanificarCita"));
 				return;
 			}
+
+			var sIndex = that._byId(that.frgIdFechaPlan + "--tbRegistroDisponible").getSelectedIndex().toString();
+			var fecha = that.oModel.getProperty("/DataFecha/" + sIndex);
 			
-			var sIndex=that._byId(that.frgIdFechaPlan + "--tbRegistroDisponible").getSelectedIndex().toString();
-			var fecha = that.oModel.getProperty("/DataFecha/"+sIndex);
-			
+			var jEnvioFecha = {
+				"FECHAS": fecha.FECHAS,
+				"HORARIOS": fecha.HORARIOS,
+				"NUMERO_ENTREGA": fecha.NUMERO_ENTREGA,
+				"PROVEEDORES": fecha.PROVEEDORES,
+				"STATUS": fecha.STATUS
+			}
+
 			clearTimeout(timeOutFecha);
 			if (sTarget == "02") {
 				sap.ui.core.BusyIndicator.show(0);
-				that.newDialogGuiaTempConcurrencia(fecha);
-			}else if(sTarget == "03") {
-				
+				that.newDialogGuiaTempConcurrencia(jEnvioFecha);
 			}
- 		},
- 		newDialogGuiaTempConcurrencia: function (fecha) {
- 			var arrayOrdenes = that.oModel.getProperty("/oEntregaSelect");
- 			var arr = [];
- 			var arrProv = [];
+		},
+		newDialogGuiaTempConcurrencia: function (fecha) {
+			var arrayOrdenes = that.oModel.getProperty("/oEntregaSelect");
+			var arr = [];
+			var arrProv = [];
 
- 			if (sTarget == "03") {
- 				var validateCita = [];
- 				validateCita = that.validateCita();
- 				if (!validateCita.validate) {
- 					utilUI.onMessageErrorDialogPress2(validateCita.msj);
- 					return;
- 				}
- 			}
+			if (sTarget == "02") {} else if (sTarget == "03") {
+				for (var i = 0; i < arrayOrdenes.length; i++) {
+					if (arrayOrdenes[i].Zbolnr.substr(0, 2) == "09") {
+						arrayOrdenes[i].Zbolnr = arrayOrdenes[i].Zbolnr.substr(3);
+						arrayOrdenes[i].numGuia = arrayOrdenes[i].numGuia.substr(3);
+					}
+				}
+			}
+			that.oModel.setProperty("/fecha", fecha);
 
- 			if (sTarget == "02") {
- 			} else if (sTarget == "03") {
- 				for (var i = 0; i < arrayOrdenes.length; i++) {
- 					if (arrayOrdenes[i].Zbolnr.substr(0, 2) == "09") {
- 						arrayOrdenes[i].Zbolnr = arrayOrdenes[i].Zbolnr.substr(3);
- 						arrayOrdenes[i].numGuia = arrayOrdenes[i].numGuia.substr(3);
- 					}
- 				}
- 			}
- 			that.oModel.setProperty("/fecha", fecha);
+			var arrHorarioTotal = [];
+			var obj = {};
+			var condEntrega = arrayOrdenes[0].lugdestino;
+			if (condEntrega == "03") {
+				obj.TitleFecha = "Fecha de Recojo"
+				obj.TitleHora = "Hora de Recojo"
+			} else if (condEntrega == "02") {
+				obj.TitleFecha = "Fecha de Llegada"
+				obj.TitleHora = "Hora de Llegada"
+			} else if (condEntrega == "01") {
+				obj.TitleFecha = "Fecha Cita"
+				obj.TitleHora = "Hora Cita"
+			} else {
+				obj.TitleFecha = "Fecha"
+				obj.TitleHora = "Hora"
+			}
+			arrHorarioTotal.push(obj)
 
- 			var arrHorarioTotal = [];
- 			var obj = {};
- 			var condEntrega = arrayOrdenes[0].lugdestino;
- 			if (condEntrega == "03") {
- 				obj.TitleFecha = "Fecha de Recojo"
- 				obj.TitleHora = "Hora de Recojo"
- 			} else if (condEntrega == "02") {
- 				obj.TitleFecha = "Fecha de Llegada"
- 				obj.TitleHora = "Hora de Llegada"
- 			} else if (condEntrega == "01") {
- 				obj.TitleFecha = "Fecha Cita"
- 				obj.TitleHora = "Hora Cita"
- 			} else {
- 				obj.TitleFecha = "Fecha"
- 				obj.TitleHora = "Hora"
- 			}
- 			arrHorarioTotal.push(obj)
+			that.oModel.setProperty("/DataFechaNoProg", arrHorarioTotal);
 
- 			that.oModel.setProperty("/DataFechaNoProg", arrHorarioTotal);
+			var oDataCentro = that.oModelGet.getProperty("/oCentro");
+			var arrCompleteCentro = [];
 
- 			var oDataCentro = that.oModelGet.getProperty("/oCentro");
- 			var arrCompleteCentro = [];
+			var validatecentros = false;
+			for (var i = 0; i < oDataCentro.length; i++) {
+				for (var j = 0; j < arrayOrdenes.length; j++) {
+					if (oDataCentro[i].CENTRO == arrayOrdenes[j].Werks) {
+						validatecentros = true;
+					}
+				}
+			}
+			if (validatecentros) {
+				for (var i = 0; i < oDataCentro.length; i++) {
+					var obj = {};
+					obj.Centro = oDataCentro[i].CENTRO;
+					arrCompleteCentro.push(obj);
+				}
+			}
 
- 			var validatecentros = false;
- 			for (var i = 0; i < oDataCentro.length; i++) {
- 				for (var j = 0; j < arrayOrdenes.length; j++) {
- 					if (oDataCentro[i].CENTRO == arrayOrdenes[j].Werks) {
- 						validatecentros = true;
- 					}
- 				}
- 			}
- 			if (validatecentros) {
- 				for (var i = 0; i < oDataCentro.length; i++) {
- 					var obj = {};
- 					obj.Centro = oDataCentro[i].CENTRO;
- 					arrCompleteCentro.push(obj);
- 				}
- 			}
+			for (var i = 0; i < arrayOrdenes.length; i++) {
+				var obj = {};
+				obj.Centro = arrayOrdenes[i].Werks;
+				arrCompleteCentro.push(obj);
+			}
 
- 			for (var i = 0; i < arrayOrdenes.length; i++) {
- 				var obj = {};
- 				obj.Centro = arrayOrdenes[i].Werks;
- 				arrCompleteCentro.push(obj);
- 			}
+			var arrCentro = [];
+			arrCentro = arrCompleteCentro;
+			var cant = arrCentro.length;
+			const myObj = {}
 
- 			var arrCentro = [];
- 			arrCentro = arrCompleteCentro;
- 			var cant = arrCentro.length;
- 			const myObj = {}
+			for (var i = 0, len = arrCentro.length; i < len; i++)
+				myObj[arrCentro[i]['Centro']] = arrCentro[i].Centro;
 
- 			for (var i = 0, len = arrCentro.length; i < len; i++)
- 				myObj[arrCentro[i]['Centro']] = arrCentro[i].Centro;
+			arrCentro = new Array();
+			for (var key in myObj)
+				arrCentro.push(myObj[key]);
 
- 			arrCentro = new Array();
- 			for (var key in myObj)
- 				arrCentro.push(myObj[key]);
+			var arrCantCentro = [];
+			for (var i = 0; i < arrCentro.length; i++) {
+				var cantidadcentro = 0;
+				var obj = {};
+				obj.centro = arrCentro[i];
+				for (var j = 0; j < arrayOrdenes.length; j++) {
+					if (arrCentro[i] == arrayOrdenes[j].Werks) {
+						cantidadcentro += 1;
+						obj.numero = cantidadcentro;
 
- 			var arrCantCentro = [];
- 			for (var i = 0; i < arrCentro.length; i++) {
- 				var cantidadcentro = 0;
- 				var obj = {};
- 				obj.centro = arrCentro[i];
- 				for (var j = 0; j < arrayOrdenes.length; j++) {
- 					if (arrCentro[i] == arrayOrdenes[j].Werks) {
- 						cantidadcentro += 1;
- 						obj.numero = cantidadcentro;
+					}
+				}
+				arrCantCentro.push(obj)
+			}
 
- 					}
- 				}
- 				arrCantCentro.push(obj)
- 			}
+			for (var i = 0; i < arrCantCentro.length; i++) {
+				for (var j = 0; j < arrayOrdenes.length; j++) {
+					if (arrCantCentro[i].centro == arrayOrdenes[j].Werks) {
+						arrayOrdenes[j].ID_Eliminar = "";
+						arrayOrdenes[j].Enviar = arrCantCentro[i].numero;
+						arrayOrdenes[j].Centro = arrayOrdenes[i].Werks;
+						arrayOrdenes[j].Proveedor = arrayOrdenes[i].Lifnr;
+					}
+				}
+			}
 
- 			for (var i = 0; i < arrCantCentro.length; i++) {
- 				for (var j = 0; j < arrayOrdenes.length; j++) {
- 					if (arrCantCentro[i].centro == arrayOrdenes[j].Werks) {
- 						arrayOrdenes[j].ID_Eliminar = "";
- 						arrayOrdenes[j].Enviar = arrCantCentro[i].numero;
- 						arrayOrdenes[j].Centro = arrayOrdenes[i].Werks;
- 						arrayOrdenes[j].Proveedor = arrayOrdenes[i].Lifnr;
- 					}
- 				}
- 			}
+			//Adicionar Proveedor
+			var arrProveedor = [];
+			arrProveedor = arrayOrdenes;
+			var cantProveedor = arrProveedor.length;
+			const myObj2 = {}
 
- 			//Adicionar Proveedor
- 			var arrProveedor = [];
- 			arrProveedor = arrayOrdenes;
- 			var cantProveedor = arrProveedor.length;
- 			const myObj2 = {}
+			for (var i = 0, len = arrProveedor.length; i < len; i++)
+				myObj2[arrProveedor[i]['Proveedor']] = arrProveedor[i].Lifnr;
 
- 			for (var i = 0, len = arrProveedor.length; i < len; i++)
- 				myObj2[arrProveedor[i]['Proveedor']] = arrProveedor[i].Lifnr;
+			arrProveedor = new Array();
+			for (var key2 in myObj2)
+				arrProveedor.push(myObj2[key2]);
 
- 			arrProveedor = new Array();
- 			for (var key2 in myObj2)
- 				arrProveedor.push(myObj2[key2]);
+			var arrCantProveedor = [];
+			var arrProv = [];
+			for (var i = 0; i < arrProveedor.length; i++) {
+				var cantidadProveedor = 0;
+				var objProveedor = {};
+				objProveedor.PROVEEDOR = arrProveedor[i];
+				for (var j = 0; j < arrayOrdenes.length; j++) {
+					if (arrProveedor[i] == arrayOrdenes[j].Lifnr) {
+						cantidadProveedor += 1;
+						objProveedor.numero = cantidadProveedor;
 
- 			var arrCantProveedor = [];
- 			var arrProv = [];
- 			for (var i = 0; i < arrProveedor.length; i++) {
- 				var cantidadProveedor = 0;
- 				var objProveedor = {};
- 				objProveedor.PROVEEDOR = arrProveedor[i];
- 				for (var j = 0; j < arrayOrdenes.length; j++) {
- 					if (arrProveedor[i] == arrayOrdenes[j].Lifnr) {
- 						cantidadProveedor += 1;
- 						objProveedor.numero = cantidadProveedor;
-
- 					}
- 				}
- 				arrCantProveedor.push(objProveedor);
- 				arrProv.push(objProveedor);
- 			}
- 			if (sTarget == "02") {
- 				if (validateTipoFecha == "01") {
- 					var seleccionado = that._byId(this.frgIdFechaPlan + "--tbRegistroDisponible").getSelectedIndex();
- 					var contextActual = "/DataFecha/" + seleccionado.toString();
- 					var contextNuevo = "/DataFecha/" + (seleccionado + 1).toString();
- 					var actual = that.oModel.getProperty(contextActual);
- 					var nuevo = that.oModel.getProperty(contextNuevo);
- 					var horaactual = "";
- 					var horanueva = "";
- 					if (actual) {
- 						horaactual = actual.HORARIOS.split(":")[0];
- 					} else {
- 						horaactual = "";
- 					}
- 					if (nuevo) {
- 						horanueva = nuevo.HORARIOS.split(":")[0];
- 					} else {
- 						horanueva = "";
- 					}
+					}
+				}
+				arrCantProveedor.push(objProveedor);
+				arrProv.push(objProveedor);
+			}
+			if (sTarget == "02") {
+				if (validateTipoFecha == "01") {
+					var seleccionado = that._byId(this.frgIdFechaPlan + "--tbRegistroDisponible").getSelectedIndex();
+					var contextActual = "/DataFecha/" + seleccionado.toString();
+					var contextNuevo = "/DataFecha/" + (seleccionado + 1).toString();
+					var actual = that.oModel.getProperty(contextActual);
+					var jFechaActual = {
+						"FECHAS": actual.FECHAS,
+						"HORARIOS": actual.HORARIOS,
+						"NUMERO_ENTREGA": actual.NUMERO_ENTREGA,
+						"PROVEEDORES": actual.PROVEEDORES,
+						"STATUS": actual.STATUS
+					}
+					var nuevo = that.oModel.getProperty(contextNuevo);
+					var jFechaNuevo = {
+						"FECHAS": nuevo.FECHAS,
+						"HORARIOS": nuevo.HORARIOS,
+						"NUMERO_ENTREGA": nuevo.NUMERO_ENTREGA,
+						"PROVEEDORES": nuevo.PROVEEDORES,
+						"STATUS": nuevo.STATUS
+					}
+					var horaactual = "";
+					var horanueva = "";
+					if (actual) {
+						horaactual = actual.HORARIOS.split(":")[0];
+					} else {
+						horaactual = "";
+					}
+					if (nuevo) {
+						horanueva = nuevo.HORARIOS.split(":")[0];
+					} else {
+						horanueva = "";
+					}
 					var oUserGeneral = that.oModelUser.getData();
 					var jEnvioUser = {
 						displayName: oUserGeneral.Resources[0].name.givenName,
@@ -1211,1637 +1233,1610 @@ sap.ui.define([
 						mail: oUserGeneral.oDataAditional[0].Smtp_addr,
 						ruc: oUserGeneral.oDataAditional[0].Stcd1
 					}
-					that.oModelGet.setProperty("/oUserIng",jEnvioUser)
-					fecha.FECHAS = that.reverseStringForParameter(fecha.FECHAS,"/").replaceAll("/",".");
-					actual.FECHAS = that.reverseStringForParameter(actual.FECHAS,"/").replaceAll("/",".");
-					if(nuevo){
-						nuevo.FECHAS = that.reverseStringForParameter(nuevo.FECHAS,"/").replaceAll("/",".");
+					that.oModelGet.setProperty("/oUserIng", jEnvioUser)
+					fecha.FECHAS = that.reverseStringForParameter(fecha.FECHAS, "/").replaceAll("/", ".");
+					jFechaActual.FECHAS = that.reverseStringForParameter(actual.FECHAS, "/").replaceAll("/", ".");
+					if (nuevo) {
+						jFechaNuevo.FECHAS = that.reverseStringForParameter(nuevo.FECHAS, "/").replaceAll("/", ".");
 					}
- 					var objEnvio = {
- 						"oResults": {
- 							"arrayOrdenes": arrayOrdenes,
- 							"arrCentro": arrCentro,
- 							"arrCantCentro": arrCantCentro,
- 							"arrProveedor": arrProveedor,
- 							"arrCantProveedor": arrCantProveedor,
- 							"arrProv": arrProv,
- 							"target": sTarget,
- 							"arrayFechaDisponibles": fecha,
- 							"User": jEnvioUser,
- 							"fecha": fecha,
- 							"actual": actual,
- 							"nuevo": nuevo
- 						}
- 					}
- 					if (actual) {
- 						Services.ValidacionConcurrenciaFecha(that, objEnvio, function (result) {
- 							util.response.validateFunctionSingleEnd(result, {
- 								success: function (data, message) {
- 									that.oModel.setProperty("/dataConcurrencia", data);
- 									that.newEstructuraInsertFecha();
- 								},
- 								error: function (message) {
- 									that.getFilterTableFechaWhere(true);
- 								}
- 							});
- 						});
- 					} else {
- 						that.getFilterTableFechaWhere(true);
- 					}
- 				} else {
- 					that.abrirnewDialogGuiaTemp();
- 				}
- 			} else {
- 				var seleccionado = oView.byId("idTableRegistroDisponible").getSelectedIndex();
- 				var contextActual = "/DataFecha/" + seleccionado.toString();
- 				var contextNuevo = "/DataFecha/" + (seleccionado + 1).toString();
- 				var actual = oView.getModel("Proyect").getProperty(contextActual);
- 				var nuevo = oView.getModel("Proyect").getProperty(contextNuevo);
- 				var horaactual = "";
- 				var horanueva = "";
- 				if (actual) {
- 					horaactual = actual.HORARIOS.split(":")[0];
- 				} else {
- 					// actual=""
- 					horaactual = "";
- 				}
- 				if (nuevo) {
- 					horanueva = nuevo.HORARIOS.split(":")[0];
- 				} else {
- 					// nuevo=""
- 					horanueva = "";
- 				}
-
- 				var objEnvio = {
- 					"oResults": {
- 						"arrayOrdenes": arrayOrdenes,
- 						"arrCentro": arrCentro,
- 						"arrCantCentro": arrCantCentro,
- 						"arrProveedor": arrProveedor,
- 						"arrCantProveedor": arrCantProveedor,
- 						"arrProv": arrProv,
- 						"target": target,
- 						"arrayFechaDisponibles": oView.getModel("Proyect").getProperty("/arrayFechasDisponibles"),
- 						"User": oView.getModel("Proyect").getProperty("/User"),
- 						"fecha": fecha,
- 						"actual": actual,
- 						"nuevo": nuevo
- 					}
- 				}
-
- 				if (actual) {
- 					Services.ValidacionConcurrenciaFecha(that, objEnvio, function (result) {
- 						util.response.validateFunctionSingleEnd(result, {
- 							success: function (data, message) {
- 								// console.log(data);
- 								oView.getModel("Proyect").setProperty("/dataConcurrencia", data);
- 								that.newEstructuraInsertFecha();
- 							},
- 							error: function (message) {
- 								console.log(message);
- 								sap.ui.core.BusyIndicator.hide(0);
- 								that.getFilterTableFechaWhere(true);
- 								MessageToast.show(message, {
- 									duration: 4000,
- 									my: "center center",
- 									at: "center center"
- 								});
-
- 							}
- 						});
- 					});
- 				} else {
- 					sap.ui.core.BusyIndicator.hide(0);
- 					that.getFilterTableFechaWhere(true);
- 					MessageToast.show("Ocurrio un error al seleccionar la hora, favor de seleccionar nuevamente", {
- 						duration: 4000,
- 						my: "center center",
- 						at: "center center"
- 					});
- 				}
- 			}
- 		},
- 		newEstructuraInsertFecha: function () {
- 			var cita = "";
- 			var dataConcurrencia = that.oModel.getProperty("/dataConcurrencia");
-
- 			var dataERP = [];
- 			var dataSCP = [];
- 			var dataOrdenesERP = [];
- 			var dataOrdenesSCP = [];
- 			var dataTotalERP = [];
- 			var dataTotalSCP = [];
-
- 			for (var i = 0; i < dataConcurrencia.length; i++) {
- 				var FechaDisponibles = dataConcurrencia[i].FechaDisponibles;
- 				var Ordenes = dataConcurrencia[i].Ordenes;
-
- 				for (var j = 0; j < Ordenes.length; j++) {
- 					if (Ordenes[j].codtipoData == "01") {
- 						dataOrdenesERP.push(Ordenes[j]);
- 					} else if (Ordenes[j].codtipoData == "02") {
- 						dataOrdenesSCP.push(Ordenes[j]);
- 					}
- 				}
-
- 				if (dataOrdenesERP.length > 0) {
- 					dataERP.Ordenes = dataOrdenesERP;
- 					dataERP.FechaDisponibles = FechaDisponibles;
-
- 					dataTotalERP.push(dataERP);
- 				}
-
- 				if (dataOrdenesSCP.length > 0) {
- 					dataSCP.Ordenes = dataOrdenesSCP;
- 					dataSCP.FechaDisponibles = FechaDisponibles;
-
- 					dataTotalSCP.push(dataSCP);
- 				}
-
- 			}
-
- 			var estructuraDataTotalERP = {};
- 			var estructuraDataTotalSCP = {};
- 			var estructuraDataConcurrencia = {};
-
- 			if (sTarget == "02") {
- 				if (dataConcurrencia[0].Ordenes[0].LugEntD === "01") { //cede campoy                
- 					if (validateTipoFecha == "01") {
- 						cita = that.generarCita();
- 					} else {
- 						cita = that.generarCita();
- 					}
- 				} else if (dataConcurrencia[0].Ordenes[0].LugEntD === "02") { //puesto en mina
- 					cita = "";
- 				} else {
- 					cita = "";
- 				}
- 			}
-
- 			if (dataTotalERP.length > 0) {
- 				estructuraDataTotalERP = this.EstructuraInsertFechaReturn(dataTotalERP, "POST", cita,sTarget,validateTipoFecha);
- 			}
- 			if (dataTotalSCP.length > 0) {
- 				estructuraDataTotalSCP = this.EstructuraInsertFechaReturn(dataTotalSCP, "POST", cita,sTarget,validateTipoFecha);
- 			}
-
- 			estructuraDataConcurrencia = this.EstructuraInsertFechaReturn(dataConcurrencia, "POST", cita,sTarget,validateTipoFecha);
-
- 			console.log("Estructura ERP:", estructuraDataTotalERP);
- 			console.log("Estructura SCP:", estructuraDataTotalSCP);
- 			console.log("Estructura Validation:", estructuraDataConcurrencia);
- 			
- 			if (sTarget == "02") {
- 				if (Object.keys(estructuraDataTotalERP).length > 0) {
- 					this.methodPostFlujoSap(dataOrdenesERP, dataOrdenesSCP, estructuraDataTotalERP, estructuraDataTotalSCP,
- 						estructuraDataConcurrencia, "/ERP/sap/opu/odata/sap/ZBVMM_WEB_OC_PLANIFICAR_ENT_SRV",
- 						"/ERP/sap/opu/odata/sap/ZBVMM_WEB_OC_PLANIFICAR_ENT_SRV/ZetPlanificarSet", "DialogSelecFechaProg", "1", cita);
- 				} else {
- 					if (estructuraDataTotalSCP.arr2New != "") {
- 						that.methodPostXsjs(estructuraDataTotalSCP.arr2New, "POST", estructuraDataTotalSCP.arr3);
- 					}
- 					this.methodPostHana(estructuraDataTotalSCP.arr4, cita);
- 				}
- 			}
- 		},
- 		methodPostXsjs: function (content, methodo, contentDelete) {
- 			
- 			var objEnvio = {
- 				"oResults": {
- 					"content": content,
- 					"methodo": methodo,
- 					"contentDelete": contentDelete,
- 					"target": sTarget,
- 					"User": that.oModelGet.getProperty("/oUserIng")
- 				}
- 			}
-
- 			Services.RegistrarEntregasAprobadas(that, objEnvio, function (result) {
- 				util.response.validateFunctionSingleEnd(result, {
- 					success: function (data, message) {
- 						console.log(data)
- 					},
- 					error: function (message) {
- 						console.log(message);
- 						MessageToast.show("Erro al añadir registro");
-
- 					}
- 				});
- 			});
-
- 			if (sTarget == "03") {
- 				this.BuscarDeleteXsjs(contentDelete);
- 			}
-
- 		},
- 		methodPostHana: function (content, cita) {
- 			var data = {
- 				"oResults": content
- 			};
-
- 			Services.InsertarEntregasHana(this, data, function (result) {
- 				util.response.validateAjaxGetHana(result, {
- 					success: function (oData, message) {
- 						console.log(oData);
- 						var LISTA_GENERAL = oData.oResults.oData.oData.CitaEntrega;
- 						var LISTA_GENERAL_ERP = that.oModel.getProperty("/LISTA_GENERAL_ERP");
- 						if (LISTA_GENERAL_ERP.length > 0) {
- 							for (var i = 0; i < LISTA_GENERAL_ERP.length; i++) {
- 								LISTA_GENERAL.push(LISTA_GENERAL_ERP[i]);
- 							}
- 						}
- 						var cita = LISTA_GENERAL[0].Zcita;
- 						that.generatePdfWithQr(that, LISTA_GENERAL, cita);
- 					},
- 					error: function (message) {
- 						sap.ui.core.BusyIndicator.hide(0);
- 					}
- 				});
- 			});
- 		},
- 		generatePdfWithQr: function (context, listaGeneral, cita) {
- 			var that = this;
- 			if (sTarget == '02') {
- 				that.saveCitaHanaScp(context, listaGeneral, cita);
- 			}
- 		},
- 		saveCitaHanaScp: function (context, listaGeneral, cita) {
- 			var obj = {
- 				ID_CITA: cita.toString()
- 			};
- 			console.log(listaGeneral);
- 			if (cita != "") {
- 				if (validateTipoFecha == "01") {
- 					that.exitopdf(context, "Se ha generado el número de cita " + cita, cita, listaGeneral, 1);
- 				} else {
- 					that.exitopdf(context,
- 						"Se registró la solicitud de cita no programada, una vez sea aprobada podrá visualizar el número en la pestaña “Citas y entregas” para que descargue los QR.",
- 						cita, listaGeneral, 1);
- 				}
- 			} else {
- 				var text = [];
- 				for (var i = 0; i < listaGeneral.length; i++) {
- 					text.push(this.formatInteger(listaGeneral[i].Zvbeln));
- 				}
-
- 				let result = text.filter((item, index) => {
- 					return text.indexOf(item) === index;
- 				})
-
- 				if (listaGeneral[0].ZzlugEnt == "03") {
- 					that.exitopdf(context, "Se ha planificado el recojo de la entrega: " + result.join(), cita, listaGeneral, 1);
- 				} else {
- 					that.exitopdf(context, "Se han actualizado la(s) Entrega(s)", cita, listaGeneral, 1);
- 				}
-
- 			}
- 		},
- 		exitopdf: function (context, msj, cita, listaGeneral, validate) {
- 			that.entregas = [];
-
- 			if (validate == 1) {
- 				sap.m.MessageBox.success(msj, {
- 					title: "Mensaje de éxito",
- 					actions: ["OK"],
- 					onClose: function (sActionClicked) {
- 						if (sActionClicked === "OK") {
- 							if (context.byId("DialogMant") != undefined) {
- 								context.byId("DialogMant").close();
- 							}
- 							if (context.byId("DialogConfirmarCentro") != undefined) {
- 								context.byId("DialogConfirmarCentro").close();
- 							}
- 							if (context.byId("DialogEntregasTemp") != undefined) {
- 								context.byId("DialogEntregasTemp").close();
- 							}
- 							if (context.byId("DialogSelecFechaProg") != undefined) {
- 								context.byId("DialogSelecFechaProg").close();
- 							}
- 							if (context.byId("DialogSelecFechaNoProgTemp") != undefined) {
- 								context.byId("DialogSelecFechaNoProgTemp").close();
- 							}
-
- 							var oView = context.getView();
-
- 							// var data = that.getData();
- 							var data = [];
- 							listaGeneral.forEach(function (value, index) {
- 								value.Zvemng = that.currencyFormat(value.Zvemng);
- 								data.push(value);
- 							});
- 							console.log("Lado de Kassiel para PDF");
- 							console.log(listaGeneral);
- 							console.log(data);
- 							if (data.length === 0) {
- 								sap.ui.core.BusyIndicator.hide(0);
- 								return;
- 							}
- 							var Entregas = [];
- 							var cantidad = data.length;
-
- 							while (cantidad !== 0) {
- 								var data1 = data[0];
- 								var arrayCoincidencias = [];
- 								var a = 1;
- 								for (a = 1; a < data.length; a++) {
- 									if (data1.Zvbeln === data[a].Zvbeln) {
- 										arrayCoincidencias.push(data[a]);
- 										cantidad--;
- 										data.splice(a, 1);
- 										a--;
- 									}
- 								}
- 								arrayCoincidencias.push(data[0]);
- 								data.splice(0, 1);
-
- 								cantidad--;
-
- 								var nBultos = arrayCoincidencias[0].Zanzpk;
- 								var cita = arrayCoincidencias[0].Zcita;
- 								var sociedad = arrayCoincidencias[0].Zbukrs;
- 								var entrega = that.formatInteger(arrayCoincidencias[0].Zvbeln);
- 								var proveedor = arrayCoincidencias[0].Zname1;
- 								var destino = arrayCoincidencias[0].Zlgobe;
-
- 								var guia = arrayCoincidencias[0].Zbolnr;
- 								var numeroTotalBultos = (arrayCoincidencias[0].Zanzpk) * 1;
- 								var condEnt = arrayCoincidencias[0].Zdesc_cond;
- 								var codcondEnt = arrayCoincidencias[0].ZzlugEnt;
- 								var direccion = arrayCoincidencias[0].Zdireccion;
- 								var fecha = that.formaterxTemp(arrayCoincidencias[0].Zlfdat);
- 								var horaAbap = arrayCoincidencias[0].Zlfuhr;
- 								var nombreCompleto = arrayCoincidencias[0].nombreCompleto;
- 								var nombreCompleto2 = arrayCoincidencias[0].nombreCompleto2;
- 								var nombreCompleto3 = arrayCoincidencias[0].nombreCompleto3;
- 								var nombreCompleto4 = arrayCoincidencias[0].nombreCompleto4;
- 								var ID_ENTREGA_SIN_OC_CABECERA = arrayCoincidencias[0].ID_ENTREGA_SIN_OC_CABECERA;
- 								var EMAIL_DESTINATARIO_FINAL = arrayCoincidencias[0].EMAIL_DESTINATARIO_FINAL;
- 								var DESCRIPCION_MOTIVOS = arrayCoincidencias[0].DESCRIPCION_MOTIVOS;
-
- 								var hora;
- 								if (validateTipoFecha == "01") {
- 									if (that.formatHourTemp(arrayCoincidencias[0].Zlfuhr) == "00:00") {
- 										hora = that.formatHourTemp(arrayCoincidencias[0].Zlfuhr);
- 									} else {
- 										hora = that.formatHour2Temp(arrayCoincidencias[0].Zlfuhr);
- 									}
- 								} else if (validateTipoFecha == "") {
- 									if (arrayCoincidencias[0].Zcita_np == "NO PROGRAMADA" || arrayCoincidencias[0].Zcita_np == "NO PROGRAMADO") {
- 										hora = that.formatHourTemp(arrayCoincidencias[0].Zlfuhr);
- 									} else {
- 										hora = that.formatHour2Temp(arrayCoincidencias[0].Zlfuhr);
- 									}
- 								} else {
- 									hora = that.formatHourTemp(arrayCoincidencias[0].Zlfuhr);
- 								}
- 								var zona = arrayCoincidencias[0].Zzona;
- 								var pesoTotBultos = that.currencyFormat(arrayCoincidencias[0].Zbtgew);
- 								var dni = arrayCoincidencias[0].Zdni;
- 								var dni2 = arrayCoincidencias[0].Zdni2;
- 								var dni3 = arrayCoincidencias[0].Zdni3;
- 								var dni4 = arrayCoincidencias[0].Zdni4;
- 								var placa = arrayCoincidencias[0].Zplaca;
- 								var placa2 = arrayCoincidencias[0].Zplaca2;
- 								var placa3 = arrayCoincidencias[0].Zplaca3;
- 								var placa4 = arrayCoincidencias[0].Zplaca4;
-
- 								var almacen = arrayCoincidencias[0].Zlgobe;
- 								var cantidadEmbalaje = parseInt(arrayCoincidencias[0].Zanzpk);
-
- 								var Bultos = [];
- 								var CantidadEntregas = arrayCoincidencias.length;
- 								while (CantidadEntregas !== 0) {
- 									var dataEntregas = arrayCoincidencias[0];
- 									var arrayBultos = [];
- 									var e = 1;
- 									for (e; e < arrayCoincidencias.length; e++) {
- 										if (dataEntregas.ZvhilmKu === arrayCoincidencias[e].ZvhilmKu) {
- 											arrayBultos.push(arrayCoincidencias[e]);
- 											CantidadEntregas--;
- 											arrayCoincidencias.splice(e, 1);
- 											e--;
- 										}
- 									}
- 									arrayBultos.push(arrayCoincidencias[0]);
- 									arrayCoincidencias.splice(0, 1);
-
- 									CantidadEntregas--;
-
- 									var BultoCodigo = arrayBultos[0].ZvhilmKu;
- 									var PesoBulto = that.currencyFormat(arrayBultos[0].ZbrgewB);
- 									var codigo = arrayBultos[0].Zbezei;
- 									var descipcion = that.formatNoDecimal(parseFloat(arrayBultos[0].Zlaeng).toFixed(2)) + "x" +
- 										that.formatNoDecimal(parseFloat(arrayBultos[0].Zbreit).toFixed(2)) + "x" +
- 										that.formatNoDecimal(parseFloat(arrayBultos[0].Zhoehe).toFixed(2))
- 										.toString();
- 									var CantidadEmbalajeBulto = parseInt(arrayBultos[0].ZvhilmKu);
- 									var Zet_emb_complSet = arrayBultos[0].Zet_emb_complSet.results;
- 									var Un_map = ''
- 									if (arrayBultos[0].Exidv) {
- 										Un_map = (arrayBultos[0].Exidv * 1).toString();
- 									}
-
- 									var ArrayComplementario = [];
- 									if (Zet_emb_complSet) {
- 										Zet_emb_complSet.forEach(function (values) {
- 											if (values.VHILM_KU == BultoCodigo) {
- 												ArrayComplementario.push(values);
- 											}
- 										});
- 									}
-
- 									var dataBultos = {
- 										Descipcion: descipcion,
- 										Codigo: codigo,
- 										CantidadEmbalajeBulto: CantidadEmbalajeBulto,
- 										PesoBult: PesoBulto,
- 										DescripcionGeneral: BultoCodigo,
- 										Un_map: Un_map,
- 										ArrayComplementario: ArrayComplementario,
- 										ArrayGeneral: arrayBultos
- 									};
-
- 									Bultos.push(dataBultos);
-
- 								}
-
- 								var DataEntregas = {
- 									cita: cita,
- 									ID_ENTREGA_SIN_OC_CABECERA: ID_ENTREGA_SIN_OC_CABECERA,
- 									EMAIL_DESTINATARIO_FINAL: EMAIL_DESTINATARIO_FINAL,
- 									DESCRIPCION_MOTIVOS: DESCRIPCION_MOTIVOS,
- 									sociedad: sociedad,
- 									entrega: entrega,
- 									almacen: almacen,
- 									proveedor: proveedor,
- 									cantidadEmbalaje: cantidadEmbalaje,
- 									destino: destino,
- 									guia: guia,
- 									numeroTotalBultos: numeroTotalBultos,
- 									condEnt: condEnt,
- 									codcondEnt: codcondEnt,
- 									direccion: direccion,
- 									fecha: fecha,
- 									hora: hora,
- 									zona: zona,
- 									pesoTotBultos: pesoTotBultos,
- 									bultos: nBultos,
- 									dni: dni,
- 									dni2: dni2,
- 									dni3: dni3,
- 									dni4: dni4,
- 									placa: placa,
- 									placa2: placa2,
- 									placa3: placa3,
- 									placa4: placa4,
- 									nombreCompleto: nombreCompleto,
- 									nombreCompleto2: nombreCompleto2,
- 									nombreCompleto3: nombreCompleto3,
- 									nombreCompleto4: nombreCompleto4,
- 									horaAbap: horaAbap,
- 									ArrayGeneral: Bultos
- 								};
- 								Entregas.push(DataEntregas);
- 								that.entregas.push(DataEntregas);
- 							}
- 							var EntregasOrdenada = that.ordenarEntrega(Entregas);
- 							var Data = {
- 								ArrayGeneral: EntregasOrdenada
- 							};
-
- 							var arrtext = [];
- 							var cantidad = Data.ArrayGeneral.length
- 							for (var i = 0; i < Data.ArrayGeneral.length; i++) {
- 								if (cantidad == 1) {
- 									arrtext += Data.ArrayGeneral[i].entrega
- 								} else {
- 									arrtext += Data.ArrayGeneral[i].entrega + "-"
- 								}
- 								cantidad--;
- 							}
- 							var logo = "";
-
- 							if (EntregasOrdenada[0].codcondEnt == "01") {
-
- 								if (validateTipoFecha == "01") {
- 									that.abriDialog(Data, logo, arrtext);
- 								} else if (validateTipoFecha == "") {
- 									//modificacion 02/08/2021
- 									if (listaGeneral[0].Zcita_np == "NO PROGRAMADA" || listaGeneral[0].Zcita_np == "NO PROGRAMADO") {
- 										that.refresGeneral();
- 									} else {
- 										that.abriDialog(Data, logo, arrtext);
- 									}
- 								} else {
- 									that.refresGeneral();
- 								}
-
- 							} else {
- 								that.abriDialog(Data, logo, arrtext);
- 							}
- 						}
- 					}
-
- 				});
- 			}
- 		},
- 		abriDialog: function (Data, logo, arrtext) {
- 			var oView = that.getView();
-
- 			if (!oView.byId("DialogFormatQR")) {
- 				Fragment.load({
- 					id: oView.getId(),
- 					name: "solicitarcitapr.view.dialogs.FormatQR",
- 					controller: that
- 				}).then(function (oDialog) {
- 					oView.addDependent(oDialog);
- 					that.onPdfFormat(Data, logo, arrtext);
- 					var qrCitaTotal = that.oModel.getProperty("/DataqrCitaTotal");
- 					var arrCitaTotal = that.oModel.getProperty("/DataarrCitaTotal");
- 					var arrCita = that.oModel.getProperty("/DataarrCita");
- 					var arrQrBultos = that.oModel.getProperty("/DataarrQrBultos");
- 					var arrQrBultosComplementario = that.oModel.getProperty("/DataarrQrBultosComplementario");
- 					oDialog.open();
-
- 					// cita
- 					if (Data.ArrayGeneral[0].cita) {
- 						var textQRCitaTotal = arrCita[0].cita
- 						qrcode = new QRCode(document.getElementById(qrCitaTotal), {
- 							text: textQRCitaTotal, //ESTE ES EL TEXTO SE CONVERTIRA EL EL CODIGO QR 
- 							width: "120",
- 							height: "120",
- 							colorDark: "#000000",
- 							colorLight: "#ffffff",
- 							correctLevel: QRCode.CorrectLevel.H
- 						});
- 					}
- 					// cita
- 					//PDF DETALLADOS
- 					for (var i = 0; i < arrCita.length; i++) {
-
- 						var textQREntrega = arrCita[i].entrega + "|" + arrCita[i].nbultos + "|" + arrCita[i].condEnt + "|" + arrCita[i].almacen
-
- 						qrcode = new QRCode(document.getElementById(arrCita[i].qrentrega), {
- 							text: textQREntrega, //ESTE ES EL TEXTO SE CONVERTIRA EL EL CODIGO QR 
- 							width: "110",
- 							height: "110",
- 							colorDark: "#000000",
- 							colorLight: "#ffffff",
- 							correctLevel: QRCode.CorrectLevel.H
- 						});
- 					}
-
- 					for (var i = 0; i < arrQrBultos.length; i++) {
- 						var textQRBulto = (arrQrBultos[i].Un_map * 1).toString();
- 						qrcode = new QRCode(document.getElementById(arrQrBultos[i].qrBultos), {
- 							text: textQRBulto, //ESTE ES EL TEXTO SE CONVERTIRA EL EL CODIGO QR 
- 							width: "80",
- 							height: "80",
- 							colorDark: "#000000",
- 							colorLight: "#ffffff",
- 							correctLevel: QRCode.CorrectLevel.H
- 						});
- 					}
-
- 					for (var i = 0; i < arrQrBultosComplementario.length; i++) {
- 						var textQRBultoComplementario = (arrQrBultosComplementario[i].Un_map * 1).toString() + "-" + arrQrBultosComplementario[i].bultoComplementario;
- 						qrcode = new QRCode(document.getElementById(arrQrBultosComplementario[i].qrBultosComplementario), {
- 							text: textQRBultoComplementario,
- 							width: "80",
- 							height: "80",
- 							colorDark: "#000000",
- 							colorLight: "#ffffff",
- 							correctLevel: QRCode.CorrectLevel.H
- 						});
- 					}
-
- 					//enviar al onBase
- 					that.GetSendOnbaseCitaEntrega("no");
- 					//enviar al onBase
-
- 				});
- 			} else {
- 				that.onPdfFormat(Data, logo, arrtext);
- 				var qrCitaTotal = that.oModel.getProperty("/DataqrCitaTotal");
- 				var arrCitaTotal = that.oModel.getProperty("/DataarrCitaTotal");
- 				var arrCita = that.oModel.getProperty("/DataarrCita");
- 				var arrQrBultos = that.oModel.getProperty("/DataarrQrBultos");
- 				var arrQrBultosComplementario = that.oModel.getProperty("/DataarrQrBultosComplementario");
- 				oView.byId("DialogFormatQR").open();
-
- 				// cita
- 				if (Data.ArrayGeneral[0].cita) {
-
- 					var textQRCitaTotal = arrCita[0].cita
- 					qrcode = new QRCode(document.getElementById(qrCitaTotal), {
- 						text: textQRCitaTotal, //ESTE ES EL TEXTO SE CONVERTIRA EL EL CODIGO QR 
- 						width: "120",
- 						height: "120",
- 						colorDark: "#000000",
- 						colorLight: "#ffffff",
- 						correctLevel: QRCode.CorrectLevel.H
- 					});
- 				}
-
- 				//PDF DETALLADOS
- 				for (var i = 0; i < arrCita.length; i++) {
-
- 					var textQREntrega = arrCita[i].entrega + "|" + arrCita[i].nbultos + "|" + arrCita[i].condEnt + "|" + arrCita[i].almacen
-
- 					qrcode = new QRCode(document.getElementById(arrCita[i].qrentrega), {
- 						text: textQREntrega, //ESTE ES EL TEXTO SE CONVERTIRA EL EL CODIGO QR 
- 						width: "110",
- 						height: "110",
- 						colorDark: "#000000",
- 						colorLight: "#ffffff",
- 						correctLevel: QRCode.CorrectLevel.H
- 					});
- 				}
-
- 				for (var i = 0; i < arrQrBultos.length; i++) {
- 					var textQRBulto = (arrQrBultos[i].Un_map * 1).toString();
- 					qrcode = new QRCode(document.getElementById(arrQrBultos[i].qrBultos), {
- 						text: textQRBulto, //ESTE ES EL TEXTO SE CONVERTIRA EL EL CODIGO QR 
- 						width: "80",
- 						height: "80",
- 						colorDark: "#000000",
- 						colorLight: "#ffffff",
- 						correctLevel: QRCode.CorrectLevel.H
- 					});
- 				}
-
- 				for (var i = 0; i < arrQrBultosComplementario.length; i++) {
- 					var textQRBultoComplementario = (arrQrBultosComplementario[i].Un_map * 1).toString() + "-" + arrQrBultosComplementario[i].bultoComplementario;
- 					qrcode = new QRCode(document.getElementById(arrQrBultosComplementario[i].qrBultosComplementario), {
- 						text: textQRBultoComplementario,
- 						width: "80",
- 						height: "80",
- 						colorDark: "#000000",
- 						colorLight: "#ffffff",
- 						correctLevel: QRCode.CorrectLevel.H
- 					});
- 				}
-
- 				//enviar al onBase
- 				that.GetSendOnbaseCitaEntrega("no");
- 				//enviar al onBase
- 			}
- 		},
- 		onPdfFormat: function (Data, logo, arrtext) {
- 			var that = this;
- 			var oView = that.getView();
-
- 			var textoPlacas = "";
- 			var textoDocumentos = "";
- 			var arrHorasAsignadas = [];
- 			var arrEntregasSCP = [];
- 			var arrEntregasERP = [];
- 			for (var i = 0; i < Data.ArrayGeneral.length; i++) {
- 				if (i == 0) {
- 					if (Data.ArrayGeneral[i].placa) {
- 						textoPlacas += Data.ArrayGeneral[i].placa;
- 					}
- 					if (Data.ArrayGeneral[i].placa2) {
- 						textoPlacas += ";" + Data.ArrayGeneral[i].placa2;
- 					}
- 					if (Data.ArrayGeneral[i].placa3) {
- 						textoPlacas += ";" + Data.ArrayGeneral[i].placa3;
- 					}
- 					if (Data.ArrayGeneral[i].placa4) {
- 						textoPlacas += ";" + Data.ArrayGeneral[i].placa4;
- 					}
-
- 					if (Data.ArrayGeneral[i].nombreCompleto) {
- 						textoDocumentos += '-' + Data.ArrayGeneral[i].nombreCompleto + "<br>";
- 					}
- 					if (Data.ArrayGeneral[i].nombreCompleto2) {
- 						textoDocumentos += '-' + Data.ArrayGeneral[i].nombreCompleto2 + "<br>";
- 					}
- 					if (Data.ArrayGeneral[i].nombreCompleto3) {
- 						textoDocumentos += '-' + Data.ArrayGeneral[i].nombreCompleto3 + "<br>";
- 					}
- 					if (Data.ArrayGeneral[i].nombreCompleto4) {
- 						textoDocumentos += '-' + Data.ArrayGeneral[i].nombreCompleto4 + "<br>";
- 					}
- 				}
- 				if (Data.ArrayGeneral[i].ID_ENTREGA_SIN_OC_CABECERA) {
- 					arrEntregasSCP.push(Data.ArrayGeneral[i]);
- 				} else {
- 					arrEntregasERP.push(Data.ArrayGeneral[i]);
- 				}
-
- 				arrHorasAsignadas.push(Data.ArrayGeneral[i].horaAbap);
- 			}
-
- 			if (Data.ArrayGeneral[0].codcondEnt == "01") {
- 				var VBoxPrincipalCita = new sap.m.VBox({
- 					width: "720px"
- 				});
- 				VBoxPrincipalCita.addStyleClass("VBoxPrincipal sapUiSizeCompact");
- 				var VBoxPrincipalCita2 = new sap.m.VBox({
- 					alignItems: "Center"
- 				});
- 				var hcita2 = '<h4 style="text-align: center;">Resumen de Cita</h4>';
- 				var titleCita = new sap.ui.core.HTML({});
- 				titleCita.setContent(hcita2);
- 				VBoxPrincipalCita2.addItem(titleCita);
-
- 				var qrCitaTotal2 = '<div style="text-align: center;"></div>'
- 				var qrCitaTotal2Html = new sap.ui.core.HTML({});
- 				qrCitaTotal2Html.setContent(qrCitaTotal2);
-
- 				var idCitaTotal = Data.ArrayGeneral[0].cita;
- 				var condEntrega = Data.ArrayGeneral[0].condEnt;
-
- 				var titlqQrCitaTotalHtml = new sap.ui.core.HTML({
- 					content: '<h4 style="text-align: center;font-weight:normal;">Condición de Entrega: ' +
- 						'<font size=6 style="font-weight:bold;">' + condEntrega + '</font>' +
- 						' </h4>'
- 				});
-
- 				var HBoxQRTotal = new sap.m.HBox({
- 					width: "100%",
- 					justifyContent: "Center"
- 				});
- 				var HBoxQRTotal2 = new sap.m.HBox({
- 					width: "100%",
- 					justifyContent: "Center",
- 					alignItems: "Center",
- 					height: "3rem"
- 				});
- 				HBoxQRTotal2.addItem(titlqQrCitaTotalHtml);
-
- 				HBoxQRTotal.addItem(HBoxQRTotal2);
-
- 				var VBoxQRTotal = new sap.m.VBox({
- 					width: "100%",
- 					alignItems: "Center"
- 				})
- 				VBoxQRTotal.addItem(HBoxQRTotal);
-
- 				VBoxQRTotal.addItem(qrCitaTotal2Html);
- 				VBoxPrincipalCita2.addItem(VBoxQRTotal);
-
- 				var resumenHtml = new sap.ui.core.HTML({
- 					content: '<h4 style="text-align: Start;font-weight:normal;">*Este documento se debe presentar en la garita de acceso al almacén</h4>'
- 				});
-
- 				var HBoxQRTotalDetalleCita = new sap.m.HBox({
- 					width: "100%",
- 					justifyContent: "Start",
- 					alignItems: "Center",
- 					height: "3rem"
- 				});
- 				HBoxQRTotalDetalleCita.addItem(resumenHtml);
- 				VBoxPrincipalCita2.addItem(HBoxQRTotalDetalleCita);
- 				that.oModel.setProperty("/DataqrCitaTotal", qrCitaTotal2Html.getId());
-
- 				var TablaCitaVBox = new sap.m.VBox({
- 					width: "100%"
- 				});
- 				var TablaCitaHtml = new sap.ui.core.HTML({});
-
- 				var direccionCita = Data.ArrayGeneral[0].direccion;
- 				var fechaCita = Data.ArrayGeneral[0].fecha;
- 				var idCitaCita = Data.ArrayGeneral[0].cita;
-
- 				var horaMinima = Math.min(...arrHorasAsignadas).toString();
- 				if (horaMinima.length == 5) {
- 					horaMinima = "0" + horaMinima;
- 				}
- 				var horaCita = that.formatHourTemp(horaMinima);
-
- 				var htmlTablaCita = '<table style="border: 1px solid black; border-collapse: collapse; width: 100%;" align="center">' +
- 					'<thead>' +
- 					'<tr>' +
- 					'<td style="border: 1px solid black; border-collapse: collapse;" colspan="4" width="100%" height="18px">Proovedor: ' + Data.ArrayGeneral[
- 						0].proveedor + '</td>' +
- 					'</tr>' +
- 					'</thead>' +
- 					'<tbody>' +
- 					'<tr>' +
- 					'<td style="border: 1px solid black; border-collapse: collapse;text-align:center;" width="14%" height="18px">Nº Cita</td>' +
- 					'<td style="border: 1px solid black; border-collapse: collapse;" width="37%" height="18px">Dirección de Entrega</td>' +
- 					'<td style="border: 1px solid black; border-collapse: collapse;text-align:center;" width="auto" height="18px">Fecha y hora</td>' +
- 					'<td style="border: 1px solid black; border-collapse: collapse;text-align:center;" width="33%" height="18px">Vehículo</td>' +
- 					'</tr>' +
- 					'<tr>' +
- 					'<td style="border: 1px solid black; border-collapse: collapse;text-align:center;font-size:35px;" height="72px" rowspan="4">' +
- 					idCitaCita + '</td>' +
- 					'<td style="border: 1px solid black; border-collapse: collapse;font-size: 14px;" height="72px" rowspan = "4">' + direccionCita +
- 					'</td>' +
- 					'<td style="border: 1px solid black; border-collapse: collapse;font-size: 15px;" height="36px" rowspan = "2">' + fechaCita +
- 					'</td>' +
- 					'<td style="border: 1px solid black; border-collapse: collapse;font-size: 15px;" height="18px" >' + textoPlacas + '</td>' +
- 					'</tr>' +
- 					'<tr>' +
- 					'<td style="border: 1px solid black; border-collapse: collapse;" height="18px">Nombres  y Apellidos</td>' +
- 					'</tr>' +
- 					'<tr>' +
- 					'<td style="border: 1px solid black; border-collapse: collapse;font-size: 15px;" height="36px" >' + horaCita + '</td>' +
- 					'<td style="border: 1px solid black; border-collapse: collapse;font-size: 13px;" height="36px">' + textoDocumentos + '</td>' +
- 					'</tr>' +
- 					'</tbody>' +
- 					'</table>';
- 				TablaCitaHtml.setContent(htmlTablaCita);
- 				TablaCitaVBox.addItem(TablaCitaHtml);
- 				VBoxPrincipalCita2.addItem(TablaCitaVBox);
-
- 				var resumenEntregasHtml = new sap.ui.core.HTML({
- 					content: '<h4 style="text-align: Start;font-weight:normal;">*Una guía de remisión hace referencia unicamente a una entrega</h4>'
- 				});
- 				var HBoxResumenEntregasHtml = new sap.m.HBox({
- 					width: "100%",
- 					justifyContent: "Start",
- 					alignItems: "Center",
- 					height: "2rem"
- 				});
- 				HBoxResumenEntregasHtml.addItem(resumenEntregasHtml);
- 				VBoxPrincipalCita2.addItem(HBoxResumenEntregasHtml);
-
- 				var arrCitaTotal = [];
- 				var entregasERPDetalle = "";
- 				for (var i = 0; i < arrEntregasERP.length; i++) {
- 					var numeroEntregaERP = arrEntregasERP[i].entrega;
- 					var destinoEntregaERP = arrEntregasERP[i].destino;
- 					var pesoTotalbultosCitaERP = that.currencyFormat(arrEntregasERP[i].pesoTotBultos);
- 					var guiaEntregaERP = "";
- 					if (arrEntregasERP[i].guia.substr(0, 3) == "09-") {
- 						guiaEntregaERP = arrEntregasERP[i].guia.substr(3);
- 					} else {
- 						guiaEntregaERP = arrEntregasERP[i].guia;
- 					}
- 					var numeroTotalbultosCitaERP = that.currencyFormat(arrEntregasERP[i].numeroTotalBultos.toString());
-
- 					entregasERPDetalle += '<tr>' +
- 						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:center;font-size: 14px;" >' +
- 						numeroEntregaERP +
- 						'</td>' +
- 						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:center;font-size: 14px;">' +
- 						destinoEntregaERP +
- 						'</td>' +
- 						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:right;font-size: 14px;">' +
- 						pesoTotalbultosCitaERP +
- 						'</td>' +
- 						'<td height="18px" style="border:1px solid black;border-collapse:collapse;font-size: 14px;">' +
- 						guiaEntregaERP +
- 						'</td>' +
- 						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:right;font-size: 14px;">' +
- 						numeroTotalbultosCitaERP +
- 						'</td>' +
- 						'</tr>';
- 				}
- 				if (arrEntregasERP.length > 0) {
- 					var titleCitaERPHtml = new sap.ui.core.HTML({
- 						content: '<h4 style="text-align: start;" >Resumen de Entregas: </h4>'
- 					});
- 					var VBoxTitleCitaERPHtml = new sap.m.VBox({
- 						width: "100%",
- 						justifyContent: "Center",
- 						alignItems: "Start",
- 						height: "1.5rem"
- 					});
- 					VBoxTitleCitaERPHtml.addItem(titleCitaERPHtml);
- 					VBoxPrincipalCita2.addItem(VBoxTitleCitaERPHtml);
-
- 					var oTableERP = "";
- 					oTableERP = '<table style="border: 1px solid black; border-collapse: collapse; width: 100%;" align="center">' +
- 						'<thead>' +
- 						'<tr>' +
- 						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="18%" >Entrega</td>' +
- 						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="23%">Destino</td>' +
- 						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="auto">Peso Total <br> (KG)</td>' +
- 						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="23%">Guia de remisión</td>' +
- 						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="18%">Cantidad de Embalajes</td>' +
- 						'</tr>' +
- 						'</thead>' +
- 						'<tbody>' +
- 						entregasERPDetalle +
- 						'</tbody>' +
- 						'</table><br>';
-
- 					var oTableERPHTML = new sap.ui.core.HTML({
- 						content: oTableERP
- 					});
-
- 					var VBoxEntregaCitaERPHtml = new sap.m.VBox({
- 						width: "100%",
- 						justifyContent: "Center",
- 						alignItems: "Stretch",
- 					});
- 					VBoxEntregaCitaERPHtml.addItem(oTableERPHTML);
- 					VBoxPrincipalCita2.addItem(VBoxEntregaCitaERPHtml);
- 				}
-
- 				var entregasSCPDetalle = "";
- 				for (var i = 0; i < arrEntregasSCP.length; i++) {
- 					var numeroEntregaSCP = arrEntregasSCP[i].entrega;
- 					var descMotivosSCP = arrEntregasSCP[i].DESCRIPCION_MOTIVOS === undefined ? "" : arrEntregasSCP[i].DESCRIPCION_MOTIVOS;
- 					var correoSCP = arrEntregasSCP[i].EMAIL_DESTINATARIO_FINAL === undefined ? "" : arrEntregasSCP[i].EMAIL_DESTINATARIO_FINAL;
- 					var destinoEntregaSCP = arrEntregasSCP[i].destino;
- 					var pesoTotalbultosCitaSCP = that.currencyFormat(arrEntregasSCP[i].pesoTotBultos);
- 					var numeroTotalbultosCitaSCP = that.currencyFormat(arrEntregasSCP[i].numeroTotalBultos.toString());
-
- 					var guiaEntregaSCP = "";
- 					if (arrEntregasSCP[i].guia.substr(0, 3) == "09-") {
- 						guiaEntregaSCP = arrEntregasSCP[i].guia.substr(3);
- 					} else {
- 						guiaEntregaSCP = arrEntregasSCP[i].guia;
- 					}
-
- 					entregasSCPDetalle += '<tr>' +
- 						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:center;font-size: 14px;" >' +
- 						descMotivosSCP +
- 						'</td>' +
- 						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;font-size: 13px;" >' +
- 						numeroEntregaSCP + '<br>' + correoSCP +
- 						'</td>' +
- 						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:center;font-size: 14px;">' +
- 						destinoEntregaSCP +
- 						'</td>' +
- 						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:right;font-size: 14px;">' +
- 						pesoTotalbultosCitaSCP +
- 						'</td>' +
- 						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:center;font-size: 14px;">' +
- 						guiaEntregaSCP +
- 						'</td>' +
- 						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:right;font-size: 14px;">' +
- 						numeroTotalbultosCitaSCP +
- 						'</td>' +
- 						'</tr>';
- 				}
- 				if (arrEntregasSCP.length > 0) {
- 					var titleCitaSCPHtml = new sap.ui.core.HTML({
- 						content: '<h4 style="text-align: start;">Resumen de Entregas Sin OC: </h4>'
- 					});
- 					var VBoxTitleCitaSCPHtml = new sap.m.VBox({
- 						width: "100%",
- 						justifyContent: "Center",
- 						alignItems: "Start",
- 						height: "1.5rem"
- 					});
- 					VBoxTitleCitaSCPHtml.addItem(titleCitaSCPHtml);
- 					VBoxPrincipalCita2.addItem(VBoxTitleCitaSCPHtml);
-
- 					var oTableSCP = "";
- 					oTableSCP = '<table style="border: 1px solid black; border-collapse: collapse; width: 100%;" align="center">' +
- 						'<thead>' +
- 						'<tr>' +
- 						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="15%" >Motivo</td>' +
- 						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="auto">Entrega & Destinatario</td>' +
- 						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="15%">Destino</td>' +
- 						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="auto">Peso Total<br>(KG)</td>' +
- 						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="15%">Guia de remisión</td>' +
- 						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="10%">Cantidad de Embalajes</td>' +
- 						'</tr>' +
- 						'</thead>' +
- 						'<tbody>' +
- 						entregasSCPDetalle +
- 						'</tbody>' +
- 						'</table><br>';
-
- 					var oTableSCPHTML = new sap.ui.core.HTML({
- 						content: oTableSCP
- 					});
-
- 					var VBoxEntregaCitaSCPHtml = new sap.m.VBox({
- 						width: "100%",
- 						justifyContent: "Center",
- 						alignItems: "Stretch",
- 					});
- 					VBoxEntregaCitaSCPHtml.addItem(oTableSCPHTML);
- 					VBoxPrincipalCita2.addItem(VBoxEntregaCitaSCPHtml);
- 				}
-
- 				for (var i = 0; i < Data.ArrayGeneral.length; i++) {
- 					var destinoCita = Data.ArrayGeneral[i].destino;
- 					var numeroEntregaCita = Data.ArrayGeneral[i].guia;
- 					var numBultosCita = Data.ArrayGeneral[i].numeroTotalBultos;
- 					var almacenCita = Data.ArrayGeneral[i].almacen;
- 					var cantidadEmbalajeCita = Data.ArrayGeneral[i].cantidadEmbalaje;
-
- 					var idCitaCita = Data.ArrayGeneral[i].cita;
- 					var condEntregaCita = Data.ArrayGeneral[i].condEnt;
- 					var direccionCita = Data.ArrayGeneral[i].direccion;
- 					var fechaCita = Data.ArrayGeneral[i].fecha;
- 					var horaCita = Data.ArrayGeneral[i].hora;
- 					var zonaCita = Data.ArrayGeneral[i].zona;
- 					var pesototalbultosCita = that.currencyFormat(Data.ArrayGeneral[i].pesoTotBultos);
- 					var qrEntregaCita = new sap.m.HBox({})
- 					var tableEntregaCita = new sap.ui.core.HTML({});
-
- 					var textoFecha = "";
- 					var textoHora = "";
- 					if (condEntregaCita == "03") {
- 						textoFecha = "Fecha de Recojo";
- 						textoHora = "Hora de Recojo";
- 					} else if (condEntregaCita == "02") {
- 						textoFecha = "Fecha de llegada";
- 						textoHora = "Hora de Llegada";
- 					} else {
- 						textoFecha = "Fecha Cita"
- 						textoHora = "Hora Cita";
- 					}
-
- 					var objqrCitaTotal = {
- 						qrentrega: qrEntregaCita.getId(),
- 						cita: Data.ArrayGeneral[i].cita,
- 						entrega: Data.ArrayGeneral[i].entrega,
- 						arrtext: arrtext,
- 						almacen: almacenCita,
- 						placa: Data.ArrayGeneral[i].placa,
- 						fecha: Data.ArrayGeneral[i].fecha,
- 						hora: Data.ArrayGeneral[i].hora,
- 						destino: Data.ArrayGeneral[i].destino,
- 						nbultos: numBultosCita.toString(),
- 						condEnt: Data.ArrayGeneral[i].condEnt,
- 						direccion: Data.ArrayGeneral[i].direccion,
- 						pesoTotBultos: Data.ArrayGeneral[i].pesoTotBultos,
- 						zona: Data.ArrayGeneral[i].zona
- 					}
- 					arrCitaTotal.push(objqrCitaTotal)
- 					that.oModel.setProperty("/DataarrCitaTotal", arrCitaTotal);
- 				}
- 				VBoxPrincipalCita.addItem(VBoxPrincipalCita2);
- 				that._byId("total").addItem(VBoxPrincipalCita);
- 			}
-
- 			var arrCita = [];
- 			var arrQrBultos = [];
-
- 			//complementario
- 			var arrQrBultoComplementario = [];
- 			for (var i = 0; i < Data.ArrayGeneral.length; i++) {
- 				var VBoxPrincipalEntrega = new sap.m.VBox({
- 					width: "720px"
- 				});
- 				VBoxPrincipalEntrega.addStyleClass("VBoxPrincipal sapUiSizeCompact");
- 				var VBoxPrincipalEntrega3 = new sap.m.VBox({
- 					alignItems: "Center"
- 				});
- 				var titleEntrega = new sap.ui.core.HTML({
- 					content: '<h4 style="text-align: center;">Resumen  de carga a entregar</h4>'
- 				});
- 				VBoxPrincipalEntrega3.addItem(titleEntrega);
-
- 				var VBoxQREntregaTotal = new sap.m.VBox({
- 					width: "100%",
- 				});
- 				var qrEntrega = new sap.m.HBox({});
- 				var numeroEntregaTotal = Data.ArrayGeneral[i].entrega;
- 				var guiaEntregaTotal = "";
- 				var destino = Data.ArrayGeneral[i].destino;
-
- 				if (Data.ArrayGeneral[i].guia.substr(0, 3) == "09-") {
- 					guiaEntregaTotal = Data.ArrayGeneral[i].guia.substr(3);
- 				} else {
- 					guiaEntregaTotal = Data.ArrayGeneral[i].guia;
- 				}
-
- 				var titleEntregaTotalText = '<table width="79%" style="">' +
- 					'<thead>' +
- 					'<tr>' +
- 					'<td style="text-align:center;" width="auto" rowspan="3">' +
- 					'<div id="' + qrEntrega.getId() + '" style="display: block;margin-left: auto;margin-right: auto;text-align: right;"></div>' +
- 					'</td>' +
- 					'<td style="text-align: center;font-size: 35px;margin:0px" width="auto"><strong>' + numeroEntregaTotal + '</strong></td>' +
- 					'</tr>' +
- 					'<tr>' +
- 					'<td style="text-align: center;font-size: 35px;margin:0px" width="auto"><strong>' + guiaEntregaTotal + '</strong></td>' +
- 					'</tr>' +
- 					'<tr>' +
- 					'<td style="text-align: center;font-size: 35px;margin:0px" width="auto"><strong>' + destino + '</strong></td>' +
- 					'</tr>' +
- 					'</thead>' +
- 					'</table>'
- 				var titleEntregaTotal2Html = new sap.ui.core.HTML({});
- 				titleEntregaTotal2Html.setContent(titleEntregaTotalText)
- 				VBoxQREntregaTotal.addItem(titleEntregaTotal2Html);
- 				VBoxPrincipalEntrega3.addItem(VBoxQREntregaTotal);
-
- 				var detalleTitleHtml = new sap.ui.core.HTML({
- 					content: '<h4 style="text-align: Start;font-weight:normal;">*Esta hoja se debe pegar en cada embalaje según corresponda</h4>'
- 				});
- 				var HBoxQRTotalDetalleTitle = new sap.m.HBox({
- 					width: "100%",
- 					justifyContent: "Start",
- 					alignItems: "Center",
- 					height: "3rem"
- 				});
- 				HBoxQRTotalDetalleTitle.addItem(detalleTitleHtml);
- 				VBoxPrincipalEntrega3.addItem(HBoxQRTotalDetalleTitle);
-
- 				var VBoxBultos = new sap.m.VBox({});
- 				for (var k = 0; k < Data.ArrayGeneral[i].ArrayGeneral.length; k++) {
- 					var VBoxBulto = new sap.m.VBox({
- 						width: "100%"
- 					})
- 					var tableBultos = new sap.ui.core.HTML({});
- 					var qrBultos = new sap.m.HBox({});
- 					var tableHtmlBultos =
- 						'<p style="width:100%;border-top:2px dotted;height: 5px;"><span style="display:none;height: 5px;">x</span></p>' +
- 						'<table width="100%" style="border-collapse:collapse;">' +
- 						'<tbody>' +
- 						'<tr>' +
- 						'<td height="36px" style="border:1px solid black;border-collapse:collapse;" width="40%"><strong>' +
- 						'Embalaje ' + Data.ArrayGeneral[i].ArrayGeneral[k].CantidadEmbalajeBulto + ': ' + Data.ArrayGeneral[i].ArrayGeneral[k].Un_map +
- 						'</strong></td>' +
- 						'<td height="36px" style="border:1px solid black;border-collapse:collapse;" width="40%">' +
- 						Data.ArrayGeneral[i].ArrayGeneral[k].Codigo +
- 						'</td>' +
- 						'<td height="36px" style="border:1px solid black;border-collapse:collapse;" width="auto">' +
- 						Data.ArrayGeneral[i].ArrayGeneral[k].Descipcion +
- 						'</td>' +
- 						'<td height="51px" style="" rowspan = "2" width="14%">' +
- 						'<div id="' + qrBultos.getId() + '" style="display: block;margin-left: auto;margin-right: auto;width: 78%;"></div>' +
- 						'</td>' +
- 						'</tr>' +
- 						'<tr>' +
- 						'<td height="15px" style="font-size: 14px;border:1px solid black;border-collapse:collapse;"><strong>' +
- 						'Detalle del Contenido:</strong>' + numeroEntregaTotal + '-' + Data.ArrayGeneral[i].ArrayGeneral[k].CantidadEmbalajeBulto +
- 						'</td>' +
- 						'<td height="15px" style="font-size: 14px;text-align: left;border:1px solid black;border-collapse:collapse;" width="35%"><strong>' +
- 						Data.ArrayGeneral[i].proveedor +
- 						'</strong></td>' +
- 						'<td height="15px" style="font-size: 14px;text-align: center;border:1px solid black;border-collapse:collapse;" width="auto">' +
- 						destino +
- 						'</td>' +
- 						'</tr>' +
- 						'</tbody>' +
- 						'</table><br>'
- 					tableBultos.setContent(tableHtmlBultos)
- 					VBoxBulto.addItem(tableBultos)
- 					VBoxBultos.addItem(VBoxBulto)
-
- 					var objqrBulto = {
- 						qrBultos: qrBultos.getId(),
- 						CantidadEmbalajeBulto: Data.ArrayGeneral[i].ArrayGeneral[k].CantidadEmbalajeBulto,
- 						Un_map: Data.ArrayGeneral[i].ArrayGeneral[k].Un_map,
- 						bulto: Data.ArrayGeneral[i].ArrayGeneral[k].DescripcionGeneral,
- 						dimensionbulto: Data.ArrayGeneral[i].ArrayGeneral[k].Descipcion,
- 						pesobulto: Data.ArrayGeneral[i].ArrayGeneral[k].PesoBult,
- 						entrega: Data.ArrayGeneral[i].entrega,
- 						cantidad: Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral.length.toString(),
- 						ecri: Data.ArrayGeneral[i].ArrayGeneral[k].Codigo
- 					}
- 					arrQrBultos.push(objqrBulto)
- 					that.oModel.setProperty("/DataarrQrBultos", arrQrBultos);
- 					var VBoxPedidos = new sap.m.VBox({
- 						width: "100%"
- 					});
-
- 					VBoxBulto.addItem(VBoxPedidos);
- 					var materiales = "";
-
- 					for (var l = 0; l < Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral.length; l++) {
- 						var oTableMaterialesHTML = new sap.ui.core.HTML({});
- 						var ecri = Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zecri === undefined ? "" : Data.ArrayGeneral[i].ArrayGeneral[k]
- 							.ArrayGeneral[l].Zecri;
- 						var codeMat = that.formatInteger(Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zmatnr) === undefined ? "" :
- 							that.formatInteger(Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zmatnr);
- 						var pedido = Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zebeln === undefined ? "" : Data.ArrayGeneral[i].ArrayGeneral[
- 							k].ArrayGeneral[l].Zebeln;
- 						var material = Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zmaktx === undefined ? "" : Data.ArrayGeneral[i].ArrayGeneral[
- 							k].ArrayGeneral[l].Zmaktx;
-
- 						var motivo = Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].DESCRIPCION_MOTIVOS === undefined ? "" : Data.ArrayGeneral[i]
- 							.ArrayGeneral[k].ArrayGeneral[l].DESCRIPCION_MOTIVOS;
- 						var email = Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].EMAIL_DESTINATARIO_FINAL === undefined ? "" : Data.ArrayGeneral[
- 							i].ArrayGeneral[k].ArrayGeneral[l].EMAIL_DESTINATARIO_FINAL;
- 						var area = Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].AREA_RESPONSABLE === undefined ? "" : Data.ArrayGeneral[i].ArrayGeneral[
- 							k].ArrayGeneral[l].AREA_RESPONSABLE;
-
- 						if (!Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].ID_ENTREGA_SIN_OC_CABECERA) {
- 							materiales += '<tr>' +
- 								'<td height="18px" style="border:1px solid black;border-collapse:collapse;" >' +
- 								codeMat +
- 								'</td>' +
- 								'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
- 								material +
- 								'</td>' +
- 								'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
- 								this.currencyFormat(Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zvemng) +
- 								'</td>' +
- 								'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
- 								Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zunmed +
- 								'</td>' +
- 								'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
- 								pedido +
- 								'</td>' +
- 								'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
- 								ecri +
- 								'</td>' +
- 								'</tr>'
- 						} else {
- 							if (l == 0) {
- 								materiales += '<tr>' +
- 									'<td height="18px" style="border:1px solid black;border-collapse:collapse;" rowspan="' + Data.ArrayGeneral[i].ArrayGeneral[k]
- 									.ArrayGeneral.length.toString() + '">' +
- 									motivo +
- 									'</td>' +
- 									'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
- 									Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zmaktx +
- 									'</td>' +
- 									'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
- 									this.currencyFormat(Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zvemng) +
- 									'</td>' +
- 									'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
- 									Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zunmed +
- 									'</td>' +
- 									'<td height="18px" style="border:1px solid black;border-collapse:collapse;" rowspan="' + Data.ArrayGeneral[i].ArrayGeneral[k]
- 									.ArrayGeneral.length.toString() + '">' +
- 									email +
- 									'</td>' +
- 									'<td height="18px" style="border:1px solid black;border-collapse:collapse;" rowspan="' + Data.ArrayGeneral[i].ArrayGeneral[k]
- 									.ArrayGeneral.length.toString() + '">' +
- 									area +
- 									'</td>' +
- 									'</tr>'
- 							} else {
- 								materiales += '<tr>' +
- 									'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
- 									Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zmaktx +
- 									'</td>' +
- 									'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
- 									this.currencyFormat(Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zvemng) +
- 									'</td>' +
- 									'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
- 									Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zunmed +
- 									'</td>' +
- 									'</tr>'
- 							}
-
- 						}
-
- 					}
-
- 					var oTable = "";
- 					if (!Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[0].ID_ENTREGA_SIN_OC_CABECERA) {
- 						oTable = '<table width="100%" style="border:1px solid black;border-collapse:collapse;">' +
- 							'<thead>' +
- 							'<tr>' +
- 							'<td style="border:1px solid black;border-collapse:collapse;" width="auto">Material</td>' +
- 							'<td style="border:1px solid black;border-collapse:collapse;" width="34%">Descripción</td>' +
- 							'<td style="border:1px solid black;border-collapse:collapse;" width="15%">Cantidad</td>' +
- 							'<td style="border:1px solid black;border-collapse:collapse;" width="10%">UM</td>' +
- 							'<td style="border:1px solid black;border-collapse:collapse;" width="15%">Pedido</td>' +
- 							'<td style="border:1px solid black;border-collapse:collapse;" width="15%">Ecri</td>' +
- 							'</tr>' +
- 							'</thead>' +
- 							'<tbody>' +
- 							materiales +
- 							'</tbody>' +
- 							'</table>'
- 					} else {
- 						oTable = '<table width="100%" style="border:1px solid black;border-collapse:collapse;">' +
- 							'<thead>' +
- 							'<tr>' +
- 							'<td style="border:1px solid black;border-collapse:collapse;" width="15%">Motivo</td>' +
- 							'<td style="border:1px solid black;border-collapse:collapse;" width="35%">Descripción</td>' +
- 							'<td style="border:1px solid black;border-collapse:collapse;" width="15%">Cantidad</td>' +
- 							'<td style="border:1px solid black;border-collapse:collapse;" width="10%">UM</td>' +
- 							'<td style="border:1px solid black;border-collapse:collapse;" width="10%">Destinatario</td>' +
- 							'<td style="border:1px solid black;border-collapse:collapse;" width="15%">Área</td>' +
- 							'</tr>' +
- 							'</thead>' +
- 							'<tbody>' +
- 							materiales +
- 							'</tbody>' +
- 							'</table>'
- 					}
-
- 					oTableMaterialesHTML.setContent(oTable);
-
- 					VBoxPedidos.addItem(oTableMaterialesHTML);
- 					VBoxBulto.addItem(VBoxPedidos);
-
- 					if (Data.ArrayGeneral[i].ArrayGeneral[k].ArrayComplementario.length > 0) {
- 						var VBoxBultosComplementario = new sap.m.VBox({
- 							width: "100%"
- 						});
- 						for (var l = 0; l < Data.ArrayGeneral[i].ArrayGeneral[k].ArrayComplementario.length; l++) {
- 							var qrBultosComplementario = new sap.m.HBox({});
- 							var dataComplementario = Data.ArrayGeneral[i].ArrayGeneral[k].ArrayComplementario[l];
- 							var descipcionComplementario = that.formatNoDecimal(parseFloat(dataComplementario.LAENG).toFixed(2)) + "x" +
- 								that.formatNoDecimal(parseFloat(dataComplementario.BREIT).toFixed(2)) + "x" +
- 								that.formatNoDecimal(parseFloat(dataComplementario.HOEHE).toFixed(2));
- 							var oTableBultoComplementarioHtml = new sap.ui.core.HTML({});
- 							var oTableComplementario =
- 								'<p style="width:100%;border-top:2px dotted;height: 5px;"><span style="display:none;height: 5px;">x</span></p>' +
- 								'<table width="100%" style="border-collapse:collapse;">' +
- 								'<tbody>' +
- 								'<tr>' +
- 								'<td height="36px" style="border:1px solid black;border-collapse:collapse;" width="40%"><strong>' +
- 								'Embalaje complementario ' + Data.ArrayGeneral[i].ArrayGeneral[k].ArrayComplementario[l].VHILM_KU_SUB +
- 								'</strong></td>' +
- 								'<td height="36px" style="border:1px solid black;border-collapse:collapse;" width="40%">' +
- 								Data.ArrayGeneral[i].ArrayGeneral[k].ArrayComplementario[l].BEZEI2 +
- 								'</td>' +
- 								'<td height="36px" style="border:1px solid black;border-collapse:collapse;" width="auto">' +
- 								descipcionComplementario +
- 								'</td>' +
- 								'<td height="51px" style="" rowspan = "2" width="14%">' +
- 								'<div id="' + qrBultosComplementario.getId() +
- 								'" style="display: block;margin-left: auto;margin-right: auto;width: 78%;"></div>' +
- 								'</td>' +
- 								'</tr>' +
- 								'<tr>' +
- 								'<td height="15px" style="font-size: 14px;border:1px solid black;border-collapse:collapse;"><strong>' +
- 								'Detalle del Contenido:</strong>' + dataComplementario.INHALT +
- 								'</td>' +
- 								'<td height="15px" style="font-size: 14px;text-align: left;border:1px solid black;border-collapse:collapse;" width="35%"><strong>' +
- 								Data.ArrayGeneral[i].proveedor +
- 								'</strong></td>' +
- 								'<td height="15px" style="font-size: 14px;text-align: center;border:1px solid black;border-collapse:collapse;" width="auto">' +
- 								destino +
- 								'</td>' +
- 								'</tr>' +
- 								'</tbody>' +
- 								'</table><br>'
-
- 							oTableBultoComplementarioHtml.setContent(oTableComplementario);
- 							VBoxBultosComplementario.addItem(oTableBultoComplementarioHtml);
-
- 							var objqrBultoComplementario = {
- 								qrBultosComplementario: qrBultosComplementario.getId(),
- 								bulto: dataComplementario.VHILM_KU,
- 								Un_map: dataComplementario.EXIDV,
- 								bultoComplementario: dataComplementario.VHILM_KU_SUB,
- 								dimensionbulto: descipcionComplementario,
- 								pesobulto: dataComplementario.BRGEW,
- 								entrega: dataComplementario.VBELN
- 							}
- 							arrQrBultoComplementario.push(objqrBultoComplementario)
-
- 						}
-
- 						VBoxBulto.addItem(VBoxBultosComplementario)
-
- 					}
-
- 					that.oModel.setProperty("/DataarrQrBultosComplementario", arrQrBultoComplementario);
-
- 				}
-
- 				var sociedad = Data.ArrayGeneral[i].sociedad;
- 				var numeroEntrega = Data.ArrayGeneral[i].guia;
- 				var numBultos = Data.ArrayGeneral[i].numeroTotalBultos;
- 				//campos nuevos
- 				var almacen = Data.ArrayGeneral[i].almacen;
- 				var cantidadEmbalaje = Data.ArrayGeneral[i].cantidadEmbalaje;
- 				//
- 				var idCita = Data.ArrayGeneral[i].cita;
- 				var condEntrega = Data.ArrayGeneral[i].condEnt;
- 				var codCondEntrega = Data.ArrayGeneral[i].codcondEnt;
- 				var direccion = Data.ArrayGeneral[i].direccion;
- 				var fecha = Data.ArrayGeneral[i].fecha;
- 				var hora = Data.ArrayGeneral[i].hora;
- 				var zona = Data.ArrayGeneral[i].zona;
- 				var pesototalbultos = that.currencyFormat(Data.ArrayGeneral[i].pesoTotBultos);
-
- 				var objqrCita = {
- 					qrentrega: qrEntrega.getId(),
- 					cita: Data.ArrayGeneral[i].cita,
- 					entrega: Data.ArrayGeneral[i].entrega,
- 					arrtext: arrtext,
- 					almacen: almacen,
- 					placa: Data.ArrayGeneral[i].placa,
- 					fecha: Data.ArrayGeneral[i].fecha,
- 					hora: Data.ArrayGeneral[i].hora,
- 					destino: Data.ArrayGeneral[i].destino,
- 					nbultos: numBultos.toString(),
- 					condEnt: Data.ArrayGeneral[i].condEnt,
- 					direccion: Data.ArrayGeneral[i].direccion,
- 					pesoTotBultos: Data.ArrayGeneral[i].pesoTotBultos,
- 					zona: Data.ArrayGeneral[i].zona
- 				}
- 				arrCita.push(objqrCita)
- 				that.oModel.setProperty("/DataarrCita", arrCita);
-
- 				VBoxPrincipalEntrega.addItem(VBoxPrincipalEntrega3)
- 				VBoxPrincipalEntrega.addItem(VBoxBultos)
- 				that._byId("total").addItem(VBoxPrincipalEntrega)
- 			}
- 		},
- 		downloadQr: function () {
- 			this.GetSendOnbaseCitaEntrega("yes");
- 			that.getView().byId("total").destroyItems();
- 			this.CancelarDocQr();
- 		},
- 		GetSendOnbaseCitaEntrega: function (save) {
- 			var oView = that.getView();
- 			if (save != "no") {
- 				that.entregas.sort(function (a, b) {
- 					return a.entrega - b.entrega;
- 				});
- 			}
-
- 			oView.byId("DialogFormatQR").getScrollDelegate().scrollTo(0, 0)
-
- 			var idInicial = this.getView().byId("total").getDomRef().firstChild.id
- 			var idFinal = this.getView().byId("total").getDomRef().lastChild.id
-
- 			var idtotal = this.getView().byId("total").getDomRef().id
- 			var rango = $("#" + idtotal + "> div").length
- 			var arr = [];
- 			var nameEntrega, cita, j;
- 			var listaAux = [];
- 			that.Base64 = [];
-
- 			sap.ui.core.BusyIndicator.show(0);
-
- 			for (var i = 0; i < rango; i++) {
- 				var divs = $("#" + idtotal + "> div").get(i)
-
- 				var fileContent = $("#" + divs.id).wordExport();
- 				var blob = new Blob([fileContent], {
- 					type: "application/msword;charset=utf-8"
- 				});
- 				if (that.entregas[0].codcondEnt == "01") {
- 					if (i == 0) {
- 						var obj = {
- 							cita: that.entregas[0].cita,
- 							entrega: "",
- 							file: btoa(fileContent)
- 						};
- 						if (save === "yes") {
- 							saveAs(blob, "Cita numero:" + that.entregas[0].cita + ".doc");
- 						}
- 						that.Base64.push(obj);
- 					} else {
- 						nameEntrega = that.entregas[i - 1].entrega;
- 						var obj = {
- 							cita: that.entregas[0].cita,
- 							entrega: nameEntrega,
- 							file: btoa(fileContent)
- 						};
- 						if (save === "yes") {
- 							saveAs(blob, "Entrega numero:" + nameEntrega + ".doc");
- 						}
- 						that.Base64.push(obj);
- 					}
- 				} else {
- 					nameEntrega = that.entregas[i].entrega;
- 					var obj = {
- 						cita: that.entregas[0].cita,
- 						entrega: nameEntrega,
- 						file: btoa(unescape(encodeURIComponent((fileContent))))
- 					};
-
- 					if (save === "yes") {
- 						saveAs(blob, "Entrega numero:" + nameEntrega + ".doc");
- 					}
-
- 					that.Base64.push(obj);
- 				}
- 			}
- 		},
- 		CancelarDocQr: function () {
- 			var that = this;
- 			that.byId("total").destroyItems();
- 			if (that.byId("DialogFormatQR") != undefined) {
- 				that.byId("DialogFormatQR").close();
- 			}
- 			if (that.byId("DialogMant") != undefined) {
- 				that.byId("DialogMant").close();
- 			}
- 			if (that.byId("DialogEntregasTemp") != undefined) {
- 				that.byId("DialogEntregasTemp").close();
- 			}
- 			this.fnClearDataFechaPlan();
-			this.fnClearComponentFechaPlan();
- 			that._byId("frgIdFechaPlan--DialogFechaPlan").close();
- 			that.handleRouteMatched();
- 		},
- 		ordenarEntrega: function (entrega) {
- 			console.log(entrega)
- 			entrega.sort(function (a, b) {
- 				return a.entrega - b.entrega;
- 			});
- 			for (var i = 0; i < entrega.length; i++) {
- 				entrega[i].ArrayGeneral.sort(function (a, b) {
- 					return a.DescripcionGeneral - b.DescripcionGeneral;
- 				});
- 			}
- 			return entrega;
- 		},
- 		
- 		abrirnewDialogGuiaTemp: function () {
- 			var arrayOrdenes = that.oModel.getProperty("/oEntregaSelect");;
- 			var fecha;
- 			var arr = [];
- 			clearTimeout(timeOutFecha);
- 			if (target == "03") {
- 				var validateCita = [];
- 				validateCita = that.validateCita();
- 				if (!validateCita.validate) {
- 					utilUI.onMessageErrorDialogPress2(validateCita.msj);
- 					return;
- 				}
- 			}
+					var objEnvio = {
+						"oResults": {
+							"arrayOrdenes": arrayOrdenes,
+							"arrCentro": arrCentro,
+							"arrCantCentro": arrCantCentro,
+							"arrProveedor": arrProveedor,
+							"arrCantProveedor": arrCantProveedor,
+							"arrProv": arrProv,
+							"target": sTarget,
+							"arrayFechaDisponibles": fecha,
+							"User": jEnvioUser,
+							"fecha": fecha,
+							"actual": jFechaActual,
+							"nuevo": jFechaNuevo
+						}
+					}
+					if (actual) {
+						Services.ValidacionConcurrenciaFecha(that, objEnvio, function (result) {
+							util.response.validateFunctionSingleEnd(result, {
+								success: function (data, message) {
+									that.oModel.setProperty("/dataConcurrencia", data);
+									that.newEstructuraInsertFecha();
+								},
+								error: function (message) {
+									that.getFilterTableFechaWhere(true);
+								}
+							});
+						});
+					} else {
+						that.getFilterTableFechaWhere(true);
+					}
+				} else {
+					that.abrirnewDialogGuiaTemp();
+				}
+			}
+		},
+		newEstructuraInsertFecha: function () {
+			var cita = "";
+			var dataConcurrencia = that.oModel.getProperty("/dataConcurrencia");
+
+			var dataTotalERP = [];
+			var dataTotalSCP = [];
+
+			for (var i = 0; i < dataConcurrencia.length; i++) {
+				var dataERP = [];
+				var dataSCP = [];
+				var dataOrdenesERP = [];
+				var dataOrdenesSCP = [];
+				var FechaDisponibles = dataConcurrencia[i].FechaDisponibles;
+				var Ordenes = dataConcurrencia[i].Ordenes;
+
+				for (var j = 0; j < Ordenes.length; j++) {
+					if (Ordenes[j].codtipoData == "01") {
+						dataOrdenesERP.push(Ordenes[j]);
+					} else if (Ordenes[j].codtipoData == "02") {
+						dataOrdenesSCP.push(Ordenes[j]);
+					}
+				}
+
+				if (dataOrdenesERP.length > 0) {
+					dataERP.Ordenes = dataOrdenesERP;
+					dataERP.FechaDisponibles = FechaDisponibles;
+					dataTotalERP.push(dataERP);
+				}
+
+				if (dataOrdenesSCP.length > 0) {
+					dataSCP.Ordenes = dataOrdenesSCP;
+					dataSCP.FechaDisponibles = FechaDisponibles;
+
+					dataTotalSCP.push(dataSCP);
+				}
+
+			}
+
+			var estructuraDataTotalERP = {};
+			var estructuraDataTotalSCP = {};
+			var estructuraDataConcurrencia = {};
+
+			if (sTarget == "02") {
+				if (dataConcurrencia[0].Ordenes[0].LugEntD === "01") { //cede campoy                
+					if (validateTipoFecha == "01") {
+						cita = that.generarCita();
+					} else {
+						cita = that.generarCita();
+					}
+				} else if (dataConcurrencia[0].Ordenes[0].LugEntD === "02") { //puesto en mina
+					cita = "";
+				} else {
+					cita = "";
+				}
+			}
+
+			if (dataTotalERP.length > 0) {
+				estructuraDataTotalERP = this.EstructuraInsertFechaReturn(dataTotalERP, "POST", cita, sTarget, validateTipoFecha);
+			}
+			if (dataTotalSCP.length > 0) {
+				estructuraDataTotalSCP = this.EstructuraInsertFechaReturn(dataTotalSCP, "POST", cita, sTarget, validateTipoFecha);
+			}
+
+			estructuraDataConcurrencia = this.EstructuraInsertFechaReturn(dataConcurrencia, "POST", cita, sTarget, validateTipoFecha);
+
+			console.log("Estructura ERP:", estructuraDataTotalERP);
+			console.log("Estructura SCP:", estructuraDataTotalSCP);
+			console.log("Estructura Validation:", estructuraDataConcurrencia);
+
+			if (sTarget == "02") {
+				if (Object.keys(estructuraDataTotalERP).length > 0) {
+					if (estructuraDataTotalSCP.arr2New != "") {
+						that.methodPostXsjs(estructuraDataTotalERP.arr2New, "POST", estructuraDataTotalERP.arr3);
+					}
+					if (estructuraDataTotalSCP.arr2New != "") {
+						that.methodPostXsjs(estructuraDataTotalSCP.arr2New, "POST", estructuraDataTotalSCP.arr3);
+					}
+					this.methodPostFlujoSap(dataOrdenesERP, dataOrdenesSCP, estructuraDataTotalERP, estructuraDataTotalSCP,
+						estructuraDataConcurrencia, "/ERP/sap/opu/odata/sap/ZBVMM_WEB_OC_PLANIFICAR_ENT_SRV",
+						"/ERP/sap/opu/odata/sap/ZBVMM_WEB_OC_PLANIFICAR_ENT_SRV/ZetPlanificarSet", "DialogSelecFechaProg", "1", cita);
+				} else {
+					if (estructuraDataTotalSCP.arr2New != "") {
+						that.methodPostXsjs(estructuraDataTotalSCP.arr2New, "POST", estructuraDataTotalSCP.arr3);
+					}
+					this.methodPostHana(estructuraDataTotalSCP.arr4, cita);
+				}
+			}
+		},
+		methodPostFlujoSap: function (dataOrdenesERP, dataOrdenesSCP, contentERP, contentSCP, contentConcurrencia, urlGet, urlPost, Dialog,msg, cita) {
+			var estatus = that.oModelGet.getProperty("/oEstado");
+			var codigoestatus = estatus[4].Campo;
+			var descestatus = estatus[4].DescripcionCampo;
 			
-			var seleccionado = that._byId(this.frgIdFechaPlan + "--tbRegistroDisponible").getSelectedIndex();
- 			var contextActual = "/DataFecha/" + seleccionado.toString();
- 			var contextNuevo = "/DataFecha/" + (seleccionado + 1).toString();
- 			var actual = that.oModel.getProperty(contextActual);
- 			var nuevo = that.oModel.getProperty(contextNuevo);
+			contentERP.objEnvioSap.ItemSet.forEach(function(x){
+				x.Zzlfstk	= codigoestatus;
+				x.Zcita = cita;
+			});
+			var data = {
+				"oResults": contentERP.objEnvioSap
+			};
+ 			Services.InsertarEntregasERPHana(this, data, function (result) {
+				util.response.validateAjaxGetHana(result, {
+					success: function (oData, message) {
+						console.log(oData);
+						var LISTA_GENERAL = oData.oResults;
+						that.oModel.setProperty("/LISTA_GENERAL_ERP",LISTA_GENERAL);
+						var cita = LISTA_GENERAL[0].Zcita;
+						if (Object.keys(contentSCP).length > 0) {
+							that.methodPostHana(contentSCP.arr4, cita);
+						}else{
+							that.generatePdfWithQr(that, LISTA_GENERAL, cita);
+						}
+					},
+					error: function (message) {
+						sap.ui.core.BusyIndicator.hide(0);
+					}
+				});
+			});
  					
- 			fecha =actual;
-
- 			if (sTarget == "02") {
- 			} else if (target == "03") {
- 				for (var i = 0; i < arrayOrdenes.length; i++) {
- 					if (arrayOrdenes[i].Zbolnr.substr(0, 2) == "09") {
- 						arrayOrdenes[i].Zbolnr = arrayOrdenes[i].Zbolnr.substr(3);
- 						arrayOrdenes[i].numGuia = arrayOrdenes[i].numGuia.substr(3);
- 					}
- 				}
- 			}
- 			that.oModel.setProperty("/fecha", fecha);
-
- 			var arrHorarioTotal = [];
- 			var obj = {};
- 			var condEntrega = arrayOrdenes[0].lugdestino;
- 			if (condEntrega == "03") {
- 				obj.TitleFecha = "Fecha de Recojo"
- 				obj.TitleHora = "Hora de Recojo"
- 			} else if (condEntrega == "02") {
- 				obj.TitleFecha = "Fecha de Llegada"
- 				obj.TitleHora = "Hora de Llegada"
- 			} else if (condEntrega == "01") {
- 				obj.TitleFecha = "Fecha Cita"
- 				obj.TitleHora = "Hora Cita"
- 			} else {
- 				obj.TitleFecha = "Fecha"
- 				obj.TitleHora = "Hora"
- 			}
- 			arrHorarioTotal.push(obj)
-
- 			tha.oModel.setProperty("/DataFechaNoProg", arrHorarioTotal);
-
- 			if (!oView.byId("DialogEntregasTemp")) {
- 				Fragment.load({
- 					id: oView.getId(),
- 					name: "com.rava.fragment.Cambios.Entregas",
- 					controller: that
- 				}).then(function (oDialog) {
- 					oView.addDependent(oDialog);
- 					sap.ui.core.BusyIndicator.hide(0);
- 					oDialog.open();
- 					oView.byId("nEntregaSeleccionadas").setText(arrayOrdenes.length)
- 				});
- 			} else {
- 				sap.ui.core.BusyIndicator.hide(0);
- 				oView.byId("DialogEntregasTemp").open();
- 				oView.byId("nEntregaSeleccionadas").setText(arrayOrdenes.length)
- 			}
  		},
- 		validateCita: function () {
- 			var that = this;
- 			var oView = this.getView();
+		methodPostHana: function (content, cita) {
+			var data = {
+				"oResults": content
+			};
 
- 			var DataEntregasPlanificadas = oView.getModel("Proyect").getProperty("/DataEntregasPlanificadas");
- 			var EntregasSelecionadas = that.oModel.getProperty("/arrayOrdenesPlanificadas");
- 			var boolean = true;
- 			var cont = 0;
- 			var table = oView.byId("TreeTable2");
- 			var Selecciones = table.getSelectedIndices();
- 			var msj = "";
- 			var textCita = "";
- 			var entregasMensaje = [];
+			Services.InsertarEntregasHana(this, data, function (result) {
+				util.response.validateAjaxGetHana(result, {
+					success: function (oData, message) {
+						console.log(oData);
+						var LISTA_GENERAL = oData.oResults.oData.oData.CitaEntrega;
+						var LISTA_GENERAL_ERP = that.oModel.getProperty("/LISTA_GENERAL_ERP");
+						if (LISTA_GENERAL_ERP.length > 0) {
+							for (var i = 0; i < LISTA_GENERAL_ERP.length; i++) {
+								LISTA_GENERAL.push(LISTA_GENERAL_ERP[i]);
+							}
+						}
+						var cita = LISTA_GENERAL[0].Zcita;
+						that.generatePdfWithQr(that, LISTA_GENERAL, cita);
+					},
+					error: function (message) {
+						sap.ui.core.BusyIndicator.hide(0);
+					}
+				});
+			});
+		},
+		methodPostXsjs: function (content, methodo, contentDelete) {
 
- 			if (EntregasSelecionadas.length > 0) {
- 				if (EntregasSelecionadas[0].numCitas.toString() != "") {
- 					textCita = EntregasSelecionadas[0].numCitas.toString();
- 					for (var i = 0; i < DataEntregasPlanificadas.ArrayGeneral.length; i++) {
- 						if (EntregasSelecionadas[0].numCitas.toString() == DataEntregasPlanificadas.ArrayGeneral[i].numCitas.toString()) {
- 							entregasMensaje.push(DataEntregasPlanificadas.ArrayGeneral[i].DescripcionGeneralEntrega.toString())
- 							cont++;
- 						}
- 					}
+			var objEnvio = {
+				"oResults": {
+					"content": content,
+					"methodo": methodo,
+					"contentDelete": contentDelete,
+					"target": sTarget,
+					"User": that.oModelGet.getProperty("/oUserIng")
+				}
+			}
 
- 					if (cont == Selecciones.length) {
- 						boolean = true;
- 					} else {
- 						msj = "Falta seleccionar entregas para la cita " + textCita + ". Entregas Relacionadas " + entregasMensaje.join();
- 						boolean = false;
- 					}
+			Services.RegistrarEntregasAprobadas(that, objEnvio, function (result) {
+				util.response.validateFunctionSingleEnd(result, {
+					success: function (data, message) {
+						console.log(data)
+					},
+					error: function (message) {
+						console.log(message);
+						MessageToast.show("Erro al añadir registro");
 
- 				} else {
- 					boolean = true;
- 				}
- 			} else {
- 				msj = "Debe seleccionar la entrega para descargar el documento ";
- 				boolean = false;
- 			}
- 			var json = {
- 				"validate": boolean,
- 				"msj": msj,
- 				"entregas": entregasMensaje
- 			};
+					}
+				});
+			});
 
- 			return json;
- 		},
+			if (sTarget == "03") {
+				this.BuscarDeleteXsjs(contentDelete);
+			}
+
+		},
+		generatePdfWithQr: function (context, listaGeneral, cita) {
+			var that = this;
+			if (sTarget == '02') {
+				that.saveCitaHanaScp(context, listaGeneral, cita);
+			}
+		},
+		saveCitaHanaScp: function (context, listaGeneral, cita) {
+			var obj = {
+				ID_CITA: cita.toString()
+			};
+			console.log(listaGeneral);
+			if (cita != "") {
+				if (validateTipoFecha == "01") {
+					that.exitopdf(context, "Se ha generado el número de cita " + cita, cita, listaGeneral, 1);
+				} else {
+					that.exitopdf(context,
+						"Se registró la solicitud de cita no programada, una vez sea aprobada podrá visualizar el número en la pestaña “Citas y entregas” para que descargue los QR.",
+						cita, listaGeneral, 1);
+				}
+			} else {
+				var text = [];
+				for (var i = 0; i < listaGeneral.length; i++) {
+					text.push(this.formatInteger(listaGeneral[i].Zvbeln));
+				}
+
+				let result = text.filter((item, index) => {
+					return text.indexOf(item) === index;
+				})
+
+				if (listaGeneral[0].ZzlugEnt == "03") {
+					that.exitopdf(context, "Se ha planificado el recojo de la entrega: " + result.join(), cita, listaGeneral, 1);
+				} else {
+					that.exitopdf(context, "Se han actualizado la(s) Entrega(s)", cita, listaGeneral, 1);
+				}
+
+			}
+		},
+		exitopdf: function (context, msj, cita, listaGeneral, validate) {
+			that.entregas = [];
+
+			if (validate == 1) {
+				sap.m.MessageBox.success(msj, {
+					title: "Mensaje de éxito",
+					actions: ["OK"],
+					onClose: function (sActionClicked) {
+						if (sActionClicked === "OK") {
+							if (context.byId("DialogMant") != undefined) {
+								context.byId("DialogMant").close();
+							}
+							if (context.byId("DialogConfirmarCentro") != undefined) {
+								context.byId("DialogConfirmarCentro").close();
+							}
+							if (context.byId("DialogEntregasTemp") != undefined) {
+								context.byId("DialogEntregasTemp").close();
+							}
+							if (context.byId("DialogSelecFechaProg") != undefined) {
+								context.byId("DialogSelecFechaProg").close();
+							}
+							if (context.byId("DialogSelecFechaNoProgTemp") != undefined) {
+								context.byId("DialogSelecFechaNoProgTemp").close();
+							}
+
+							var oView = context.getView();
+
+							// var data = that.getData();
+							var data = [];
+							listaGeneral.forEach(function (value, index) {
+								value.Zvemng = that.currencyFormat(value.Zvemng);
+								data.push(value);
+							});
+							console.log("Lado de Kassiel para PDF");
+							console.log(listaGeneral);
+							console.log(data);
+							if (data.length === 0) {
+								sap.ui.core.BusyIndicator.hide(0);
+								return;
+							}
+							var Entregas = [];
+							var cantidad = data.length;
+
+							while (cantidad !== 0) {
+								var data1 = data[0];
+								var arrayCoincidencias = [];
+								var a = 1;
+								for (a = 1; a < data.length; a++) {
+									if (data1.Zvbeln === data[a].Zvbeln) {
+										arrayCoincidencias.push(data[a]);
+										cantidad--;
+										data.splice(a, 1);
+										a--;
+									}
+								}
+								arrayCoincidencias.push(data[0]);
+								data.splice(0, 1);
+
+								cantidad--;
+
+								var nBultos = arrayCoincidencias[0].Zanzpk;
+								var cita = arrayCoincidencias[0].Zcita;
+								var sociedad = arrayCoincidencias[0].Zbukrs;
+								var entrega = that.formatInteger(arrayCoincidencias[0].Zvbeln);
+								var proveedor = arrayCoincidencias[0].Zname1;
+								var destino = arrayCoincidencias[0].Zlgobe;
+
+								var guia = arrayCoincidencias[0].Zbolnr;
+								var numeroTotalBultos = (arrayCoincidencias[0].Zanzpk) * 1;
+								var condEnt = arrayCoincidencias[0].Zdesc_cond;
+								var codcondEnt = arrayCoincidencias[0].ZzlugEnt;
+								var direccion = arrayCoincidencias[0].Zdireccion;
+								var fecha = that.formaterxTemp(arrayCoincidencias[0].Zlfdat);
+								var horaAbap = arrayCoincidencias[0].Zlfuhr;
+								var nombreCompleto = arrayCoincidencias[0].nombreCompleto;
+								var nombreCompleto2 = arrayCoincidencias[0].nombreCompleto2;
+								var nombreCompleto3 = arrayCoincidencias[0].nombreCompleto3;
+								var nombreCompleto4 = arrayCoincidencias[0].nombreCompleto4;
+								var ID_ENTREGA_SIN_OC_CABECERA = arrayCoincidencias[0].ID_ENTREGA_SIN_OC_CABECERA;
+								var EMAIL_DESTINATARIO_FINAL = arrayCoincidencias[0].EMAIL_DESTINATARIO_FINAL;
+								var DESCRIPCION_MOTIVOS = arrayCoincidencias[0].DESCRIPCION_MOTIVOS;
+
+								var hora;
+								if (validateTipoFecha == "01") {
+									if (that.formatHourTemp(arrayCoincidencias[0].Zlfuhr) == "00:00") {
+										hora = that.formatHourTemp(arrayCoincidencias[0].Zlfuhr);
+									} else {
+										hora = that.formatHour2Temp(arrayCoincidencias[0].Zlfuhr);
+									}
+								} else if (validateTipoFecha == "") {
+									if (arrayCoincidencias[0].Zcita_np == "NO PROGRAMADA" || arrayCoincidencias[0].Zcita_np == "NO PROGRAMADO") {
+										hora = that.formatHourTemp(arrayCoincidencias[0].Zlfuhr);
+									} else {
+										hora = that.formatHour2Temp(arrayCoincidencias[0].Zlfuhr);
+									}
+								} else {
+									hora = that.formatHourTemp(arrayCoincidencias[0].Zlfuhr);
+								}
+								var zona = arrayCoincidencias[0].Zzona;
+								var pesoTotBultos = that.currencyFormat(arrayCoincidencias[0].Zbtgew);
+								var dni = arrayCoincidencias[0].Zdni;
+								var dni2 = arrayCoincidencias[0].Zdni2;
+								var dni3 = arrayCoincidencias[0].Zdni3;
+								var dni4 = arrayCoincidencias[0].Zdni4;
+								var placa = arrayCoincidencias[0].Zplaca;
+								var placa2 = arrayCoincidencias[0].Zplaca2;
+								var placa3 = arrayCoincidencias[0].Zplaca3;
+								var placa4 = arrayCoincidencias[0].Zplaca4;
+
+								var almacen = arrayCoincidencias[0].Zlgobe;
+								var cantidadEmbalaje = parseInt(arrayCoincidencias[0].Zanzpk);
+
+								var Bultos = [];
+								var CantidadEntregas = arrayCoincidencias.length;
+								while (CantidadEntregas !== 0) {
+									var dataEntregas = arrayCoincidencias[0];
+									var arrayBultos = [];
+									var e = 1;
+									for (e; e < arrayCoincidencias.length; e++) {
+										if (dataEntregas.ZvhilmKu === arrayCoincidencias[e].ZvhilmKu) {
+											arrayBultos.push(arrayCoincidencias[e]);
+											CantidadEntregas--;
+											arrayCoincidencias.splice(e, 1);
+											e--;
+										}
+									}
+									arrayBultos.push(arrayCoincidencias[0]);
+									arrayCoincidencias.splice(0, 1);
+
+									CantidadEntregas--;
+
+									var BultoCodigo = arrayBultos[0].ZvhilmKu;
+									var PesoBulto = that.currencyFormat(arrayBultos[0].ZbrgewB);
+									var codigo = arrayBultos[0].Zbezei;
+									var descipcion = that.formatNoDecimal(parseFloat(arrayBultos[0].Zlaeng).toFixed(2)) + "x" +
+										that.formatNoDecimal(parseFloat(arrayBultos[0].Zbreit).toFixed(2)) + "x" +
+										that.formatNoDecimal(parseFloat(arrayBultos[0].Zhoehe).toFixed(2))
+										.toString();
+									var CantidadEmbalajeBulto = parseInt(arrayBultos[0].ZvhilmKu);
+									var Zet_emb_complSet = arrayBultos[0].Zet_emb_complSet.results;
+									var Un_map = ''
+									if (arrayBultos[0].Exidv) {
+										Un_map = (arrayBultos[0].Exidv * 1).toString();
+									}
+
+									var ArrayComplementario = [];
+									if (Zet_emb_complSet) {
+										Zet_emb_complSet.forEach(function (values) {
+											if (values.VHILM_KU == BultoCodigo) {
+												ArrayComplementario.push(values);
+											}
+										});
+									}
+
+									var dataBultos = {
+										Descipcion: descipcion,
+										Codigo: codigo,
+										CantidadEmbalajeBulto: CantidadEmbalajeBulto,
+										PesoBult: PesoBulto,
+										DescripcionGeneral: BultoCodigo,
+										Un_map: Un_map,
+										ArrayComplementario: ArrayComplementario,
+										ArrayGeneral: arrayBultos
+									};
+
+									Bultos.push(dataBultos);
+
+								}
+
+								var DataEntregas = {
+									cita: cita,
+									ID_ENTREGA_SIN_OC_CABECERA: ID_ENTREGA_SIN_OC_CABECERA,
+									EMAIL_DESTINATARIO_FINAL: EMAIL_DESTINATARIO_FINAL,
+									DESCRIPCION_MOTIVOS: DESCRIPCION_MOTIVOS,
+									sociedad: sociedad,
+									entrega: entrega,
+									almacen: almacen,
+									proveedor: proveedor,
+									cantidadEmbalaje: cantidadEmbalaje,
+									destino: destino,
+									guia: guia,
+									numeroTotalBultos: numeroTotalBultos,
+									condEnt: condEnt,
+									codcondEnt: codcondEnt,
+									direccion: direccion,
+									fecha: fecha,
+									hora: hora,
+									zona: zona,
+									pesoTotBultos: pesoTotBultos,
+									bultos: nBultos,
+									dni: dni,
+									dni2: dni2,
+									dni3: dni3,
+									dni4: dni4,
+									placa: placa,
+									placa2: placa2,
+									placa3: placa3,
+									placa4: placa4,
+									nombreCompleto: nombreCompleto,
+									nombreCompleto2: nombreCompleto2,
+									nombreCompleto3: nombreCompleto3,
+									nombreCompleto4: nombreCompleto4,
+									horaAbap: horaAbap,
+									ArrayGeneral: Bultos
+								};
+								Entregas.push(DataEntregas);
+								that.entregas.push(DataEntregas);
+							}
+							var EntregasOrdenada = that.ordenarEntrega(Entregas);
+							var Data = {
+								ArrayGeneral: EntregasOrdenada
+							};
+
+							var arrtext = [];
+							var cantidad = Data.ArrayGeneral.length
+							for (var i = 0; i < Data.ArrayGeneral.length; i++) {
+								if (cantidad == 1) {
+									arrtext += Data.ArrayGeneral[i].entrega
+								} else {
+									arrtext += Data.ArrayGeneral[i].entrega + "-"
+								}
+								cantidad--;
+							}
+							var logo = "";
+							
+							that.abriDialog(Data, logo, arrtext);
+						}
+					}
+
+				});
+			}
+		},
+		abriDialog: function (Data, logo, arrtext) {
+			var oView = that.getView();
+
+			if (!oView.byId("DialogFormatQR")) {
+				Fragment.load({
+					id: oView.getId(),
+					name: "solicitarcitapr.view.dialogs.FormatQR",
+					controller: that
+				}).then(function (oDialog) {
+					oView.addDependent(oDialog);
+					that.onPdfFormat(Data, logo, arrtext);
+					var qrCitaTotal = that.oModel.getProperty("/DataqrCitaTotal");
+					var arrCitaTotal = that.oModel.getProperty("/DataarrCitaTotal");
+					var arrCita = that.oModel.getProperty("/DataarrCita");
+					var arrQrBultos = that.oModel.getProperty("/DataarrQrBultos");
+					var arrQrBultosComplementario = that.oModel.getProperty("/DataarrQrBultosComplementario");
+					oDialog.open();
+
+					// cita
+					if (Data.ArrayGeneral[0].cita) {
+						var textQRCitaTotal = arrCita[0].cita
+						qrcode = new QRCode(document.getElementById(qrCitaTotal), {
+							text: textQRCitaTotal, //ESTE ES EL TEXTO SE CONVERTIRA EL EL CODIGO QR 
+							width: "120",
+							height: "120",
+							colorDark: "#000000",
+							colorLight: "#ffffff",
+							correctLevel: QRCode.CorrectLevel.H
+						});
+					}
+					// cita
+					//PDF DETALLADOS
+					for (var i = 0; i < arrCita.length; i++) {
+
+						var textQREntrega = arrCita[i].entrega + "|" + arrCita[i].nbultos + "|" + arrCita[i].condEnt + "|" + arrCita[i].almacen
+
+						qrcode = new QRCode(document.getElementById(arrCita[i].qrentrega), {
+							text: textQREntrega, //ESTE ES EL TEXTO SE CONVERTIRA EL EL CODIGO QR 
+							width: "110",
+							height: "110",
+							colorDark: "#000000",
+							colorLight: "#ffffff",
+							correctLevel: QRCode.CorrectLevel.H
+						});
+					}
+
+					for (var i = 0; i < arrQrBultos.length; i++) {
+						var textQRBulto = (arrQrBultos[i].Un_map * 1).toString();
+						qrcode = new QRCode(document.getElementById(arrQrBultos[i].qrBultos), {
+							text: textQRBulto, //ESTE ES EL TEXTO SE CONVERTIRA EL EL CODIGO QR 
+							width: "80",
+							height: "80",
+							colorDark: "#000000",
+							colorLight: "#ffffff",
+							correctLevel: QRCode.CorrectLevel.H
+						});
+					}
+
+					for (var i = 0; i < arrQrBultosComplementario.length; i++) {
+						var textQRBultoComplementario = (arrQrBultosComplementario[i].Un_map * 1).toString() + "-" + arrQrBultosComplementario[i].bultoComplementario;
+						qrcode = new QRCode(document.getElementById(arrQrBultosComplementario[i].qrBultosComplementario), {
+							text: textQRBultoComplementario,
+							width: "80",
+							height: "80",
+							colorDark: "#000000",
+							colorLight: "#ffffff",
+							correctLevel: QRCode.CorrectLevel.H
+						});
+					}
+
+					//enviar al onBase
+					that.GetSendOnbaseCitaEntrega("no");
+					//enviar al onBase
+
+				});
+			} else {
+				that.onPdfFormat(Data, logo, arrtext);
+				var qrCitaTotal = that.oModel.getProperty("/DataqrCitaTotal");
+				var arrCitaTotal = that.oModel.getProperty("/DataarrCitaTotal");
+				var arrCita = that.oModel.getProperty("/DataarrCita");
+				var arrQrBultos = that.oModel.getProperty("/DataarrQrBultos");
+				var arrQrBultosComplementario = that.oModel.getProperty("/DataarrQrBultosComplementario");
+				oView.byId("DialogFormatQR").open();
+
+				// cita
+				if (Data.ArrayGeneral[0].cita) {
+
+					var textQRCitaTotal = arrCita[0].cita
+					qrcode = new QRCode(document.getElementById(qrCitaTotal), {
+						text: textQRCitaTotal, //ESTE ES EL TEXTO SE CONVERTIRA EL EL CODIGO QR 
+						width: "120",
+						height: "120",
+						colorDark: "#000000",
+						colorLight: "#ffffff",
+						correctLevel: QRCode.CorrectLevel.H
+					});
+				}
+
+				//PDF DETALLADOS
+				for (var i = 0; i < arrCita.length; i++) {
+
+					var textQREntrega = arrCita[i].entrega + "|" + arrCita[i].nbultos + "|" + arrCita[i].condEnt + "|" + arrCita[i].almacen
+
+					qrcode = new QRCode(document.getElementById(arrCita[i].qrentrega), {
+						text: textQREntrega, //ESTE ES EL TEXTO SE CONVERTIRA EL EL CODIGO QR 
+						width: "110",
+						height: "110",
+						colorDark: "#000000",
+						colorLight: "#ffffff",
+						correctLevel: QRCode.CorrectLevel.H
+					});
+				}
+
+				for (var i = 0; i < arrQrBultos.length; i++) {
+					var textQRBulto = (arrQrBultos[i].Un_map * 1).toString();
+					qrcode = new QRCode(document.getElementById(arrQrBultos[i].qrBultos), {
+						text: textQRBulto, //ESTE ES EL TEXTO SE CONVERTIRA EL EL CODIGO QR 
+						width: "80",
+						height: "80",
+						colorDark: "#000000",
+						colorLight: "#ffffff",
+						correctLevel: QRCode.CorrectLevel.H
+					});
+				}
+
+				for (var i = 0; i < arrQrBultosComplementario.length; i++) {
+					var textQRBultoComplementario = (arrQrBultosComplementario[i].Un_map * 1).toString() + "-" + arrQrBultosComplementario[i].bultoComplementario;
+					qrcode = new QRCode(document.getElementById(arrQrBultosComplementario[i].qrBultosComplementario), {
+						text: textQRBultoComplementario,
+						width: "80",
+						height: "80",
+						colorDark: "#000000",
+						colorLight: "#ffffff",
+						correctLevel: QRCode.CorrectLevel.H
+					});
+				}
+
+				//enviar al onBase
+				that.GetSendOnbaseCitaEntrega("no");
+				//enviar al onBase
+			}
+		},
+		onPdfFormat: function (Data, logo, arrtext) {
+			var that = this;
+			var oView = that.getView();
+
+			var textoPlacas = "";
+			var textoDocumentos = "";
+			var arrHorasAsignadas = [];
+			var arrEntregasSCP = [];
+			var arrEntregasERP = [];
+			for (var i = 0; i < Data.ArrayGeneral.length; i++) {
+				if (i == 0) {
+					if (Data.ArrayGeneral[i].placa) {
+						textoPlacas += Data.ArrayGeneral[i].placa;
+					}
+					if (Data.ArrayGeneral[i].placa2) {
+						textoPlacas += ";" + Data.ArrayGeneral[i].placa2;
+					}
+					if (Data.ArrayGeneral[i].placa3) {
+						textoPlacas += ";" + Data.ArrayGeneral[i].placa3;
+					}
+					if (Data.ArrayGeneral[i].placa4) {
+						textoPlacas += ";" + Data.ArrayGeneral[i].placa4;
+					}
+
+					if (Data.ArrayGeneral[i].nombreCompleto) {
+						textoDocumentos += '-' + Data.ArrayGeneral[i].nombreCompleto + "<br>";
+					}
+					if (Data.ArrayGeneral[i].nombreCompleto2) {
+						textoDocumentos += '-' + Data.ArrayGeneral[i].nombreCompleto2 + "<br>";
+					}
+					if (Data.ArrayGeneral[i].nombreCompleto3) {
+						textoDocumentos += '-' + Data.ArrayGeneral[i].nombreCompleto3 + "<br>";
+					}
+					if (Data.ArrayGeneral[i].nombreCompleto4) {
+						textoDocumentos += '-' + Data.ArrayGeneral[i].nombreCompleto4 + "<br>";
+					}
+				}
+				if (Data.ArrayGeneral[i].ID_ENTREGA_SIN_OC_CABECERA) {
+					arrEntregasSCP.push(Data.ArrayGeneral[i]);
+				} else {
+					arrEntregasERP.push(Data.ArrayGeneral[i]);
+				}
+
+				arrHorasAsignadas.push(Data.ArrayGeneral[i].horaAbap);
+			}
+
+			if (Data.ArrayGeneral[0].codcondEnt == "01") {
+				var VBoxPrincipalCita = new sap.m.VBox({
+					width: "720px"
+				});
+				VBoxPrincipalCita.addStyleClass("VBoxPrincipal sapUiSizeCompact");
+				var VBoxPrincipalCita2 = new sap.m.VBox({
+					alignItems: "Center"
+				});
+				var hcita2 = '<h4 style="text-align: center;">Resumen de Cita</h4>';
+				var titleCita = new sap.ui.core.HTML({});
+				titleCita.setContent(hcita2);
+				VBoxPrincipalCita2.addItem(titleCita);
+
+				var qrCitaTotal2 = '<div style="text-align: center;"></div>'
+				var qrCitaTotal2Html = new sap.ui.core.HTML({});
+				qrCitaTotal2Html.setContent(qrCitaTotal2);
+
+				var idCitaTotal = Data.ArrayGeneral[0].cita;
+				var condEntrega = Data.ArrayGeneral[0].condEnt;
+
+				var titlqQrCitaTotalHtml = new sap.ui.core.HTML({
+					content: '<h4 style="text-align: center;font-weight:normal;">Condición de Entrega: ' +
+						'<font size=6 style="font-weight:bold;">' + condEntrega + '</font>' +
+						' </h4>'
+				});
+
+				var HBoxQRTotal = new sap.m.HBox({
+					width: "100%",
+					justifyContent: "Center"
+				});
+				var HBoxQRTotal2 = new sap.m.HBox({
+					width: "100%",
+					justifyContent: "Center",
+					alignItems: "Center",
+					height: "3rem"
+				});
+				HBoxQRTotal2.addItem(titlqQrCitaTotalHtml);
+
+				HBoxQRTotal.addItem(HBoxQRTotal2);
+
+				var VBoxQRTotal = new sap.m.VBox({
+					width: "100%",
+					alignItems: "Center"
+				})
+				VBoxQRTotal.addItem(HBoxQRTotal);
+
+				VBoxQRTotal.addItem(qrCitaTotal2Html);
+				VBoxPrincipalCita2.addItem(VBoxQRTotal);
+
+				var resumenHtml = new sap.ui.core.HTML({
+					content: '<h4 style="text-align: Start;font-weight:normal;">*Este documento se debe presentar en la garita de acceso al almacén</h4>'
+				});
+
+				var HBoxQRTotalDetalleCita = new sap.m.HBox({
+					width: "100%",
+					justifyContent: "Start",
+					alignItems: "Center",
+					height: "3rem"
+				});
+				HBoxQRTotalDetalleCita.addItem(resumenHtml);
+				VBoxPrincipalCita2.addItem(HBoxQRTotalDetalleCita);
+				that.oModel.setProperty("/DataqrCitaTotal", qrCitaTotal2Html.getId());
+
+				var TablaCitaVBox = new sap.m.VBox({
+					width: "100%"
+				});
+				var TablaCitaHtml = new sap.ui.core.HTML({});
+
+				var direccionCita = Data.ArrayGeneral[0].direccion;
+				var fechaCita = Data.ArrayGeneral[0].fecha;
+				var idCitaCita = Data.ArrayGeneral[0].cita;
+
+				var horaMinima = Math.min(...arrHorasAsignadas).toString();
+				if (horaMinima.length == 5) {
+					horaMinima = "0" + horaMinima;
+				}
+				
+				let arrMatriz = [];
+				arrMatriz = arrHorasAsignadas;
+				let cantProveedor = arrMatriz.length;
+				const myObj2 = {}
+				for (let i = 0, len = arrMatriz.length; i < len; i++)
+				    myObj2[arrMatriz[i]] = arrMatriz[i];
+				arrMatriz = new Array();
+				for (let key2 in myObj2)
+				    arrMatriz.push(myObj2[key2]);
+				
+				var horaCita = "";
+				if(arrMatriz.length == 1){
+					horaCita = that.formatHourTemp(horaMinima);
+				}else{
+					horaCita = that.formatHourTemp(horaMinima) + "-" + that.formatHourTemp(arrMatriz[1]) ;
+				}
+
+				var htmlTablaCita = '<table style="border: 1px solid black; border-collapse: collapse; width: 100%;" align="center">' +
+					'<thead>' +
+					'<tr>' +
+					'<td style="border: 1px solid black; border-collapse: collapse;" colspan="4" width="100%" height="18px">Proovedor: ' + Data.ArrayGeneral[
+						0].proveedor + '</td>' +
+					'</tr>' +
+					'</thead>' +
+					'<tbody>' +
+					'<tr>' +
+					'<td style="border: 1px solid black; border-collapse: collapse;text-align:center;" width="14%" height="18px">Nº Cita</td>' +
+					'<td style="border: 1px solid black; border-collapse: collapse;" width="37%" height="18px">Dirección de Entrega</td>' +
+					'<td style="border: 1px solid black; border-collapse: collapse;text-align:center;" width="auto" height="18px">Fecha y hora</td>' +
+					'<td style="border: 1px solid black; border-collapse: collapse;text-align:center;" width="33%" height="18px">Vehículo</td>' +
+					'</tr>' +
+					'<tr>' +
+					'<td style="border: 1px solid black; border-collapse: collapse;text-align:center;font-size:35px;" height="72px" rowspan="4">' +
+					idCitaCita + '</td>' +
+					'<td style="border: 1px solid black; border-collapse: collapse;font-size: 14px;" height="72px" rowspan = "4">' + direccionCita +
+					'</td>' +
+					'<td style="border: 1px solid black; border-collapse: collapse;font-size: 15px;" height="36px" rowspan = "2">' + fechaCita +
+					'</td>' +
+					'<td style="border: 1px solid black; border-collapse: collapse;font-size: 15px;" height="18px" >' + textoPlacas + '</td>' +
+					'</tr>' +
+					'<tr>' +
+					'<td style="border: 1px solid black; border-collapse: collapse;" height="18px">Nombres  y Apellidos</td>' +
+					'</tr>' +
+					'<tr>' +
+					'<td style="border: 1px solid black; border-collapse: collapse;font-size: 15px;" height="36px" >' + horaCita + '</td>' +
+					'<td style="border: 1px solid black; border-collapse: collapse;font-size: 13px;" height="36px">' + textoDocumentos + '</td>' +
+					'</tr>' +
+					'</tbody>' +
+					'</table>';
+				TablaCitaHtml.setContent(htmlTablaCita);
+				TablaCitaVBox.addItem(TablaCitaHtml);
+				VBoxPrincipalCita2.addItem(TablaCitaVBox);
+
+				var resumenEntregasHtml = new sap.ui.core.HTML({
+					content: '<h4 style="text-align: Start;font-weight:normal;">*Una guía de remisión hace referencia unicamente a una entrega</h4>'
+				});
+				var HBoxResumenEntregasHtml = new sap.m.HBox({
+					width: "100%",
+					justifyContent: "Start",
+					alignItems: "Center",
+					height: "2rem"
+				});
+				HBoxResumenEntregasHtml.addItem(resumenEntregasHtml);
+				VBoxPrincipalCita2.addItem(HBoxResumenEntregasHtml);
+
+				var arrCitaTotal = [];
+				var entregasERPDetalle = "";
+				for (var i = 0; i < arrEntregasERP.length; i++) {
+					var numeroEntregaERP = arrEntregasERP[i].entrega;
+					var destinoEntregaERP = arrEntregasERP[i].destino;
+					var pesoTotalbultosCitaERP = that.currencyFormat(arrEntregasERP[i].pesoTotBultos);
+					var guiaEntregaERP = "";
+					if (arrEntregasERP[i].guia.substr(0, 3) == "09-") {
+						guiaEntregaERP = arrEntregasERP[i].guia.substr(3);
+					} else {
+						guiaEntregaERP = arrEntregasERP[i].guia;
+					}
+					var numeroTotalbultosCitaERP = that.currencyFormat(arrEntregasERP[i].numeroTotalBultos.toString());
+
+					entregasERPDetalle += '<tr>' +
+						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:center;font-size: 14px;" >' +
+						numeroEntregaERP +
+						'</td>' +
+						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:center;font-size: 14px;">' +
+						destinoEntregaERP +
+						'</td>' +
+						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:right;font-size: 14px;">' +
+						pesoTotalbultosCitaERP +
+						'</td>' +
+						// '<td height="18px" style="border:1px solid black;border-collapse:collapse;font-size: 14px;">' +
+						// guiaEntregaERP +
+						// '</td>' +
+						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:right;font-size: 14px;">' +
+						numeroTotalbultosCitaERP +
+						'</td>' +
+						'</tr>';
+				}
+				if (arrEntregasERP.length > 0) {
+					var titleCitaERPHtml = new sap.ui.core.HTML({
+						content: '<h4 style="text-align: start;" >Resumen de Entregas: </h4>'
+					});
+					var VBoxTitleCitaERPHtml = new sap.m.VBox({
+						width: "100%",
+						justifyContent: "Center",
+						alignItems: "Start",
+						height: "1.5rem"
+					});
+					VBoxTitleCitaERPHtml.addItem(titleCitaERPHtml);
+					VBoxPrincipalCita2.addItem(VBoxTitleCitaERPHtml);
+
+					var oTableERP = "";
+					oTableERP = '<table style="border: 1px solid black; border-collapse: collapse; width: 100%;" align="center">' +
+						'<thead>' +
+						'<tr>' +
+						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="18%" >Entrega</td>' +
+						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="23%">Destino</td>' +
+						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="auto">Peso Total <br> (KG)</td>' +
+						// '<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="23%">Guia de remisión</td>' +
+						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="18%">Cantidad de Embalajes</td>' +
+						'</tr>' +
+						'</thead>' +
+						'<tbody>' +
+						entregasERPDetalle +
+						'</tbody>' +
+						'</table><br>';
+
+					var oTableERPHTML = new sap.ui.core.HTML({
+						content: oTableERP
+					});
+
+					var VBoxEntregaCitaERPHtml = new sap.m.VBox({
+						width: "100%",
+						justifyContent: "Center",
+						alignItems: "Stretch",
+					});
+					VBoxEntregaCitaERPHtml.addItem(oTableERPHTML);
+					VBoxPrincipalCita2.addItem(VBoxEntregaCitaERPHtml);
+				}
+
+				var entregasSCPDetalle = "";
+				for (var i = 0; i < arrEntregasSCP.length; i++) {
+					var numeroEntregaSCP = arrEntregasSCP[i].entrega;
+					var descMotivosSCP = arrEntregasSCP[i].DESCRIPCION_MOTIVOS === undefined ? "" : arrEntregasSCP[i].DESCRIPCION_MOTIVOS;
+					var correoSCP = arrEntregasSCP[i].EMAIL_DESTINATARIO_FINAL === undefined ? "" : arrEntregasSCP[i].EMAIL_DESTINATARIO_FINAL;
+					var destinoEntregaSCP = arrEntregasSCP[i].destino;
+					var pesoTotalbultosCitaSCP = that.currencyFormat(arrEntregasSCP[i].pesoTotBultos);
+					var numeroTotalbultosCitaSCP = that.currencyFormat(arrEntregasSCP[i].numeroTotalBultos.toString());
+
+					var guiaEntregaSCP = "";
+					if (arrEntregasSCP[i].guia.substr(0, 3) == "09-") {
+						guiaEntregaSCP = arrEntregasSCP[i].guia.substr(3);
+					} else {
+						guiaEntregaSCP = arrEntregasSCP[i].guia;
+					}
+
+					entregasSCPDetalle += '<tr>' +
+						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:center;font-size: 14px;" >' +
+						descMotivosSCP +
+						'</td>' +
+						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;font-size: 13px;" >' +
+						numeroEntregaSCP + '<br>' + correoSCP +
+						'</td>' +
+						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:center;font-size: 14px;">' +
+						destinoEntregaSCP +
+						'</td>' +
+						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:right;font-size: 14px;">' +
+						pesoTotalbultosCitaSCP +
+						'</td>' +
+						// '<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:center;font-size: 14px;">' +
+						// guiaEntregaSCP +
+						// '</td>' +
+						'<td height="18px" style="border:1px solid black;border-collapse:collapse;text-align:right;font-size: 14px;">' +
+						numeroTotalbultosCitaSCP +
+						'</td>' +
+						'</tr>';
+				}
+				if (arrEntregasSCP.length > 0) {
+					var titleCitaSCPHtml = new sap.ui.core.HTML({
+						content: '<h4 style="text-align: start;">Resumen de Entregas Sin OC: </h4>'
+					});
+					var VBoxTitleCitaSCPHtml = new sap.m.VBox({
+						width: "100%",
+						justifyContent: "Center",
+						alignItems: "Start",
+						height: "1.5rem"
+					});
+					VBoxTitleCitaSCPHtml.addItem(titleCitaSCPHtml);
+					VBoxPrincipalCita2.addItem(VBoxTitleCitaSCPHtml);
+
+					var oTableSCP = "";
+					oTableSCP = '<table style="border: 1px solid black; border-collapse: collapse; width: 100%;" align="center">' +
+						'<thead>' +
+						'<tr>' +
+						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="15%" >Motivo</td>' +
+						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="auto">Entrega & Destinatario</td>' +
+						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="15%">Destino</td>' +
+						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="auto">Peso Total<br>(KG)</td>' +
+						// '<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="15%">Guia de remisión</td>' +
+						'<td style="border:1px solid black;border-collapse:collapse;text-align:center;" width="10%">Cantidad de Embalajes</td>' +
+						'</tr>' +
+						'</thead>' +
+						'<tbody>' +
+						entregasSCPDetalle +
+						'</tbody>' +
+						'</table><br>';
+
+					var oTableSCPHTML = new sap.ui.core.HTML({
+						content: oTableSCP
+					});
+
+					var VBoxEntregaCitaSCPHtml = new sap.m.VBox({
+						width: "100%",
+						justifyContent: "Center",
+						alignItems: "Stretch",
+					});
+					VBoxEntregaCitaSCPHtml.addItem(oTableSCPHTML);
+					VBoxPrincipalCita2.addItem(VBoxEntregaCitaSCPHtml);
+				}
+
+				for (var i = 0; i < Data.ArrayGeneral.length; i++) {
+					var destinoCita = Data.ArrayGeneral[i].destino;
+					var numeroEntregaCita = Data.ArrayGeneral[i].guia;
+					var numBultosCita = Data.ArrayGeneral[i].numeroTotalBultos;
+					var almacenCita = Data.ArrayGeneral[i].almacen;
+					var cantidadEmbalajeCita = Data.ArrayGeneral[i].cantidadEmbalaje;
+
+					var idCitaCita = Data.ArrayGeneral[i].cita;
+					var condEntregaCita = Data.ArrayGeneral[i].condEnt;
+					var direccionCita = Data.ArrayGeneral[i].direccion;
+					var fechaCita = Data.ArrayGeneral[i].fecha;
+					var horaCita = Data.ArrayGeneral[i].hora;
+					var zonaCita = Data.ArrayGeneral[i].zona;
+					var pesototalbultosCita = that.currencyFormat(Data.ArrayGeneral[i].pesoTotBultos);
+					var qrEntregaCita = new sap.m.HBox({})
+					var tableEntregaCita = new sap.ui.core.HTML({});
+
+					var textoFecha = "";
+					var textoHora = "";
+					if (condEntregaCita == "03") {
+						textoFecha = "Fecha de Recojo";
+						textoHora = "Hora de Recojo";
+					} else if (condEntregaCita == "02") {
+						textoFecha = "Fecha de llegada";
+						textoHora = "Hora de Llegada";
+					} else {
+						textoFecha = "Fecha Cita"
+						textoHora = "Hora Cita";
+					}
+
+					var objqrCitaTotal = {
+						qrentrega: qrEntregaCita.getId(),
+						cita: Data.ArrayGeneral[i].cita,
+						entrega: Data.ArrayGeneral[i].entrega,
+						arrtext: arrtext,
+						almacen: almacenCita,
+						placa: Data.ArrayGeneral[i].placa,
+						fecha: Data.ArrayGeneral[i].fecha,
+						hora: Data.ArrayGeneral[i].hora,
+						destino: Data.ArrayGeneral[i].destino,
+						nbultos: numBultosCita.toString(),
+						condEnt: Data.ArrayGeneral[i].condEnt,
+						direccion: Data.ArrayGeneral[i].direccion,
+						pesoTotBultos: Data.ArrayGeneral[i].pesoTotBultos,
+						zona: Data.ArrayGeneral[i].zona
+					}
+					arrCitaTotal.push(objqrCitaTotal)
+					that.oModel.setProperty("/DataarrCitaTotal", arrCitaTotal);
+				}
+				VBoxPrincipalCita.addItem(VBoxPrincipalCita2);
+				that._byId("total").addItem(VBoxPrincipalCita);
+			}
+
+			var arrCita = [];
+			var arrQrBultos = [];
+
+			//complementario
+			var arrQrBultoComplementario = [];
+			for (var i = 0; i < Data.ArrayGeneral.length; i++) {
+				var VBoxPrincipalEntrega = new sap.m.VBox({
+					width: "720px"
+				});
+				VBoxPrincipalEntrega.addStyleClass("VBoxPrincipal sapUiSizeCompact");
+				var VBoxPrincipalEntrega3 = new sap.m.VBox({
+					alignItems: "Center"
+				});
+				var titleEntrega = new sap.ui.core.HTML({
+					content: '<h4 style="text-align: center;">Resumen  de carga a entregar</h4>'
+				});
+				VBoxPrincipalEntrega3.addItem(titleEntrega);
+
+				var VBoxQREntregaTotal = new sap.m.VBox({
+					width: "100%",
+				});
+				var qrEntrega = new sap.m.HBox({});
+				var numeroEntregaTotal = Data.ArrayGeneral[i].entrega;
+				var guiaEntregaTotal = "";
+				var destino = Data.ArrayGeneral[i].destino;
+
+				if (Data.ArrayGeneral[i].guia.substr(0, 3) == "09-") {
+					guiaEntregaTotal = Data.ArrayGeneral[i].guia.substr(3);
+				} else {
+					guiaEntregaTotal = Data.ArrayGeneral[i].guia;
+				}
+
+				var titleEntregaTotalText = '<table width="79%" style="">' +
+					'<thead>' +
+					'<tr>' +
+					'<td style="text-align:center;" width="auto" rowspan="3">' +
+					'<div id="' + qrEntrega.getId() + '" style="display: block;margin-left: auto;margin-right: auto;text-align: right;"></div>' +
+					'</td>' +
+					'<td style="text-align: center;font-size: 35px;margin:0px" width="auto"><strong>' + numeroEntregaTotal + '</strong></td>' +
+					'</tr>' +
+					'<tr>' +
+					'<td style="text-align: center;font-size: 35px;margin:0px" width="auto"><strong>' + guiaEntregaTotal + '</strong></td>' +
+					'</tr>' +
+					'<tr>' +
+					'<td style="text-align: center;font-size: 35px;margin:0px" width="auto"><strong>' + destino + '</strong></td>' +
+					'</tr>' +
+					'</thead>' +
+					'</table>'
+				var titleEntregaTotal2Html = new sap.ui.core.HTML({});
+				titleEntregaTotal2Html.setContent(titleEntregaTotalText)
+				VBoxQREntregaTotal.addItem(titleEntregaTotal2Html);
+				VBoxPrincipalEntrega3.addItem(VBoxQREntregaTotal);
+
+				var detalleTitleHtml = new sap.ui.core.HTML({
+					content: '<h4 style="text-align: Start;font-weight:normal;">*Esta hoja se debe pegar en cada embalaje según corresponda</h4>'
+				});
+				var HBoxQRTotalDetalleTitle = new sap.m.HBox({
+					width: "100%",
+					justifyContent: "Start",
+					alignItems: "Center",
+					height: "3rem"
+				});
+				HBoxQRTotalDetalleTitle.addItem(detalleTitleHtml);
+				VBoxPrincipalEntrega3.addItem(HBoxQRTotalDetalleTitle);
+
+				var VBoxBultos = new sap.m.VBox({});
+				for (var k = 0; k < Data.ArrayGeneral[i].ArrayGeneral.length; k++) {
+					var VBoxBulto = new sap.m.VBox({
+						width: "100%"
+					})
+					var tableBultos = new sap.ui.core.HTML({});
+					var qrBultos = new sap.m.HBox({});
+					var tableHtmlBultos =
+						'<p style="width:100%;border-top:2px dotted;height: 5px;"><span style="display:none;height: 5px;">x</span></p>' +
+						'<table width="100%" style="border-collapse:collapse;">' +
+						'<tbody>' +
+						'<tr>' +
+						'<td height="36px" style="border:1px solid black;border-collapse:collapse;" width="40%"><strong>' +
+						'Embalaje ' + Data.ArrayGeneral[i].ArrayGeneral[k].CantidadEmbalajeBulto + ': ' + Data.ArrayGeneral[i].ArrayGeneral[k].Un_map +
+						'</strong></td>' +
+						'<td height="36px" style="border:1px solid black;border-collapse:collapse;" width="40%">' +
+						Data.ArrayGeneral[i].ArrayGeneral[k].Codigo +
+						'</td>' +
+						'<td height="36px" style="border:1px solid black;border-collapse:collapse;" width="auto">' +
+						Data.ArrayGeneral[i].ArrayGeneral[k].Descipcion +
+						'</td>' +
+						'<td height="51px" style="" rowspan = "2" width="14%">' +
+						'<div id="' + qrBultos.getId() + '" style="display: block;margin-left: auto;margin-right: auto;width: 78%;"></div>' +
+						'</td>' +
+						'</tr>' +
+						'<tr>' +
+						'<td height="15px" style="font-size: 14px;border:1px solid black;border-collapse:collapse;"><strong>' +
+						'Detalle del Contenido:</strong>' + numeroEntregaTotal + '-' + Data.ArrayGeneral[i].ArrayGeneral[k].CantidadEmbalajeBulto +
+						'</td>' +
+						'<td height="15px" style="font-size: 14px;text-align: left;border:1px solid black;border-collapse:collapse;" width="35%"><strong>' +
+						Data.ArrayGeneral[i].proveedor +
+						'</strong></td>' +
+						'<td height="15px" style="font-size: 14px;text-align: center;border:1px solid black;border-collapse:collapse;" width="auto">' +
+						destino +
+						'</td>' +
+						'</tr>' +
+						'</tbody>' +
+						'</table><br>'
+					tableBultos.setContent(tableHtmlBultos)
+					VBoxBulto.addItem(tableBultos)
+					VBoxBultos.addItem(VBoxBulto)
+
+					var objqrBulto = {
+						qrBultos: qrBultos.getId(),
+						CantidadEmbalajeBulto: Data.ArrayGeneral[i].ArrayGeneral[k].CantidadEmbalajeBulto,
+						Un_map: Data.ArrayGeneral[i].ArrayGeneral[k].Un_map,
+						bulto: Data.ArrayGeneral[i].ArrayGeneral[k].DescripcionGeneral,
+						dimensionbulto: Data.ArrayGeneral[i].ArrayGeneral[k].Descipcion,
+						pesobulto: Data.ArrayGeneral[i].ArrayGeneral[k].PesoBult,
+						entrega: Data.ArrayGeneral[i].entrega,
+						cantidad: Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral.length.toString(),
+						ecri: Data.ArrayGeneral[i].ArrayGeneral[k].Codigo
+					}
+					arrQrBultos.push(objqrBulto)
+					that.oModel.setProperty("/DataarrQrBultos", arrQrBultos);
+					var VBoxPedidos = new sap.m.VBox({
+						width: "100%"
+					});
+
+					VBoxBulto.addItem(VBoxPedidos);
+					var materiales = "";
+
+					for (var l = 0; l < Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral.length; l++) {
+						var oTableMaterialesHTML = new sap.ui.core.HTML({});
+						var ecri = Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zecri === undefined ? "" : Data.ArrayGeneral[i].ArrayGeneral[k]
+							.ArrayGeneral[l].Zecri;
+						var codeMat = that.formatInteger(Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zmatnr) === undefined ? "" :
+							that.formatInteger(Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zmatnr);
+						var pedido = Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zebeln === undefined ? "" : Data.ArrayGeneral[i].ArrayGeneral[
+							k].ArrayGeneral[l].Zebeln;
+						var material = Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zmaktx === undefined ? "" : Data.ArrayGeneral[i].ArrayGeneral[
+							k].ArrayGeneral[l].Zmaktx;
+
+						var motivo = Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].DESCRIPCION_MOTIVOS === undefined ? "" : Data.ArrayGeneral[i]
+							.ArrayGeneral[k].ArrayGeneral[l].DESCRIPCION_MOTIVOS;
+						var email = Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].EMAIL_DESTINATARIO_FINAL === undefined ? "" : Data.ArrayGeneral[
+							i].ArrayGeneral[k].ArrayGeneral[l].EMAIL_DESTINATARIO_FINAL;
+						var area = Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].AREA_RESPONSABLE === undefined ? "" : Data.ArrayGeneral[i].ArrayGeneral[
+							k].ArrayGeneral[l].AREA_RESPONSABLE;
+
+						if (!Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].ID_ENTREGA_SIN_OC_CABECERA) {
+							materiales += '<tr>' +
+								'<td height="18px" style="border:1px solid black;border-collapse:collapse;" >' +
+								codeMat +
+								'</td>' +
+								'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
+								material +
+								'</td>' +
+								'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
+								this.currencyFormat(Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zvemng) +
+								'</td>' +
+								'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
+								Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zunmed +
+								'</td>' +
+								'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
+								pedido +
+								'</td>' +
+								// '<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
+								// ecri +
+								// '</td>' +
+								'</tr>'
+						} else {
+							if (l == 0) {
+								materiales += '<tr>' +
+									'<td height="18px" style="border:1px solid black;border-collapse:collapse;" rowspan="' + Data.ArrayGeneral[i].ArrayGeneral[k]
+									.ArrayGeneral.length.toString() + '">' +
+									motivo +
+									'</td>' +
+									'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
+									Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zmaktx +
+									'</td>' +
+									'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
+									this.currencyFormat(Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zvemng) +
+									'</td>' +
+									'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
+									Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zunmed +
+									'</td>' +
+									'<td height="18px" style="border:1px solid black;border-collapse:collapse;" rowspan="' + Data.ArrayGeneral[i].ArrayGeneral[k]
+									.ArrayGeneral.length.toString() + '">' +
+									email +
+									'</td>' +
+									'<td height="18px" style="border:1px solid black;border-collapse:collapse;" rowspan="' + Data.ArrayGeneral[i].ArrayGeneral[k]
+									.ArrayGeneral.length.toString() + '">' +
+									area +
+									'</td>' +
+									'</tr>'
+							} else {
+								materiales += '<tr>' +
+									'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
+									Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zmaktx +
+									'</td>' +
+									'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
+									this.currencyFormat(Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zvemng) +
+									'</td>' +
+									'<td height="18px" style="border:1px solid black;border-collapse:collapse;">' +
+									Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[l].Zunmed +
+									'</td>' +
+									'</tr>'
+							}
+
+						}
+
+					}
+
+					var oTable = "";
+					if (!Data.ArrayGeneral[i].ArrayGeneral[k].ArrayGeneral[0].ID_ENTREGA_SIN_OC_CABECERA) {
+						oTable = '<table width="100%" style="border:1px solid black;border-collapse:collapse;">' +
+							'<thead>' +
+							'<tr>' +
+							'<td style="border:1px solid black;border-collapse:collapse;" width="auto">Material</td>' +
+							'<td style="border:1px solid black;border-collapse:collapse;" width="34%">Descripción</td>' +
+							'<td style="border:1px solid black;border-collapse:collapse;" width="15%">Cantidad</td>' +
+							'<td style="border:1px solid black;border-collapse:collapse;" width="10%">UM</td>' +
+							'<td style="border:1px solid black;border-collapse:collapse;" width="15%">Pedido</td>' +
+							// '<td style="border:1px solid black;border-collapse:collapse;" width="15%">Ecri</td>' +
+							'</tr>' +
+							'</thead>' +
+							'<tbody>' +
+							materiales +
+							'</tbody>' +
+							'</table>'
+					} else {
+						oTable = '<table width="100%" style="border:1px solid black;border-collapse:collapse;">' +
+							'<thead>' +
+							'<tr>' +
+							'<td style="border:1px solid black;border-collapse:collapse;" width="15%">Motivo</td>' +
+							'<td style="border:1px solid black;border-collapse:collapse;" width="35%">Descripción</td>' +
+							'<td style="border:1px solid black;border-collapse:collapse;" width="15%">Cantidad</td>' +
+							'<td style="border:1px solid black;border-collapse:collapse;" width="10%">UM</td>' +
+							'<td style="border:1px solid black;border-collapse:collapse;" width="10%">Destinatario</td>' +
+							'<td style="border:1px solid black;border-collapse:collapse;" width="15%">Área</td>' +
+							'</tr>' +
+							'</thead>' +
+							'<tbody>' +
+							materiales +
+							'</tbody>' +
+							'</table>'
+					}
+
+					oTableMaterialesHTML.setContent(oTable);
+
+					VBoxPedidos.addItem(oTableMaterialesHTML);
+					VBoxBulto.addItem(VBoxPedidos);
+
+					if (Data.ArrayGeneral[i].ArrayGeneral[k].ArrayComplementario.length > 0) {
+						var VBoxBultosComplementario = new sap.m.VBox({
+							width: "100%"
+						});
+						for (var l = 0; l < Data.ArrayGeneral[i].ArrayGeneral[k].ArrayComplementario.length; l++) {
+							var qrBultosComplementario = new sap.m.HBox({});
+							var dataComplementario = Data.ArrayGeneral[i].ArrayGeneral[k].ArrayComplementario[l];
+							var descipcionComplementario = that.formatNoDecimal(parseFloat(dataComplementario.LAENG).toFixed(2)) + "x" +
+								that.formatNoDecimal(parseFloat(dataComplementario.BREIT).toFixed(2)) + "x" +
+								that.formatNoDecimal(parseFloat(dataComplementario.HOEHE).toFixed(2));
+							var oTableBultoComplementarioHtml = new sap.ui.core.HTML({});
+							var oTableComplementario =
+								'<p style="width:100%;border-top:2px dotted;height: 5px;"><span style="display:none;height: 5px;">x</span></p>' +
+								'<table width="100%" style="border-collapse:collapse;">' +
+								'<tbody>' +
+								'<tr>' +
+								'<td height="36px" style="border:1px solid black;border-collapse:collapse;" width="40%"><strong>' +
+								'Embalaje complementario ' + Data.ArrayGeneral[i].ArrayGeneral[k].ArrayComplementario[l].VHILM_KU_SUB +
+								'</strong></td>' +
+								'<td height="36px" style="border:1px solid black;border-collapse:collapse;" width="40%">' +
+								Data.ArrayGeneral[i].ArrayGeneral[k].ArrayComplementario[l].BEZEI2 +
+								'</td>' +
+								'<td height="36px" style="border:1px solid black;border-collapse:collapse;" width="auto">' +
+								descipcionComplementario +
+								'</td>' +
+								'<td height="51px" style="" rowspan = "2" width="14%">' +
+								'<div id="' + qrBultosComplementario.getId() +
+								'" style="display: block;margin-left: auto;margin-right: auto;width: 78%;"></div>' +
+								'</td>' +
+								'</tr>' +
+								'<tr>' +
+								'<td height="15px" style="font-size: 14px;border:1px solid black;border-collapse:collapse;"><strong>' +
+								'Detalle del Contenido:</strong>' + dataComplementario.INHALT +
+								'</td>' +
+								'<td height="15px" style="font-size: 14px;text-align: left;border:1px solid black;border-collapse:collapse;" width="35%"><strong>' +
+								Data.ArrayGeneral[i].proveedor +
+								'</strong></td>' +
+								'<td height="15px" style="font-size: 14px;text-align: center;border:1px solid black;border-collapse:collapse;" width="auto">' +
+								destino +
+								'</td>' +
+								'</tr>' +
+								'</tbody>' +
+								'</table><br>'
+
+							oTableBultoComplementarioHtml.setContent(oTableComplementario);
+							VBoxBultosComplementario.addItem(oTableBultoComplementarioHtml);
+
+							var objqrBultoComplementario = {
+								qrBultosComplementario: qrBultosComplementario.getId(),
+								bulto: dataComplementario.VHILM_KU,
+								Un_map: dataComplementario.EXIDV,
+								bultoComplementario: dataComplementario.VHILM_KU_SUB,
+								dimensionbulto: descipcionComplementario,
+								pesobulto: dataComplementario.BRGEW,
+								entrega: dataComplementario.VBELN
+							}
+							arrQrBultoComplementario.push(objqrBultoComplementario)
+
+						}
+
+						VBoxBulto.addItem(VBoxBultosComplementario)
+
+					}
+
+					that.oModel.setProperty("/DataarrQrBultosComplementario", arrQrBultoComplementario);
+
+				}
+
+				var sociedad = Data.ArrayGeneral[i].sociedad;
+				var numeroEntrega = Data.ArrayGeneral[i].guia;
+				var numBultos = Data.ArrayGeneral[i].numeroTotalBultos;
+				//campos nuevos
+				var almacen = Data.ArrayGeneral[i].almacen;
+				var cantidadEmbalaje = Data.ArrayGeneral[i].cantidadEmbalaje;
+				//
+				var idCita = Data.ArrayGeneral[i].cita;
+				var condEntrega = Data.ArrayGeneral[i].condEnt;
+				var codCondEntrega = Data.ArrayGeneral[i].codcondEnt;
+				var direccion = Data.ArrayGeneral[i].direccion;
+				var fecha = Data.ArrayGeneral[i].fecha;
+				var hora = Data.ArrayGeneral[i].hora;
+				var zona = Data.ArrayGeneral[i].zona;
+				var pesototalbultos = that.currencyFormat(Data.ArrayGeneral[i].pesoTotBultos);
+
+				var objqrCita = {
+					qrentrega: qrEntrega.getId(),
+					cita: Data.ArrayGeneral[i].cita,
+					entrega: Data.ArrayGeneral[i].entrega,
+					arrtext: arrtext,
+					almacen: almacen,
+					placa: Data.ArrayGeneral[i].placa,
+					fecha: Data.ArrayGeneral[i].fecha,
+					hora: Data.ArrayGeneral[i].hora,
+					destino: Data.ArrayGeneral[i].destino,
+					nbultos: numBultos.toString(),
+					condEnt: Data.ArrayGeneral[i].condEnt,
+					direccion: Data.ArrayGeneral[i].direccion,
+					pesoTotBultos: Data.ArrayGeneral[i].pesoTotBultos,
+					zona: Data.ArrayGeneral[i].zona
+				}
+				arrCita.push(objqrCita)
+				that.oModel.setProperty("/DataarrCita", arrCita);
+
+				VBoxPrincipalEntrega.addItem(VBoxPrincipalEntrega3)
+				VBoxPrincipalEntrega.addItem(VBoxBultos)
+				that._byId("total").addItem(VBoxPrincipalEntrega)
+			}
+		},
+		downloadQr: function () {
+			this.GetSendOnbaseCitaEntrega("yes");
+			that.getView().byId("total").destroyItems();
+			this.CancelarDocQr();
+		},
+		GetSendOnbaseCitaEntrega: function (save) {
+			var oView = that.getView();
+			if (save != "no") {
+				that.entregas.sort(function (a, b) {
+					return a.entrega - b.entrega;
+				});
+			}
+
+			oView.byId("DialogFormatQR").getScrollDelegate().scrollTo(0, 0)
+
+			var idInicial = this.getView().byId("total").getDomRef().firstChild.id
+			var idFinal = this.getView().byId("total").getDomRef().lastChild.id
+
+			var idtotal = this.getView().byId("total").getDomRef().id
+			var rango = $("#" + idtotal + "> div").length
+			var arr = [];
+			var nameEntrega, cita, j;
+			var listaAux = [];
+			that.Base64 = [];
+
+			sap.ui.core.BusyIndicator.show(0);
+
+			for (var i = 0; i < rango; i++) {
+				var divs = $("#" + idtotal + "> div").get(i)
+
+				var fileContent = $("#" + divs.id).wordExport();
+				var blob = new Blob([fileContent], {
+					type: "application/msword;charset=utf-8"
+				});
+				if (that.entregas[0].codcondEnt == "01") {
+					if (i == 0) {
+						var obj = {
+							cita: that.entregas[0].cita,
+							entrega: "",
+							file: btoa(fileContent)
+						};
+						if (save === "yes") {
+							saveAs(blob, "Cita numero:" + that.entregas[0].cita + ".doc");
+						}
+						that.Base64.push(obj);
+					} else {
+						nameEntrega = that.entregas[i - 1].entrega;
+						var obj = {
+							cita: that.entregas[0].cita,
+							entrega: nameEntrega,
+							file: btoa(fileContent)
+						};
+						if (save === "yes") {
+							saveAs(blob, "Entrega numero:" + nameEntrega + ".doc");
+						}
+						that.Base64.push(obj);
+					}
+				} else {
+					nameEntrega = that.entregas[i].entrega;
+					var obj = {
+						cita: that.entregas[0].cita,
+						entrega: nameEntrega,
+						file: btoa(unescape(encodeURIComponent((fileContent))))
+					};
+
+					if (save === "yes") {
+						saveAs(blob, "Entrega numero:" + nameEntrega + ".doc");
+					}
+
+					that.Base64.push(obj);
+				}
+				
+				if(i === rango -1){
+					sap.ui.core.BusyIndicator.hide(0);
+				}
+			}
+		},
+		CancelarDocQr: function () {
+			var that = this;
+			that.byId("total").destroyItems();
+			if (that.byId("DialogFormatQR") != undefined) {
+				that.byId("DialogFormatQR").close();
+			}
+			if (that.byId("DialogMant") != undefined) {
+				that.byId("DialogMant").close();
+			}
+			if (that.byId("DialogEntregasTemp") != undefined) {
+				that.byId("DialogEntregasTemp").close();
+			}
+			this.fnClearDataFechaPlan();
+			this.fnClearComponentFechaPlan();
+			if(that._byId("frgIdFechaPlan--DialogFechaPlan") != undefined){
+				that._byId("frgIdFechaPlan--DialogFechaPlan").close();
+			}
+			that.handleRouteMatched();
+		},
+		ordenarEntrega: function (entrega) {
+			console.log(entrega)
+			entrega.sort(function (a, b) {
+				return a.entrega - b.entrega;
+			});
+			for (var i = 0; i < entrega.length; i++) {
+				entrega[i].ArrayGeneral.sort(function (a, b) {
+					return a.DescripcionGeneral - b.DescripcionGeneral;
+				});
+			}
+			return entrega;
+		},
+
+		abrirnewDialogGuiaTemp: function () {
+			var arrayOrdenes = that.oModel.getProperty("/oEntregaSelect");;
+			var fecha;
+			var arr = [];
+			clearTimeout(timeOutFecha);
+			if (target == "03") {
+				var validateCita = [];
+				validateCita = that.validateCita();
+				if (!validateCita.validate) {
+					utilUI.onMessageErrorDialogPress2(validateCita.msj);
+					return;
+				}
+			}
+
+			var seleccionado = that._byId(this.frgIdFechaPlan + "--tbRegistroDisponible").getSelectedIndex();
+			var contextActual = "/DataFecha/" + seleccionado.toString();
+			var contextNuevo = "/DataFecha/" + (seleccionado + 1).toString();
+			var actual = that.oModel.getProperty(contextActual);
+			var nuevo = that.oModel.getProperty(contextNuevo);
+
+			fecha = actual;
+
+			if (sTarget == "02") {} else if (target == "03") {
+				for (var i = 0; i < arrayOrdenes.length; i++) {
+					if (arrayOrdenes[i].Zbolnr.substr(0, 2) == "09") {
+						arrayOrdenes[i].Zbolnr = arrayOrdenes[i].Zbolnr.substr(3);
+						arrayOrdenes[i].numGuia = arrayOrdenes[i].numGuia.substr(3);
+					}
+				}
+			}
+			that.oModel.setProperty("/fecha", fecha);
+
+			var arrHorarioTotal = [];
+			var obj = {};
+			var condEntrega = arrayOrdenes[0].lugdestino;
+			if (condEntrega == "03") {
+				obj.TitleFecha = "Fecha de Recojo"
+				obj.TitleHora = "Hora de Recojo"
+			} else if (condEntrega == "02") {
+				obj.TitleFecha = "Fecha de Llegada"
+				obj.TitleHora = "Hora de Llegada"
+			} else if (condEntrega == "01") {
+				obj.TitleFecha = "Fecha Cita"
+				obj.TitleHora = "Hora Cita"
+			} else {
+				obj.TitleFecha = "Fecha"
+				obj.TitleHora = "Hora"
+			}
+			arrHorarioTotal.push(obj)
+
+			tha.oModel.setProperty("/DataFechaNoProg", arrHorarioTotal);
+
+			if (!oView.byId("DialogEntregasTemp")) {
+				Fragment.load({
+					id: oView.getId(),
+					name: "com.rava.fragment.Cambios.Entregas",
+					controller: that
+				}).then(function (oDialog) {
+					oView.addDependent(oDialog);
+					sap.ui.core.BusyIndicator.hide(0);
+					oDialog.open();
+					oView.byId("nEntregaSeleccionadas").setText(arrayOrdenes.length)
+				});
+			} else {
+				sap.ui.core.BusyIndicator.hide(0);
+				oView.byId("DialogEntregasTemp").open();
+				oView.byId("nEntregaSeleccionadas").setText(arrayOrdenes.length)
+			}
+		},
+		validateCita: function () {
+			var that = this;
+			var oView = this.getView();
+
+			var DataEntregasPlanificadas = oView.getModel("Proyect").getProperty("/DataEntregasPlanificadas");
+			var EntregasSelecionadas = that.oModel.getProperty("/arrayOrdenesPlanificadas");
+			var boolean = true;
+			var cont = 0;
+			var table = oView.byId("TreeTable2");
+			var Selecciones = table.getSelectedIndices();
+			var msj = "";
+			var textCita = "";
+			var entregasMensaje = [];
+
+			if (EntregasSelecionadas.length > 0) {
+				if (EntregasSelecionadas[0].numCitas.toString() != "") {
+					textCita = EntregasSelecionadas[0].numCitas.toString();
+					for (var i = 0; i < DataEntregasPlanificadas.ArrayGeneral.length; i++) {
+						if (EntregasSelecionadas[0].numCitas.toString() == DataEntregasPlanificadas.ArrayGeneral[i].numCitas.toString()) {
+							entregasMensaje.push(DataEntregasPlanificadas.ArrayGeneral[i].DescripcionGeneralEntrega.toString())
+							cont++;
+						}
+					}
+
+					if (cont == Selecciones.length) {
+						boolean = true;
+					} else {
+						msj = "Falta seleccionar entregas para la cita " + textCita + ". Entregas Relacionadas " + entregasMensaje.join();
+						boolean = false;
+					}
+
+				} else {
+					boolean = true;
+				}
+			} else {
+				msj = "Debe seleccionar la entrega para descargar el documento ";
+				boolean = false;
+			}
+			var json = {
+				"validate": boolean,
+				"msj": msj,
+				"entregas": entregasMensaje
+			};
+
+			return json;
+		},
 
 		_onPressCloseFechaPlan: function (oEvent) {
 			var oSource = oEvent.getSource();
@@ -2863,10 +2858,12 @@ sap.ui.define([
 			that.oModel.setProperty("/DataFecha", []);
 		},
 		fnClearComponentFechaPlan: function () {
-			that._byId(this.frgIdFechaPlan + "--tbRegistroDisponible").clearSelection(true);
-			that._byId(this.frgIdFechaPlan + "--fecharangoInicialPlan").setValue("");
-			that._byId(this.frgIdFechaPlan + "--fecharangoFinalPlan").setValue("");
-			that._byId(this.frgIdFechaPlan + "--nEntregaPlan").setValue("");
+			if(that._byId(this.frgIdFechaPlan + "--tbRegistroDisponible")){
+				that._byId(this.frgIdFechaPlan + "--tbRegistroDisponible").clearSelection(true);
+				that._byId(this.frgIdFechaPlan + "--fecharangoInicialPlan").setValue("");
+				that._byId(this.frgIdFechaPlan + "--fecharangoFinalPlan").setValue("");
+				that._byId(this.frgIdFechaPlan + "--nEntregaPlan").setValue("");
+			}
 		},
 
 		ValidarCamposPendientes: function (oEvent) {
@@ -2904,45 +2901,45 @@ sap.ui.define([
 							return;
 						}
 					}
-					if (Object.keys(oDataCond).length > 0) {
-						for (var j = 0; j < Object.keys(oDataCond).length; j++) {
-							for (var i = 0; i < selectedEntries.length; i++) {
-								if (oDataCond[j].DESCRIPCION == selectedEntries[i].desclugardestino) {
-									contador++;
-								}
-							}
-						}
-						if (contador == 0) {
+					// if (Object.keys(oDataCond).length > 0) {
+					// 	for (var j = 0; j < Object.keys(oDataCond).length; j++) {
+					// 		for (var i = 0; i < selectedEntries.length; i++) {
+					// 			if (oDataCond[j].DESCRIPCION == selectedEntries[i].desclugardestino) {
+					// 				contador++;
+					// 			}
+					// 		}
+					// 	}
+					// 	if (contador == 0) {
 
-						} else if (contador != Selecciones.length) {
-							table.removeSelectionInterval(oIndex, oIndex);
-							var i = selectedEntries.indexOf(object);
-							if (i !== -1) {
-								selectedEntries.splice(i, 1);
-							}
-							return;
-						}
-					}
+					// 	} else if (contador != Selecciones.length) {
+					// 		table.removeSelectionInterval(oIndex, oIndex);
+					// 		var i = selectedEntries.indexOf(object);
+					// 		if (i !== -1) {
+					// 			selectedEntries.splice(i, 1);
+					// 		}
+					// 		return;
+					// 	}
+					// }
 
-					if (Object.keys(oDataCentro).length > 0) {
-						for (var j = 0; j < Object.keys(oDataCentro).length; j++) {
-							for (var i = 0; i < selectedEntries.length; i++) {
-								if (oDataCentro[j].CENTRO == selectedEntries[i].Centro) {
-									contador2++;
-								}
-							}
-						}
-						if (contador2 == 0) {
+					// if (Object.keys(oDataCentro).length > 0) {
+					// 	for (var j = 0; j < Object.keys(oDataCentro).length; j++) {
+					// 		for (var i = 0; i < selectedEntries.length; i++) {
+					// 			if (oDataCentro[j].CENTRO == selectedEntries[i].Centro) {
+					// 				contador2++;
+					// 			}
+					// 		}
+					// 	}
+					// 	if (contador2 == 0) {
 
-						} else if (contador2 != Selecciones.length) {
-							table.removeSelectionInterval(oIndex, oIndex);
-							var i = selectedEntries.indexOf(object);
-							if (i !== -1) {
-								selectedEntries.splice(i, 1);
-							}
-							return;
-						}
-					}
+					// 	} else if (contador2 != Selecciones.length) {
+					// 		table.removeSelectionInterval(oIndex, oIndex);
+					// 		var i = selectedEntries.indexOf(object);
+					// 		if (i !== -1) {
+					// 			selectedEntries.splice(i, 1);
+					// 		}
+					// 		return;
+					// 	}
+					// }
 				}
 				if (!object.Vbeln.toString()) {
 					table.removeSelectionInterval(oIndex, oIndex);
@@ -2984,72 +2981,6 @@ sap.ui.define([
 							that.fnOperacionEliminarEntregaTarget2(oEntregaSelect);
 						}
 					});
-				} else if (target === "03") {
-
-					if (EntregasSelecionadas.length === 0) {
-						MessageToast.show("Seleccione una Entrega");
-						return;
-					}
-
-					if (EntregasSelecionadas.length > 1) {
-						MessageToast.show("Solo se puede eliminar una Entrega");
-						return;
-					}
-
-					var validateCita = [];
-					validateCita = that.validateCita();
-
-					var validateHorario = [];
-					validateHorario = that.validateHorario();
-					if (EntregasSelecionadas[0].numCitas) {
-						if (validateCita.entregas.length == 1) {
-							utilUI.onMessageErrorDialogPress2("Para eliminar la entrega primero se debe eliminar la Cita");
-							return;
-						}
-					}
-
-					if (validateHorario.validate) {
-						var condicion = true;
-						if (EntregasSelecionadas[0].codtipoData == '01') {
-							condicion = true;
-						} else {
-							condicion = false;
-						}
-						sap.m.MessageBox.warning("¿Desea eliminar la Entrega? ", {
-							title: "Mensaje",
-							actions: [
-								"Si",
-								"Cancelar"
-							],
-							onClose: function (sActionClicked) {
-								if (sActionClicked === "Si") {
-									sap.ui.core.BusyIndicator.show(0);
-
-									var dataOrdenesERP = [];
-									var dataOrdenesSCP = [];
-
-									for (var i = 0; i < arrayOrdenes.length; i++) {
-										var Ordenes = arrayOrdenes[i];
-										if (Ordenes.codtipoData == "01") {
-											dataOrdenesERP.push(Ordenes);
-										} else if (Ordenes.codtipoData == "02") {
-											dataOrdenesSCP.push(Ordenes);
-										}
-									}
-
-									if (dataOrdenesERP.length > 0) {
-										that.OperacionEliminarEntregaERP(dataOrdenesERP, dataOrdenesSCP, true);
-									} else {
-										that.OperacionEliminarEntregaSCP(dataOrdenesSCP, "La entrega " + dataOrdenesSCP[0].DescripcionGeneralEntrega +
-											" ha sido eliminada");
-									}
-
-								}
-							}
-						});
-					} else {
-						utilUI.onMessageErrorDialogPress2(validateHorario.msj);
-					}
 				}
 			}
 		},
@@ -3163,5 +3094,393 @@ sap.ui.define([
 				}
 			}
 		},
+
+		_onPressDeleteAppoitment: function (oEvent) {
+			var oSource = oEvent.getSource();
+			var oRow = oSource.getParent();
+			var sTable = "";
+			var oEntregaSelect = [];
+			sTable = "TreeTableBasic2";
+			var oTable = that.byId(sTable);
+			var oIndeces = oTable.getSelectedIndices();
+
+			if (oIndeces.length === 0) {
+				utilUI.onMessageErrorDialogPress2(that.getI18nText("ErrorNoSeleccionCita"));
+				return;
+			} else {
+				oIndeces.forEach(function (value) {
+					var jEntSelect = oTable.getContextByIndex(value).getObject();
+					oEntregaSelect.push(jEntSelect);
+				});
+				if (oIndeces.length === 0) {
+					utilUI.onMessageErrorDialogPress2(that.getI18nText("ErrorNoSeleccionCita"));
+					return;
+				}
+				
+				var validateCita = {};
+				validateCita = that.validateCita(oEntregaSelect);
+				
+				var validateHorario = {};
+				validateHorario = that.validateHorario(oEntregaSelect);
+				
+				if (!validateCita.validate) {
+					utilUI.onMessageErrorDialogPress2(validateCita.msj);
+					return;
+				}
+				
+				if (!validateHorario.validate) {
+					utilUI.onMessageErrorDialogPress2(validateHorario.msj);
+					return;
+				}
+				utilUI.messageBox(this.getI18nText("sConfirmDeleteCita"), "C", function (value) {
+					if (value) {
+						that.fnOperacionEliminarCitaTarget3(oEntregaSelect, "");
+					}
+				});
+			}
+		},
+		fnOperacionEliminarCitaTarget3: function (arrayOrdenes, text) {
+			var EntregasERP = [];
+			var EntregaSCP = [];
+			EntregaSCP = arrayOrdenes.filter(function (obj) {
+				return obj.codtipoData === "02";
+			});
+			EntregasERP = arrayOrdenes.filter(function (obj) {
+				return obj.codtipoData === "01";
+			});
+
+			var estatus = that.oModelGet.getProperty("/oEstado");
+			var codigoestatus = estatus[3].Campo;
+			var descestatus = estatus[3].DescripcionCampo;
+			if (arrayOrdenes[0].ZzlugEnt == '01') {
+				if (arrayOrdenes[0].ZcitaNp == "PROGRAMADO" || arrayOrdenes[0].ZcitaNp == "PROGRAMADA") {
+					var arr3 = [];
+					var fecha;
+					var horario;
+					var centro;
+					var proveedor;
+					for (var i = 0; i < arrayOrdenes.length; i++) {
+						fecha = that.formaterxTemp(arrayOrdenes[i].Zlfdat);
+						horario = that.formatHourTemp(arrayOrdenes[i].Zlfuhr) + ":00";
+						centro = arrayOrdenes[i].Zwerks;
+						proveedor = arrayOrdenes[i].Zlifnr;
+						var objDelete = {
+							"id": "",
+							"fecha": fecha,
+							"hora": horario,
+							"centro": centro,
+							"codprov": proveedor,
+							"fechaInit": fecha,
+							"horaInit": horario
+						}
+						arr3.push(objDelete)
+					}
+					that.BuscarDeleteXsjs(arr3);
+				}
+			}
+
+			var EntregaEliminarSCP = [];
+			var EntregaEliminarERP = [];
+			EntregaSCP.map(function (obj) {
+				var jEliminar = {
+					ENTREGA: obj.Zvbeln.toString(),
+					ESTATUS_USUARIO: codigoestatus,
+					DESCRIPCION_ESTATUS_USUARIO: descestatus,
+				};
+				EntregaEliminarSCP.push(jEliminar);
+			});
+			
+			EntregasERP.map(function (obj) {
+				var jEliminar = {
+					Vbeln: obj.Zvbeln.toString(),
+					Zzlfstk: codigoestatus,
+					Zcita: ""
+				};
+				EntregaEliminarERP.push(jEliminar);
+			});
+			
+			if (text.indexOf("entrega(s)") !== -1) {
+				EntregaEliminar.map(function (obj) {
+					text = text.replace("entrega(s)", "entrega(s) " + obj.ENTREGA);
+				});
+			}
+
+			var dataSinOCHanna = {
+				"oResults": {
+					"EntregaEliminarSCP": EntregaEliminarSCP,
+					"EntregaEliminarERP": EntregaEliminarERP
+				}
+			};
+			// return;
+			sap.ui.core.BusyIndicator.show(0);
+			Services.EliminarCita(that, dataSinOCHanna, function (result) {
+				util.response.validateFunctionSingleEnd(result, {
+					success: function (data, message) {
+						utilUI.messageBox(that.getI18nText("sSuccessDeleteCita"), "S", function (value) {
+								if (value) {
+									that.handleRouteMatched();
+								}
+							});
+					},
+					error: function (jqXHR, textStatus, errorThrown) {
+						sap.ui.core.BusyIndicator.hide(0);
+					}
+				});
+			});
+		},
+
+		BuscarDeleteXsjs: function (contentProv) {
+			var content = [];
+
+			var matriz = {};
+			contentProv.forEach(function (registro) {
+				var horaInit = registro["horaInit"];
+				var centro = registro["centro"];
+				matriz[horaInit] = matriz[horaInit] ? (matriz[horaInit] + 1) : 1;
+				matriz[centro] = matriz[centro] ? (matriz[centro] + 1) : 1;
+			});
+
+			matriz = Object.keys(matriz).map(function (horaInit) {
+				return {
+					data: horaInit,
+					cant: matriz[horaInit]
+				};
+			});
+
+			var arrMatriz = [];
+			arrMatriz = matriz;
+			var cantProveedor = arrMatriz.length;
+			const myObj2 = {}
+
+			for (var i = 0, len = arrMatriz.length; i < len; i++)
+				myObj2[arrMatriz[i]['cant']] = arrMatriz[i].cant;
+
+			arrMatriz = new Array();
+			for (var key2 in myObj2)
+				arrMatriz.push(myObj2[key2]);
+			// Your code here!
+
+			for (var i = 0; i < matriz.length; i++) {
+				for (var l = 0; l < contentProv.length; l++) {
+					// if (arrMatriz.length > 1) {
+					// 	if (matriz[i].data == contentProv[l].centro) {
+					// 		contentProv[l].count = matriz[i].cant;
+					// 	}
+					// } else {
+						if (matriz[i].data == contentProv[l].horaInit) {
+							contentProv[l].count = matriz[i].cant;
+						}
+					// }
+				}
+			}
+
+			var content = [];
+			contentProv.forEach(item => {
+				try {
+					if (JSON.stringify(content[content.length - 1]) !== JSON.stringify(item)) {
+						content.push(item);
+					}
+				} catch (err) {
+					content.push(item);
+				}
+			});
+
+			for (var i = 0; i < content.length; i++) {
+				var fecha = content[i].fechaInit;
+				var horario = content[i].horaInit;
+				var centro = content[i].centro;
+				var codprov = content[i].codprov;
+				var id = content[i].id;
+				var url = "/hana/IPROVIDER_ENTREGA/REGISTRO_FECHA/RegistroHorarioFiltrar.xsjs?centro=" + centro + "&codprov=" + codprov +
+					"&fecha=" + fecha + "&horario=" + horario
+				$.ajax({
+					url: url,
+					method: "GET",
+					async: false,
+					contentType: 'application/json',
+					headers: {
+						Authorization: "Basic VVNSX1JBVkE6UmF2YTIwMjAk"
+					},
+					success: function (data) {
+						var objtotal = {}
+						if (Object.keys(data).length > 0) {
+							data[0].ID_REGISTRO = data[0].ID_REGISTRO.toString();
+							data[0].FECHA = (data[0].FECHA).split("T")[0];
+							data[0].HORA = (data[0].HORA).split("T")[1].split(".")[0];
+							for (var k = 0; k < content.length; k++) {
+								if (data[0].HORA == content[k].horaInit) {
+									var resto = (parseInt(data[0].ENTREGAS_REGISTRADAS) - content[k].count);
+									if (resto < 0) {
+										resto = 0;
+									}
+									data[0].ENTREGAS_REGISTRADAS = resto.toString();
+									break;
+								}
+							}
+
+							if (data[0].ENTREGAS_REGISTRADAS == "0") {
+								that.methodDeleteXsjs(data[0].ID_REGISTRO);
+							} else {
+								that.methodUpdateXsjs(data[0]);
+							}
+						}
+					},
+					error: function (e) {
+						console.log("Ocurrio un error" + JSON.parse(e))
+					}
+				});
+
+			}
+		},
+		methodDeleteXsjs: function (id) {
+			$.ajax({
+				url: "/hana/IPROVIDER_ENTREGA/REGISTRO_FECHA/RegistroFecha.xsjs?id_registro=" + id,
+				method: "DELETE",
+				contentType: 'application/json',
+				headers: {
+				Authorization: "Basic VVNSX1JBVkE6UmF2YTIwMjAk"
+				},
+				success: function (data) {
+				},
+				error: function (e) {
+					console.log("Ocurrio un error" + JSON.parse(e))
+					MessageToast.show("Erro al borrar registro");
+				}
+			});
+ 		},
+ 		methodUpdateXsjs: function (content) {
+			$.ajax({
+				url: "/hana/IPROVIDER_ENTREGA/REGISTRO_FECHA/RegistroFecha.xsjs",
+				type: "PUT",
+				contentType: 'text/json',
+				async: false,
+				headers: {
+				Authorization: "Basic VVNSX1JBVkE6UmF2YTIwMjAk"
+				},
+				data: JSON.stringify(content)
+			})
+ 		},
+ 		
+ 		validateCita: function (oEntregaSelect) {
+ 			var DataEntregasPlanificadas = that.oModel.getProperty("/oEntregasConCita");
+ 			var EntregasSelecionadas = oEntregaSelect;
+ 			var boolean = true;
+ 			var cont = 0;
+ 			var table = that.byId("TreeTableBasic2");
+ 			var Selecciones = table.getSelectedIndices();
+ 			var msj = "";
+ 			var textCita = "";
+ 			var entregasMensaje = [];
+
+ 			if (EntregasSelecionadas.length > 0) {
+ 				if (EntregasSelecionadas[0].Zcita.toString() != "") {
+ 					textCita = EntregasSelecionadas[0].Zcita.toString();
+ 					for (var i = 0; i < DataEntregasPlanificadas.length; i++) {
+ 						if (EntregasSelecionadas[0].Zcita.toString() == DataEntregasPlanificadas[i].Zcita.toString()) {
+ 							entregasMensaje.push(DataEntregasPlanificadas[i].Zvbeln.toString())
+ 							cont++;
+ 						}
+ 					}
+
+ 					if (cont == Selecciones.length) {
+ 						boolean = true;
+ 					} else {
+ 						msj = "Falta seleccionar entregas para la cita " + textCita + ". Entregas Relacionadas " + entregasMensaje.join();
+ 						boolean = false;
+ 					}
+
+ 				} else {
+ 					boolean = true;
+ 				}
+ 			} else {
+ 				msj = "Debe seleccionar la entrega para descargar el documento ";
+ 				boolean = false;
+ 			}
+ 			var json = {
+ 				"validate": boolean,
+ 				"msj": msj,
+ 				"entregas": entregasMensaje
+ 			};
+
+ 			return json;
+ 		},
+ 		validateHorario: function (oEntregaSelect) {
+ 			var DataEntregasPlanificadas = that.oModel.getProperty("/oEntregasConCita");
+ 			var EntregasSelecionadas = oEntregaSelect;
+ 			var boolean = true;
+ 			var cont = 0;
+ 			var table = that.byId("TreeTableBasic2");
+ 			var Selecciones = table.getSelectedIndices();
+ 			var msj = "";
+ 			var textCita = "";
+ 			var entregasMensaje = [];
+
+ 			var dateActual = new Date();
+
+ 			var fecha = EntregasSelecionadas[0].Zlfdat;
+ 			var date = fecha.substr(0, 4) + "/" + fecha.substr(4, 2) + "/" + fecha.substr(6, 2);
+ 			var hora = this.formatHourTemp(EntregasSelecionadas[0].Zlfuhr);
+ 			var datePlanificada = new Date(date + " " + hora);
+
+ 			var data = that.oModelGet.getProperty("/oHorasTolerancia");
+ 			if (data.length > 0) {
+ 				var number = data[0].CONTADOR;
+ 				if (datePlanificada.getTime() > dateActual.getTime()) {
+ 					if (dateActual.getTime() < datePlanificada.getTime() - 1 * (parseInt(number)) * 60 * 60 * 1000) {
+ 						msj = "";
+ 						boolean = true;
+ 					} else {
+ 						msj = "No es posible eliminar la(s) entrega(s) " + data[0].CONTADOR + " horas antes de la fecha planificada";
+ 						boolean = false;
+ 					}
+ 				} else {
+ 					msj = "";
+ 					boolean = true;
+ 				}
+ 			} else {
+ 				msj = "";
+ 				boolean = true;
+ 			}
+
+ 			var json = {
+ 				"validate": boolean,
+ 				"msj": msj
+ 			};
+
+ 			return json;
+ 		},
+		
+		_onPressDownload: function (oEvent) {
+ 			var oBindingContext = oEvent.getSource().getParent().getBindingContext("oModel");
+ 			var oBindingObject = oBindingContext.getObject();
+ 			var Json;
+ 			var Json2;
+ 			
+ 			var arrayOrdenes = that.oModel.getProperty('/oEntregasConCita');
+			var cita = oBindingObject.Zcita;
+			
+ 			var dataOrdenesERP = [];
+ 			var dataOrdenesSCP = [];
+			var listaGeneral = [];
+ 			for (var i = 0; i < arrayOrdenes.length; i++) {
+ 				var Ordenes = arrayOrdenes[i];
+ 				if (Ordenes.codtipoData == "01") {
+ 					dataOrdenesERP.push(Ordenes);
+ 				} else if (Ordenes.codtipoData == "02") {
+ 					dataOrdenesSCP.push(Ordenes);
+ 				}
+ 				if(Ordenes.Zcita === cita){
+ 					Ordenes.materiales.forEach(function(value){
+ 						listaGeneral.push(value);
+ 					});
+ 				}
+ 			}
+
+ 			var estructuraDataTotalERP = {};
+ 			var estructuraDataTotalSCP = {};
+ 			var estructuraDataArrayOrdenes = {};
+			
+ 			that.exitopdf(that, "Documento de Cita Número: " + cita , cita, listaGeneral, 1);
+ 		}
 	});
 });

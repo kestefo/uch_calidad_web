@@ -15,6 +15,8 @@ sap.ui.define([
             this.oRouter.getTarget("TargetLogin").attachDisplay(jQuery.proxy(this.handleRouteMatched, this));
         },
         handleRouteMatched: function(){
+        	
+                
             console.log("entro")
         },
         _onPressLogin: function(){

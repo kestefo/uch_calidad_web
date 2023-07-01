@@ -51,6 +51,7 @@
   "headerWhiteList": [
     "sToken",
     "sIdTransaccion",
-    "sAplicacion"
+    "sAplicacion",
+    "Access-Control-Allow-Origin"
   ]
 }

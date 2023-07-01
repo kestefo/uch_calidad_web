@@ -74,7 +74,7 @@
 
                     <Button id="btUpdateRegister" text="{i18n>textButtonUpdateRegister}" press="" type="Accept" icon="sap-icon://edit" visible="false"/>
                     <Button id="btUpdateDate" text="{i18n>textButtonUpdateDate}" press="" type="Accept" icon="sap-icon://edit" visible="false"/>
-                    <Button id="btDeleteAppointment" text="{i18n>textButtonDeleteAppointment}" press="" type="Reject" icon="sap-icon://delete" visible="false"/>
+                    <Button id="btDeleteAppointment" text="{i18n>textButtonDeleteAppointment}" press="_onPressDeleteAppoitment" type="Reject" icon="sap-icon://delete" visible="false"/>
                 </content>
             </OverflowToolbar>
         </footer>

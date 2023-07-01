@@ -66,5 +66,11 @@ sap.ui.define([
 		InsertarEntregasHana: function (context, oResults, callback) {
 			utilHttp.Post(constantes.services.InsertarEntregasHana, oResults, callback, context);
 		},
+		InsertarEntregasERPHana: function (context, oResults, callback) {
+			utilHttp.Post(constantes.services.InsertarEntregasERPHana, oResults, callback, context);
+		},
+		EliminarCita: function (context, oResults, callback) {
+			utilHttp.Post(constantes.services.EliminarCita, oResults, callback, context);
+		},
 	};
 });

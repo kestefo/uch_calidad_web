@@ -30,6 +30,8 @@ sap.ui.define([
 			ValidacionConcurrenciaFecha:"/Entrega/Service/ValidacionConcurrenciaFecha/",
 			RegistrarEntregasAprobadas:"/Entrega/Service/RegistrarEntregasAprobadas/",
 			InsertarEntregasHana: "/Entrega/Service/ActualizarCitaEntregaSinOC/",
+			InsertarEntregasERPHana: "/Entrega/Service/ActualizarCitaEntregaConOC/",
+			EliminarCita: "/Entrega/Service/EliminarCita/",
 		}
 	};
 });

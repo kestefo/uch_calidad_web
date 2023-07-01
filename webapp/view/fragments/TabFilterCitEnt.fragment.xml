@@ -33,12 +33,12 @@
 					<Text text="{oModel>Zgort} - {oModel>Zlgobe}" wrapping="false"/>
 				</ui:template>
 			</ui:Column>
-			<ui:Column width="9rem">
-				<Label text="{i18n>lblcolumnNumGuiaCita}"/>
-				<ui:template>
-					<Text text="{oModel>Zbolnr}" wrapping="false"/>
-				</ui:template>
-			</ui:Column>
+			<!--<ui:Column width="9rem">-->
+			<!--	<Label text="{i18n>lblcolumnNumGuiaCita}"/>-->
+			<!--	<ui:template>-->
+			<!--		<Text text="{oModel>Zbolnr}" wrapping="false"/>-->
+			<!--	</ui:template>-->
+			<!--</ui:Column>-->
 			<ui:Column width="11rem">
 				<Label text="{i18n>lblcolumnCondEntregaCita}"/>
 				<ui:template>
@@ -72,7 +72,7 @@
 			<ui:Column width="10rem" hAlign="Center">
 				<Label text="{i18n>lblcolumnDescargarDocCita}"/>
 				<ui:template>
-					<Button text="{i18n>textButtonVer}" icon="sap-icon://download"/>
+					<Button text="{i18n>textButtonVer}" press="_onPressDownload" icon="sap-icon://download"/>
 				</ui:template>
 			</ui:Column>
 		</ui:columns>
