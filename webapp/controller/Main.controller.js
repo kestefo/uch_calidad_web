@@ -64,6 +64,45 @@ sap.ui.define([
 					//jose get data table 2
 					var oDataPedConCita = oDataHana.WalInOrdersCit;
 					this._onEstructurePedConCita(oDataPedConCita, "05", "/oEntregasConCita");
+					
+					//Trazabilidad
+					var date = new Date();
+					var _24HoursInMilliseconds = 86400000;
+					var datesAfter = new Date(date.getTime() - 7 * _24HoursInMilliseconds);
+					var datesAgo = new Date(date.getTime() + 7 * _24HoursInMilliseconds);
+					var mount = date.getMonth();
+					var year = date.getFullYear();
+					var dayAfter = datesAfter.getDate();
+					var mountAfter = datesAfter.getMonth();
+					var yearAfter = datesAfter.getFullYear().toString();
+					var dayAgo = datesAgo.getDate();
+					var mountAgo = datesAgo.getMonth();
+					var yearAgo = datesAgo.getFullYear();
+					
+					var dateAfterDay = dayAfter +1;
+					if (dateAfterDay < 10) {
+						dateAfterDay = "0" + dateAfterDay;
+					}
+					
+					var dateAfterMonth = mountAfter +1;
+					if (dateAfterMonth < 10) {
+						dateAfterMonth = "0" + dateAfterMonth;
+					}
+					
+					var dateAgoDay = dayAgo +1;
+					if (dateAgoDay < 10) {
+						dateAgoDay = "0" + dateAgoDay;
+					}
+					var dateActMonth = mount +1;
+					if (dateActMonth < 10) {
+						dateActMonth = "0" + dateActMonth;
+					}
+					that.oModel.setProperty("/sTimeHorizonInit", yearAfter+dateAfterMonth.toString()+"01000000")
+					that.oModel.setProperty("/sTimeHorizonEnd", yearAfter+"1231000000")
+					
+					that.oModel.setProperty("/sTimeVisibleInit", yearAfter+dateAfterMonth.toString()+dateAfterDay.toString()+"000000");
+					that.oModel.setProperty("/sTimeVisibleEnd", yearAgo+dateActMonth.toString()+dateAgoDay.toString()+"000000");
+					
 					that.eliminarPendiente();
 					sap.ui.core.BusyIndicator.hide(0);
 				}).catch(function (oError) {
@@ -362,6 +401,20 @@ sap.ui.define([
 				this._byId("btChangeOrder").setVisible(false);
 				this._byId("btDeleteOrder").setVisible(false);
 				this._byId("btDeleteAppointment").setVisible(true);
+
+				this._byId("btUpdateRegister").setVisible(false);
+				this._byId("btUpdateDate").setVisible(false);
+				this._byId("btMakeAppointment").setVisible(false);
+				this._byId("btOrderNoOC").setVisible(false);
+				this._byId("btOrderOC").setVisible(false);
+
+				break;
+				
+			case "keyTabFilterCitEnt":
+				sTarget = "03";
+				this._byId("btChangeOrder").setVisible(false);
+				this._byId("btDeleteOrder").setVisible(false);
+				this._byId("btDeleteAppointment").setVisible(false);
 
 				this._byId("btUpdateRegister").setVisible(false);
 				this._byId("btUpdateDate").setVisible(false);

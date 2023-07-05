@@ -56,6 +56,18 @@
                                 <core:Fragment fragmentName="solicitarcitapr.view.fragments.TabFilterCitEnt" type="XML"/>
                             </content>
                         </IconTabFilter>
+                        <IconTabSeparator />
+                        <IconTabFilter
+                            icon		="sap-icon://shipping-status"
+                            iconColor	="Positive"
+                            class		="sapUiResponsiveContentPadding"
+                            design		="Horizontal"
+                            text		="{i18n>textIconTabFilterTrazabilidad}"
+                            key			="keyTabFilterTraz">
+                            <content>
+                                <core:Fragment fragmentName="solicitarcitapr.view.fragments.TabFilterTrazabilidad" type="XML"/>
+                            </content>
+                        </IconTabFilter>
                     </items>
                 </IconTabBar>
             </VBox>

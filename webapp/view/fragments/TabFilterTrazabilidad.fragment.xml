@@ -1,0 +1,65 @@
+<core:FragmentDefinition xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns="sap.ui.table" xmlns:axistime="sap.gantt.axistime"
+	xmlns:config="sap.gantt.config" xmlns:gnt2="sap.gantt.simple"
+	xmlns:custom="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
+	<gnt2:GanttChartWithTable id="FreightOrderAndFreightUnit" ghostAlignment="Start" adhocLineLayer="Bottom" shapeSelectionMode="Single"
+		enableChartOverflowToolbar="true" shapeSelectionSettings="{color:'red', strokeDasharray:'1,0'}" shapeDrop="onShapeDrop"
+		shapeDoubleClick="onShapeDoubleClick">
+		<gnt2:table>
+			<TreeTable visibleRowCountMode="Auto" selectionBehavior="RowSelector" enableColumnReordering="true"
+				 rows="{path:'oModel>/oEntregasConCita', parameters: {arrayNames:['ArrayGeneral2']}}">
+				<extension>
+					<m:OverflowToolbar>
+						<m:Select forceSelection="false" selectedKey="FOFU" change="onHierarchyChange">
+							<m:items>
+								<core:Item key="01" text="Pendiente"/>
+								<core:Item key="02" text="Diario"/>
+								<core:Item key="03" text="Vencido"/>
+							</m:items>
+						</m:Select>
+					</m:OverflowToolbar>
+				</extension>
+				<rowSettingsTemplate>
+					<gnt2:GanttRowSettings rowId="{data>RequirementID}">
+						<gnt2:shapes1>
+							<gnt2:BaseRectangle shapeId="{data>RequirementID}" countInBirdEye="true" time="{data>StartTime}" endTime="" resizable="false"
+								selectable="true" draggable="true" title="{data>RequirementID}" showTitle="true" tooltip=""
+								stroke="{ parts: [ 'data>Type', 'data>PlanStatus' ], formatter: '.formatter.strokeColor' }"
+								strokeWidth="{ parts: [ 'data>Type', 'data>PlanStatus' ], formatter: '.formatter.strokeWidth' }"
+								strokeDasharray="{ parts: [ 'data>Type', 'data>PlanStatus' ], formatter: '.formatter.strokeDasharray' }"
+								fill="{ parts: [ 'data>Type', 'data>PlanStatus' ], formatter: '.formatter.fillColor' }"/>
+						</gnt2:shapes1>
+					</gnt2:GanttRowSettings>
+				</rowSettingsTemplate>
+				<columns>
+					<Column sortProperty="ZcitaNp" filterProperty="ZcitaNp">
+						<m:Text text="Cita" wrapping="false"/>
+						<template>
+							<m:HBox>
+								<m:items>
+									<core:Icon class="sapUiSmallMarginEnd" src="sap-icon://shipping-status" size="1.25rem"/>
+									<m:Label text="{oModel>Zcita}"/>
+								</m:items>
+							</m:HBox>
+						</template>
+					</Column>
+					<Column sortProperty="Zvbeln" filterProperty="Zvbeln">
+						<m:Text text="Entrega" wrapping="false"/>
+						<template>
+							<m:Label text="{oModel>Zvbeln}"/>
+						</template>
+					</Column>
+				</columns>
+			</TreeTable>
+		</gnt2:table>
+		<gnt2:axisTimeStrategy calendarWeekNumbering="MiddleEastern">
+			<axistime:ProportionZoomStrategy>
+				<axistime:totalHorizon>
+					<config:TimeHorizon startTime="{oModel>/sTimeHorizonInit}" endTime="{oModel>/sTimeHorizonEnd}"/>
+				</axistime:totalHorizon>
+				<axistime:visibleHorizon>
+					<config:TimeHorizon startTime="{oModel>/sTimeVisibleInit}" endTime="{oModel>/sTimeVisibleEnd}"/>
+				</axistime:visibleHorizon>
+			</axistime:ProportionZoomStrategy>
+		</gnt2:axisTimeStrategy>
+	</gnt2:GanttChartWithTable>
+</core:FragmentDefinition>
