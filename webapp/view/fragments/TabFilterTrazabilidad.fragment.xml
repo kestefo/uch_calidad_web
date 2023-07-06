@@ -1,16 +1,17 @@
 <core:FragmentDefinition xmlns:m="sap.m" xmlns:core="sap.ui.core" xmlns="sap.ui.table" xmlns:axistime="sap.gantt.axistime"
 	xmlns:config="sap.gantt.config" xmlns:gnt2="sap.gantt.simple"
 	xmlns:custom="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
-	<gnt2:GanttChartWithTable id="FreightOrderAndFreightUnit" ghostAlignment="Start" adhocLineLayer="Bottom" shapeSelectionMode="Single"
+	<gnt2:GanttChartWithTable id="FreightOrderAndFreightUnit" ghostAlignment="Start" adhocLineLayer="Bottom" shapeSelectionMode="None"
 		enableChartOverflowToolbar="true" shapeSelectionSettings="{color:'red', strokeDasharray:'1,0'}" shapeDrop="onShapeDrop"
 		shapeDoubleClick="onShapeDoubleClick">
 		<gnt2:table>
-			<TreeTable visibleRowCountMode="Auto" selectionBehavior="RowSelector" enableColumnReordering="true"
-				 rows="{path:'oModel>/oEntregasConCita', parameters: {arrayNames:['ArrayGeneral2']}}">
+			<TreeTable minAutoRowCount="10" visibleRowCountMode="Auto" selectionBehavior="RowSelector" enableColumnReordering="true"
+				 rows="{path:'oModel>/oEntregasConCitaGraf', parameters: {arrayNames:['ArrayGeneral']}}" selectionMode="None">
 				<extension>
 					<m:OverflowToolbar>
-						<m:Select forceSelection="false" selectedKey="FOFU" change="onHierarchyChange">
+						<m:Select forceSelection="false" selectedKey="00" change="onChangeStatus">
 							<m:items>
+								<core:Item key="00" text="Todo"/>
 								<core:Item key="01" text="Pendiente"/>
 								<core:Item key="02" text="Diario"/>
 								<core:Item key="03" text="Vencido"/>
@@ -19,14 +20,14 @@
 					</m:OverflowToolbar>
 				</extension>
 				<rowSettingsTemplate>
-					<gnt2:GanttRowSettings rowId="{data>RequirementID}">
+					<gnt2:GanttRowSettings>
 						<gnt2:shapes1>
-							<gnt2:BaseRectangle shapeId="{data>RequirementID}" countInBirdEye="true" time="{data>StartTime}" endTime="" resizable="false"
-								selectable="true" draggable="true" title="{data>RequirementID}" showTitle="true" tooltip=""
-								stroke="{ parts: [ 'data>Type', 'data>PlanStatus' ], formatter: '.formatter.strokeColor' }"
-								strokeWidth="{ parts: [ 'data>Type', 'data>PlanStatus' ], formatter: '.formatter.strokeWidth' }"
-								strokeDasharray="{ parts: [ 'data>Type', 'data>PlanStatus' ], formatter: '.formatter.strokeDasharray' }"
-								fill="{ parts: [ 'data>Type', 'data>PlanStatus' ], formatter: '.formatter.fillColor' }"/>
+							<gnt2:BaseRectangle countInBirdEye="true" time="{oModel>dDateInit}" endTime="{oModel>dDateEnd}" resizable="false"
+								selectable="true" draggable="true" title="{path:'oModel>Zlfuhr',formatter:'.formatHHMMSSAbap'}" showTitle="true" tooltip=""
+								stroke="{oModel>sStroke}"
+								strokeWidth="3"
+								strokeDasharray="3,3"
+								fill="{oModel>sFill}"/>
 						</gnt2:shapes1>
 					</gnt2:GanttRowSettings>
 				</rowSettingsTemplate>
@@ -36,13 +37,23 @@
 						<template>
 							<m:HBox>
 								<m:items>
-									<core:Icon class="sapUiSmallMarginEnd" src="sap-icon://shipping-status" size="1.25rem"/>
-									<m:Label text="{oModel>Zcita}"/>
+									<core:Icon class="sapUiSmallMarginEnd" src="sap-icon://shipping-status" size="1.25rem" visible="{oModel>bVisible}"/>
+									<m:Label text="{oModel>Zcita}" visible="{oModel>bVisible}"/>
 								</m:items>
 							</m:HBox>
 						</template>
 					</Column>
-					<Column sortProperty="Zvbeln" filterProperty="Zvbeln">
+					<Column sortProperty="ZcitaNp" filterProperty="ZcitaNp" width="7rem">
+						<m:Text text="Fecha" wrapping="false"/>
+						<template>
+							<m:HBox>
+								<m:items>
+									<m:Label text="{path:'oModel>Zlfdat',formatter:'.formatYYYYMMDDAbap'}" visible="{oModel>bVisible}"/>
+								</m:items>
+							</m:HBox>
+						</template>
+					</Column>
+					<Column sortProperty="Zvbeln" filterProperty="Zvbeln" width="6rem">
 						<m:Text text="Entrega" wrapping="false"/>
 						<template>
 							<m:Label text="{oModel>Zvbeln}"/>

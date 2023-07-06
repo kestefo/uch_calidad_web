@@ -1,0 +1,171 @@
+<core:FragmentDefinition
+xmlns:core			="sap.ui.core"
+controllerName		="com.rava.controller.Registro" 
+xmlns				="sap.m" 
+xmlns:form			="sap.ui.layout.form"
+xmlns:ui			="sap.ui.table"
+xmlns:custom="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
+    <Dialog id="DialogEmbalarBultos1" title="hola" horizontalScrolling="true" showHeader="false" state="None" stretch="false"  type="Standard" verticalScrolling="true" class="sapUiResponsiveContentPadding">
+        <content>
+            <ui:TreeTable id="tableBultos1" rows="{path:'oModel>/DataBultosModificar',parameters: {arrayNames:['Array']}}" selectionMode="None"
+				enableSelectAll="false" rowSelectionChange="ValidarCamposBultos" visibleRowCount="6" ariaLabelledBy="title">
+				<ui:extension>
+					<OverflowToolbar>
+						<Title text="{i18n>titleEmbalajes}"/>
+						<ToolbarSpacer/>
+					</OverflowToolbar>
+				</ui:extension>
+				<ui:columns>
+					<ui:Column width="7rem">
+						<Label text="{i18n>titleNEmbalaje}"/>
+						<ui:template>
+							<ObjectNumber textAlign="Center" number="{oModel>Num}"/>
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="11rem">
+						<Label text="{i18n>titleTipoNEmbalaje}"/>
+						<ui:template>
+							<Select visible="{= !!${oModel>Num}}" change="fnSelectedTipoBultoEntregaOC" selectedKey="{oModel>TipoBulto}" forceSelection="false"
+								items="{ path:'oModelGet>/oTipoBulto' , templateShareable:false }" enabled="false">
+								<core:Item key="{oModelGet>Campo}" text="{oModelGet>DescripcionCampo}"/>
+							</Select>
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="12rem">
+						<Label text="{i18n>titledescCont}"/>
+						<ui:template>
+							<Input type="Text" value="{oModel>Observacion}" width="auto" maxLength="40" visible="{= !!${oModel>Num}}" placeholder="{i18n>phIngresarCont}" enabled="false"/>
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="9rem" hAlign="Center">
+						<Label text="{i18n>titlePeso}"/>
+						<ui:template >
+							<Input type="Text" textAlign="Right" visible="{= !!${oModel>Num}}" value="{oModel>PesoBulto}" width="auto"
+								 placeholder="{i18n>phPeso}" change="fnreemLetrasCant" enabled="false"/>
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="7rem">
+						<Label text="{i18n>titleLongitud}"/>
+						<ui:template>
+							<Input type="Text" textAlign="Right" value="{oModel>Longitud}" width="auto" visible="{= !!${oModel>Num}}"
+								placeholder="{i18n>phLonguitud}" change="fnreemLetrasCant" enabled="false"/>
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="7rem">
+						<Label text="{i18n>titleAncho}"/>
+						<ui:template>
+							<Input type="Text" textAlign="Right" visible="{= !!${oModel>Num}}" value="{oModel>Ancho}" width="auto"
+								placeholder="{i18n>phAncho}" change="fnreemLetrasCant" enabled="false"/>
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="7rem">
+						<Label  text="{i18n>titleAltura}"/>
+						<ui:template>
+							<Input textAlign="Right" type="Text" visible="{= !!${oModel>Num}}" value="{oModel>Altura}" width="auto"
+								placeholder="{i18n>phAltura}" change="fnreemLetrasCant" enabled="false"/>
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="9rem" hAlign="Center">
+						<Label text="{i18n>titlecolumnPed}"/>
+						<ui:template>
+							<ObjectNumber textAlign="Center" number="{oModel>EbelnD}"/>
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="6rem" hAlign="Center">
+						<Label text="{i18n>titlecolumnPos}"/>
+						<ui:template>
+							<ObjectNumber textAlign="Center" number="{oModel>EbelpD}"/>
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="8rem" hAlign="Center">
+						<Label text="{i18n>titlecolumnMat}"/>
+						<ui:template>
+							<ObjectNumber textAlign="Center" number="{oModel>MatnrD}"/>
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="17rem" hAlign="Center">
+						<Label text="{i18n>titlecolumnDen}"/>
+						<ui:template>
+							<Text text="{oModel>Txz01D}" wrapping="false"/>
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="9rem" hAlign="End">
+						<Label text="{i18n>titlecolumnCantEmb2}"/>
+						<ui:template>
+							<ObjectNumber textAlign="End" number="{oModel>MengezuD}"/>
+						</ui:template>
+					</ui:Column>
+					<!--<ui:Column width="9rem" hAlign="Center">-->
+					<!--	<Label text="{i18n>titlecolumnObs}"/>-->
+					<!--	<ui:template>-->
+					<!--		<Button text="Ver" enabled="{= ${oModel>TdlinePos} === '' ?false:true}" visible="{= !${oModel>Num}}" type="Emphasized"-->
+					<!--			icon="sap-icon://show" iconFirst="true" width="auto" press="DialogVerObs"/>-->
+					<!--	</ui:template>-->
+					<!--</ui:Column>-->
+				</ui:columns>
+			</ui:TreeTable>
+			<ui:Table id="tableMateriales1" rows="{oModel>/DataMaterialesModificar}" selectionMode="None" visibleRowCount="6"
+				rowSelectionChange="ValidarCamposMateriales" ariaLabelledBy="title">
+				<ui:extension>
+					<OverflowToolbar>
+						<Title text="{i18n>titleItems}"/>
+					</OverflowToolbar>
+				</ui:extension>
+				<ui:columns>
+					<ui:Column width="8.5rem" hAlign="Center">
+						<Label text="{i18n>titlecolumnPed}"/>
+						<ui:template>
+							<ObjectNumber textAlign="Center" number="{oModel>EbelnD}"/>
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="4rem" hAlign="Center">
+						<Label text="{i18n>titlecolumnPos}"/>
+						<ui:template>
+							<ObjectNumber textAlign="Center" number="{oModel>EbelpD}"/>
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="6rem" hAlign="Center">
+						<Label text="{i18n>titlecolumnMat}"/>
+						<ui:template>
+							<ObjectNumber textAlign="Center" number="{oModel>MatnrD}" />
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="10rem" hAlign="Center">
+						<Label text="{i18n>titlecolumnCantEmb}"/>
+						<ui:template>
+							<Input textAlign="Right" value="{oModel>MengezuD}" type="Text" showValueHelp="false"
+								placeholder="Ingresar" change="fnreemLetrasCant" enabled="false"/>
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="10rem" hAlign="Right">
+						<Label text="{i18n>titlecolumnCantTot}"/>
+						<ui:template>
+							<Text text="{oModel>CantTotal}"/>
+						</ui:template>
+					</ui:Column>
+					<ui:Column width="4rem" hAlign="Center">
+						<Label text="{i18n>titlecolumnUnd}"/>
+						<ui:template >
+							<Text text="{oModel>MeinsD}"/>
+						</ui:template>
+					</ui:Column>
+					<ui:Column autoResizable="true" hAlign="Center">
+						<Label text="{i18n>titlecolumnDen}" width="auto"/>
+						<ui:template>
+							<Text text="{oModel>Txz01D}"/>
+						</ui:template>
+					</ui:Column>
+					<!--<ui:Column autoResizable="true" hAlign="Center">-->
+					<!--	<Label text="{i18n>titlecolumnObs}"/>-->
+					<!--	<ui:template>-->
+					<!--		<Button text="{i18n>textButtonVer}" enabled="{=${oModel>TdlinePos}===''?false:true}" type="Emphasized" icon="sap-icon://show" press="DialogVerObs"/>-->
+					<!--	</ui:template>-->
+					<!--</ui:Column>-->
+				</ui:columns>
+			</ui:Table>
+        </content>
+        <buttons>
+            <Button text="Cancelar" icon="sap-icon://decline" type="Reject" press="_onPressClose" custom:custom="ShowMaterials"/>
+        </buttons>
+    </Dialog>
+</core:FragmentDefinition>

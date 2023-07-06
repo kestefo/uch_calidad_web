@@ -7,7 +7,9 @@ sap.ui.define([
 	'../util/util',
 	"../util/utilUI",
 	"sap/ui/core/Fragment",
-], function (Controller, BaseController, models, constantes, Services, util, utilUI, Fragment) {
+	"sap/ui/model/Filter",
+    "sap/ui/model/FilterOperator",
+], function (Controller, BaseController, models, constantes, Services, util, utilUI, Fragment, Filter, FilterOperator) {
 	"use strict";
 
 	var that;
@@ -26,6 +28,8 @@ sap.ui.define([
 			this.frgIdShowMaterials = "frgIdShowMaterials";
 			this.frgIdFechaPlan = "frgIdFechaPlan";
 			this.frgIdFormatQR = "frgIdFormatQR";
+			this.frgIdEmbalarBultosModificar = "frgIdEmbalarBultosModificar";
+			this.frgIdEmbalarBultosSinOCModificar = "frgIdEmbalarBultosSinOCModificar";
 		},
 		_onPressRefresh: function () {
 			this.handleRouteMatched();
@@ -60,16 +64,28 @@ sap.ui.define([
 					//Uso de estado
 					var oDataEstado = values[0].T_ERP_STATUS;
 					that.oModelGet.setProperty("/oEstado", oDataEstado);
+					
+					//Uso de bultos
+					var oDataEstado = values[0].T_ERP_LUMP_TYPE;
+					that.oModelGet.setProperty("/oTipoBulto", oDataEstado);
+					
+					//Uso de Unidad
+					var oDataUnidades = values[0].T_ERP_UNIDADES;
+					that.oModelGet.setProperty("/oUnidades", oDataUnidades);
 
 					//jose get data table 2
 					var oDataPedConCita = oDataHana.WalInOrdersCit;
 					this._onEstructurePedConCita(oDataPedConCita, "05", "/oEntregasConCita");
 					
+					//jose get data table 2
+					var oDataPedConCita = oDataHana.WalInOrdersCit;
+					this._onEstructurePedConCitaGraf(oDataPedConCita, "05", "/oEntregasConCitaGraf");
+					
 					//Trazabilidad
 					var date = new Date();
 					var _24HoursInMilliseconds = 86400000;
-					var datesAfter = new Date(date.getTime() - 7 * _24HoursInMilliseconds);
-					var datesAgo = new Date(date.getTime() + 7 * _24HoursInMilliseconds);
+					var datesAfter = new Date(date.getTime() - 8 * _24HoursInMilliseconds);
+					var datesAgo = new Date(date.getTime() + 8 * _24HoursInMilliseconds);
 					var mount = date.getMonth();
 					var year = date.getFullYear();
 					var dayAfter = datesAfter.getDate();
@@ -97,11 +113,13 @@ sap.ui.define([
 					if (dateActMonth < 10) {
 						dateActMonth = "0" + dateActMonth;
 					}
-					that.oModel.setProperty("/sTimeHorizonInit", yearAfter+dateAfterMonth.toString()+"01000000")
-					that.oModel.setProperty("/sTimeHorizonEnd", yearAfter+"1231000000")
+					that.oModel.setProperty("/sTimeHorizonInit", yearAfter+dateAfterMonth.toString()+dateAfterDay.toString()+"000000")
+					that.oModel.setProperty("/sTimeHorizonEnd", yearAfter+"0831000000")
 					
 					that.oModel.setProperty("/sTimeVisibleInit", yearAfter+dateAfterMonth.toString()+dateAfterDay.toString()+"000000");
 					that.oModel.setProperty("/sTimeVisibleEnd", yearAgo+dateActMonth.toString()+dateAgoDay.toString()+"000000");
+					that.oModel.setProperty("/dPrueba", new Date());
+					that.oModel.setProperty("/dPrueba2", datesAgo);
 					
 					that.eliminarPendiente();
 					sap.ui.core.BusyIndicator.hide(0);
@@ -330,6 +348,101 @@ sap.ui.define([
 			});
 			that.oModel.setProperty("/oEntregasConCita", oResults2);
 		},
+		_onEstructurePedConCitaGraf: function (oDataPedConCita) {
+			var oResults = [];
+			$.each(that._groupBy(oDataPedConCita, 'Zzlfstk'), function (x, y) {
+				var jEstado = {
+					"DescripcionGeneral2": y[0].Zzlfstk,
+					"ArrayGeneral2": y
+				}
+
+				if (y[0].Zzlfstk === "01" || y[0].Zzlfstk === "02" || y[0].Zzlfstk === "03" || y[0].Zzlfstk === "05" || y[0].Zzlfstk === "07") {
+					oResults.push(jEstado);
+				}
+			});
+
+			var oResults2 = [];
+
+			oResults.forEach(function (value) {
+				var oDataNew = value.ArrayGeneral2;
+				$.each(that._groupBy(oDataNew, 'Zcita'), function (x, y) {
+					if (y[0].COD != "02") {
+						y[0].COD = "01";
+						y[0].COD_DESC = "ERP";
+						y[0].Zzlfstkdesc = "Ent. Aprobada";
+						y[0].ZcitaNp = "PROGRAMADA";
+					}
+					
+					var lugardestino = y[0].ZzlugEnt;
+ 					var desclugardestino = y[0].ZdescCond;
+ 					
+ 					var _24HoursInMilliseconds = 86400000;
+ 					var dDateActual = new Date();
+ 					var dDateAgo = new Date( dDateActual.getTime() + 1*_24HoursInMilliseconds );
+ 					var dDateActualYear = dDateActual.getFullYear();
+ 					var dDateActualMonth = dDateActual.getMonth();
+ 					var dDateActualDay = dDateActual.getDate().toString();
+ 					var dDateEndDay = dDateActual.getDate().toString();
+ 					if (dDateActualMonth < 10) {
+						dDateActualMonth = "0" + (dDateActualMonth+1).toString();
+					}
+					var dDateActualInitDay = new Date(dDateActualYear.toString()+"/"+dDateActualMonth.toString()+"/"+"08");
+					var dDateActualEndDay = new Date(dDateActualYear.toString()+"/"+dDateActualMonth.toString()+"/"+"/09");
+ 					var dDateFechaCita = new Date( that.formatYYYYMMDDAbap(y[0].Zlfdat) + " " + that.formatHHMMSSAbap(y[0].Zlfuhr));
+ 					var dDateInit = "";
+ 					var dDateEnd = "";
+ 					var sStroke = "";
+ 					var sFill = "";
+ 					var sStatus = "";
+ 					if(dDateActualInitDay.getTime() < dDateFechaCita.getTime() && dDateFechaCita.getTime() < dDateActualEndDay.getTime()){
+ 						dDateInit = dDateActual;
+ 						dDateEnd = dDateFechaCita;
+ 						sStroke = "#FFF943";
+ 						sFill = "#FFF943";
+ 						sStatus = "02";
+ 					}else{
+	 					if(dDateActual.getTime() < dDateFechaCita){
+	 						dDateInit = dDateActual;
+	 						dDateEnd = dDateFechaCita;
+	 						sStroke = "#99D101";
+	 						sFill = "#99D101";
+	 						sStatus = "01";
+	 					}else{
+	 						dDateInit = dDateFechaCita;
+	 						dDateEnd = dDateActual
+	 						sStroke = "#FF4343";
+	 						sFill = "#FF4343";
+	 						sStatus = "03";
+	 					}
+ 					}
+
+					var jResults = {
+						"ZcitaNp": y[0].ZcitaNp,
+						"Zcita": y[0].Zcita,
+						"Zlfdat": y[0].Zlfdat,
+						"Zlfuhr": y[0].Zlfuhr,
+						"dDateEnd": dDateEnd,
+						"dDateInit": dDateInit,
+						"bVisible": true,
+						"sStroke": sStroke,
+						"sFill": sFill,
+						"sStatus": sStatus,
+						"ArrayGeneral": []
+					}
+					$.each(that._groupBy(y, 'Zvbeln'), function (xx, yy) {
+						var jEntrega={
+							"Zcita": y[0].Zcita,
+							"Zvbeln": yy[0].Zvbeln,
+							"bVisible": false,
+							"Materiales": yy
+						};
+						jResults.ArrayGeneral.push(jEntrega);
+					});
+					oResults2.push(jResults);
+				});
+			});
+			that.oModel.setProperty("/oEntregasConCitaGraf", oResults2);
+		},
 		eliminarPendiente: function () {
 			var User = that.oModelUser.getData();
 			var Proveedor = User.oDataAditional[0].Lifnr;
@@ -371,59 +484,79 @@ sap.ui.define([
 			var selectkey = oSource.getSelectedKey();
 
 			switch (selectkey) {
-			case "keyTabFilterPedEmb":
-				sTarget = "01";
-				this._byId("btOrderNoOC").setVisible(true);
-				this._byId("btOrderOC").setVisible(true);
-
-				this._byId("btChangeOrder").setVisible(false);
-				this._byId("btDeleteOrder").setVisible(false);
-				this._byId("btMakeAppointment").setVisible(false);
-				this._byId("btUpdateRegister").setVisible(false);
-				this._byId("btUpdateDate").setVisible(false);
-				this._byId("btDeleteAppointment").setVisible(false);
-				break;
-			case "keyTabFilterGenCit":
-				sTarget = "02";
-				this._byId("btMakeAppointment").setVisible(true);
-				this._byId("btChangeOrder").setVisible(true);
-				this._byId("btDeleteOrder").setVisible(true);
-
-				this._byId("btOrderNoOC").setVisible(false);
-				this._byId("btOrderOC").setVisible(false);
-				this._byId("btUpdateRegister").setVisible(false);
-				this._byId("btUpdateDate").setVisible(false);
-				this._byId("btDeleteAppointment").setVisible(false);
-
-				break;
-			case "keyTabFilterCitEnt":
-				sTarget = "03";
-				this._byId("btChangeOrder").setVisible(false);
-				this._byId("btDeleteOrder").setVisible(false);
-				this._byId("btDeleteAppointment").setVisible(true);
-
-				this._byId("btUpdateRegister").setVisible(false);
-				this._byId("btUpdateDate").setVisible(false);
-				this._byId("btMakeAppointment").setVisible(false);
-				this._byId("btOrderNoOC").setVisible(false);
-				this._byId("btOrderOC").setVisible(false);
-
-				break;
-				
-			case "keyTabFilterCitEnt":
-				sTarget = "03";
-				this._byId("btChangeOrder").setVisible(false);
-				this._byId("btDeleteOrder").setVisible(false);
-				this._byId("btDeleteAppointment").setVisible(false);
-
-				this._byId("btUpdateRegister").setVisible(false);
-				this._byId("btUpdateDate").setVisible(false);
-				this._byId("btMakeAppointment").setVisible(false);
-				this._byId("btOrderNoOC").setVisible(false);
-				this._byId("btOrderOC").setVisible(false);
-
-				break;
+				case "keyTabFilterPedEmb":
+					sTarget = "01";
+					this._byId("btOrderNoOC").setVisible(true);
+					this._byId("btOrderOC").setVisible(true);
+	
+					this._byId("btChangeOrder").setVisible(false);
+					this._byId("btDeleteOrder").setVisible(false);
+					this._byId("btMakeAppointment").setVisible(false);
+					this._byId("btUpdateRegister").setVisible(false);
+					this._byId("btUpdateDate").setVisible(false);
+					this._byId("btDeleteAppointment").setVisible(false);
+					break;
+				case "keyTabFilterGenCit":
+					sTarget = "02";
+					this._byId("btMakeAppointment").setVisible(true);
+					this._byId("btChangeOrder").setVisible(true);
+					this._byId("btDeleteOrder").setVisible(true);
+	
+					this._byId("btOrderNoOC").setVisible(false);
+					this._byId("btOrderOC").setVisible(false);
+					this._byId("btUpdateRegister").setVisible(false);
+					this._byId("btUpdateDate").setVisible(false);
+					this._byId("btDeleteAppointment").setVisible(false);
+	
+					break;
+				case "keyTabFilterCitEnt":
+					sTarget = "03";
+					this._byId("btChangeOrder").setVisible(false);
+					this._byId("btDeleteOrder").setVisible(false);
+					this._byId("btDeleteAppointment").setVisible(true);
+	
+					this._byId("btUpdateRegister").setVisible(false);
+					this._byId("btUpdateDate").setVisible(false);
+					this._byId("btMakeAppointment").setVisible(false);
+					this._byId("btOrderNoOC").setVisible(false);
+					this._byId("btOrderOC").setVisible(false);
+	
+					break;
+					
+				case "keyTabFilterTraz":
+					sTarget = "03";
+					this._byId("btChangeOrder").setVisible(false);
+					this._byId("btDeleteOrder").setVisible(false);
+					this._byId("btDeleteAppointment").setVisible(false);
+	
+					this._byId("btUpdateRegister").setVisible(false);
+					this._byId("btUpdateDate").setVisible(false);
+					this._byId("btMakeAppointment").setVisible(false);
+					this._byId("btOrderNoOC").setVisible(false);
+					this._byId("btOrderOC").setVisible(false);
+	
+					break;
 			}
+			
+			this.fnClearComponent();
+		},
+		onChangeStatus:function(oEvent){
+			var oSource = oEvent.getSource();
+			var sKey = oSource.getSelectedKey();
+			
+			var oTable = oSource.getParent().getParent();
+
+            var aFilter = [];
+            if (!this.isEmpty(sKey)){
+            	if(sKey === "00"){
+                	oTable.getBinding("rows").filter([]);
+                	return;
+            	}else{
+					aFilter.push(new Filter("sStatus", 'Contains', sKey));
+            	}
+            }
+
+            oTable.getBinding("rows").filter(aFilter);
 		},
 		_onPressShowMaterials: function (oEvent) {
 			var oSource = oEvent.getSource();
@@ -652,7 +785,7 @@ sap.ui.define([
 					util.response.validateAjaxGetHana(result, {
 						success: function (oData, message) {
 							var data = oData.oResults.oData.Constante.oData;
-							var dataHoraTrabajada = that.oModelGet.getProperty("/oHorasTrabajadas"); //2
+							var dataHoraTrabajada = that.oModelGet.getProperty("/oHorasTrabajadas"); 
 							if (data.length > 0) {
 								data.sort(function (x, y) {
 									return x.DESDE - y.DESDE
@@ -1209,8 +1342,8 @@ sap.ui.define([
 					if (arrCantCentro[i].centro == arrayOrdenes[j].Werks) {
 						arrayOrdenes[j].ID_Eliminar = "";
 						arrayOrdenes[j].Enviar = arrCantCentro[i].numero;
-						arrayOrdenes[j].Centro = arrayOrdenes[i].Werks;
-						arrayOrdenes[j].Proveedor = arrayOrdenes[i].Lifnr;
+						arrayOrdenes[j].Centro = arrayOrdenes[j].Werks;
+						arrayOrdenes[j].Proveedor = arrayOrdenes[j].Lifnr;
 					}
 				}
 			}
@@ -1258,12 +1391,15 @@ sap.ui.define([
 						"STATUS": actual.STATUS
 					}
 					var nuevo = that.oModel.getProperty(contextNuevo);
-					var jFechaNuevo = {
-						"FECHAS": nuevo.FECHAS,
-						"HORARIOS": nuevo.HORARIOS,
-						"NUMERO_ENTREGA": nuevo.NUMERO_ENTREGA,
-						"PROVEEDORES": nuevo.PROVEEDORES,
-						"STATUS": nuevo.STATUS
+					var jFechaNuevo ={};
+					if (nuevo) {
+						jFechaNuevo = {
+							"FECHAS": nuevo.FECHAS,
+							"HORARIOS": nuevo.HORARIOS,
+							"NUMERO_ENTREGA": nuevo.NUMERO_ENTREGA,
+							"PROVEEDORES": nuevo.PROVEEDORES,
+							"STATUS": nuevo.STATUS
+						}
 					}
 					var horaactual = "";
 					var horanueva = "";
@@ -3537,6 +3673,300 @@ sap.ui.define([
  			var estructuraDataArrayOrdenes = {};
 			
  			that.exitopdf(that, "Documento de Cita Número: " + cita , cita, listaGeneral, 1);
- 		}
+ 		},
+ 		
+ 		//Funcion de modificar Entrega
+ 		ModificarEntrega: async function (oEvent) {
+ 			var arrayOrdenes = [];
+ 			var oSource = oEvent.getSource();
+			var oRow = oSource.getParent();
+			var sTable = "";
+			if (sTarget == "02") {
+				var dataTotalEntrega = that.oModel.getProperty("/oEntregasNoCita");
+				sTable = "TreeTableBasic";
+			} else {
+				var dataTotalEntrega = that.oModel.getProperty("/oEntregasConCita");
+				sTable = "TreeTableBasic2";
+			}
+			
+			var oTable = that.byId(sTable);
+			var oIndeces = oTable.getSelectedIndices();
+			oIndeces.forEach(function (value) {
+				var jEntSelect = oTable.getContextByIndex(value).getObject();
+				arrayOrdenes.push(jEntSelect);
+			});
+			
+ 			
+
+ 			var EntregasSelecionadas = arrayOrdenes;
+ 			that.oModel.setProperty("/DataMaterialesSeleccionados", []);
+ 			var TipoBultos = that.oModelGet.getProperty("/oTipoBulto");
+ 			var DataPedidosEmbalar = that.oModel.getProperty("/DataPedidosEmbalar");
+
+ 			that.oModel.setProperty("/DataBultos", []);
+
+ 			if (EntregasSelecionadas.length === 0) {
+ 				utilUI.onMessageErrorDialogPress2("Seleccione una Entrega");
+ 				return;
+ 			} else if (EntregasSelecionadas.length > 1) {
+ 				utilUI.onMessageErrorDialogPress2("Seleccione una Entrega");
+ 				return;
+ 			}
+
+ 			if (EntregasSelecionadas[0].codtipoData == "01") {
+
+ 				var Materiales = [];
+ 				var Array = [];
+ 				var variable = {
+ 					MatnrD: "",
+ 					EbelnD: "",
+ 					CantTotal: 0.00,
+ 					MengezuD: 0.00,
+ 					MeinsD: "",
+ 					Txz01D: ""
+ 						// obs			:"obsPrueba"
+ 				};
+ 				var FirstObject = JSON.parse(JSON.stringify(EntregasSelecionadas[0].materiales[0]));
+ 				var almacenarObject;
+ 				var MaterialesEntrega = JSON.parse(JSON.stringify(EntregasSelecionadas[0]));
+
+ 				EntregasSelecionadas[0].materiales.forEach(function (x) {
+ 					x.MatnrD = (x.MatnrD * 1).toString();
+ 				});
+				
+				$.each(this._groupBy(EntregasSelecionadas[0].materiales, 'VhilmKuD'), function (x, y) {
+ 					$.each(y, function (datax, datay) {
+ 						datay.MengezuD = that.currencyFormat(datay.VemngD);
+ 						datay.MengezuD1 = that.currencyFormat(datay.VemngD);
+ 						datay.MengezuD2
+ 						datay.MeinsD = datay.VrkmeD;
+ 						datay.Txz01D = datay.MaktxD;
+ 						datay.TdlinePos = datay.Tdline === undefined ? "" : datay.Tdline;
+ 						datay.CantTotal = datay.MengezuD;
+ 						datay.Sum = false;
+ 						datay.CantTotal1 = 0;
+ 						$.each(EntregasSelecionadas[0].materiales, function (datax1, obj) {
+ 							if (obj.MatnrD === datay.MatnrD && obj.EbelpD * 1 === datay.EbelpD * 1 && obj.EbelnD === datay.EbelnD) {
+ 								datay.CantTotal1 += parseFloat(obj.VemngD.replace(",", ""));
+ 							}
+ 						});
+ 					});
+
+ 					let Complementarios = [];
+ 					// y[0].ZET_EMB_COMPLSet.results.map(function (obj) {
+ 					// 	let dataEstructura = {
+ 					// 		Num: obj.VHILM_KU + "." + obj.VHILM_KU_SUB,
+ 					// 		TipoBulto: obj.VEGR2,
+ 					// 		Observacion: obj.INHALT,
+ 					// 		PesoBulto: that.currencyFormat(obj.BRGEW),
+ 					// 		Longitud: that.currencyFormat(obj.LAENG),
+ 					// 		Ancho: that.currencyFormat(obj.BREIT),
+ 					// 		Altura: that.currencyFormat(obj.HOEHE),
+ 					// 		booleanComp: true
+ 					// 	}
+ 					// 	return dataEstructura;
+ 					// });
+
+ 					y = y.concat(Complementarios);
+
+ 					var objEmbalaje = {
+ 						"Num": y[0].VhilmKuD,
+ 						"TipoBulto": y[0].Vegr2D,
+ 						"CantBulto": that.currencyFormat(y[0].VhilmKuD),
+ 						"Observacion": y[0].InhaltD,
+ 						"PesoBulto": that.currencyFormat(y[0].BrgewD),
+ 						"Longitud": that.currencyFormat(y[0].LaengD),
+ 						"Ancho": that.currencyFormat(y[0].BreitD),
+ 						"Altura": that.currencyFormat(y[0].HoeheD),
+ 						"Array": y
+ 					};
+
+ 					Array.push(objEmbalaje);
+ 				});
+
+ 				let RemoveDuplicateMateriales = arrayOrdenes[0].materiales.filter((arr, index, self) =>
+ 					index === self.findIndex((t) => (t.EbelnD === arr.EbelnD && t.EbelpD === arr.EbelpD && (t.MatnrD * 1).toString() === (arr.MatnrD)
+ 						.toString())));
+
+ 				DataPedidosEmbalar.map(function (Sociedad) {
+ 					Sociedad.ArrayGeneral.map(function (Centro) {
+ 						Centro.ArrayGeneral.map(function (Almacen) {
+ 							Almacen.ArrayGeneral.map(function (Orden) {
+ 								Orden.ArrayGeneral.map(function (Pedido) {
+ 									RemoveDuplicateMateriales.map(function (obj1) {
+ 										Pedido.ArrayMaterial.map(function (obj) {
+ 											if (obj.EbelnD === obj1.EbelnD && obj.EbelpD * 1 === obj1.EbelpD * 1 && obj.MatnrD === (obj1.MatnrD * 1).toString()) {
+ 												var Mat = {
+ 													EbelnD: obj.EbelnD,
+ 													EbelpD: obj1.EbelpD,
+ 													MatnrD: obj.MatnrD,
+ 													MengezuD: parseFloat(obj.MengezuD),
+ 													EbelnD: obj.EbelnD,
+ 													MeinsD: obj.MeinsD,
+ 													Txz01D: obj.Txz01D,
+ 													TdlinePos: obj.Tdline,
+ 													Xhupf: obj.Xhupf,
+ 													cantMaterialERP: obj.MengeD
+ 												};
+ 												Mat.CantTotal = parseFloat(obj.MengezuD);
+ 												Mat.CantTotal1 = parseFloat(obj1.CantTotal1 + parseFloat(obj.MengezuD));
+ 												Materiales.push(Mat);
+ 											}
+ 										});
+ 									});
+ 								});
+ 							});
+ 						});
+ 					});
+ 				});
+
+ 				Array.map(function (obj) {
+ 					obj.Array.map(function (obj2) {
+ 						Materiales.map(function (obj3) {
+ 							if (obj2.MatnrD !== undefined && obj2.MatnrD.toString() === obj3.MatnrD.toString() && obj2.EbelpD * 1 === obj3.EbelpD *
+ 								1 && obj2.EbelnD === obj3.EbelnD) {
+ 								obj2.CantTotal1 += parseFloat(obj3.MengezuD.toString().replace(",", "").replace(",", "").replace(",", "").replace(",",
+ 									"").replace(",", ""));
+ 							}
+ 						});
+ 						obj2.CantTotal1 = parseFloat(obj2.CantTotal1);
+ 					});
+ 				});
+
+ 				Array.sort(that.dynamicSort("Descripcion"));
+ 				var data = {
+ 					Array: Array
+ 				};
+
+ 				that.oModel.setProperty("/DataBultosModificar", data);
+ 				that.oModel.setProperty("/DataMaterialesModificar", Materiales);
+ 				var arrayInit = [];
+ 				Materiales.forEach(function (x) {
+ 					arrayInit.push(x);
+ 				});
+
+ 				that.oModel.setProperty("/DataMaterialesModificarInit", JSON.parse(JSON.stringify(arrayInit)));
+
+ 				this.setFragment("_dialogEmbalarBultosModificar", this.frgIdEmbalarBultosModificar, "EmbalarBultosModificar", this);
+ 			} else if (EntregasSelecionadas[0].codtipoData == "02") {
+ 				var dataEntregas = [];
+ 				dataTotalEntrega.forEach(function (x) {
+ 					if (sTarget == '02') {
+ 						if (x.Vbeln == EntregasSelecionadas[0].Vbeln) {
+	 						x.materiales.forEach(function(xx){
+	 							dataEntregas.push(xx);
+	 						});
+	 					}
+ 					}else{
+ 						if (x.Zvbeln == EntregasSelecionadas[0].Zvbeln) {
+	 						x.materiales.forEach(function(xx){
+	 							dataEntregas.push(xx);
+	 						});
+	 					}
+ 					}
+ 				});
+				if(sTarget == "02"){
+ 					dataEntregas.sort((a, b) => a.VhilmKuD - b.VhilmKuD);
+				}else{
+					dataEntregas.sort((a, b) => a.ZvhilmKu - b.ZvhilmKu);
+				}
+
+ 				if (dataEntregas.length > 0) {
+ 					if (sTarget == '02') {
+ 						that.oModel.setProperty("/pedEntregaGlobal", dataEntregas[0].Vbeln);
+ 					} else {
+ 						that.oModel.setProperty("/pedEntregaGlobal", dataEntregas[0].Zvbeln);
+ 					}
+ 				} else {
+ 					if (sTarget == '02') {
+ 						that.oModel.setProperty("/pedEntregaGlobal", dataEntregas[0].Vbeln);
+ 					} else {
+ 						that.oModel.setProperty("/pedEntregaGlobal", dataEntregas[0].Zvbeln);
+ 					}
+ 				}
+ 				var maximoemb = 0;
+ 				var embalajes = [];
+ 				if (sTarget == '02') {
+ 					$.each(this._groupBy(dataEntregas, 'VhilmKuD'), function (x, y) {
+ 						var objEmbalaje = {
+ 							"key": maximoemb + 1,
+ 							"nEmbalaje": parseInt(y[0].VhilmKuD),
+ 							"selectedKey": y[0].Vegr2D,
+ 							"tipoEmbalaje": y[0].Vegr2D,
+ 							"desctipoEmbalaje": y[0].Vegr2D_Desc,
+ 							"descripcionContenido": y[0].InhaltD,
+ 							"peso": y[0].BrgewD,
+ 							"longitud": y[0].LaengD,
+ 							"ancho": y[0].BreitD,
+ 							"altura": y[0].HoeheD
+ 						};
+ 						maximoemb++;
+ 						embalajes.push(objEmbalaje);
+ 					});
+ 				} else {
+ 					$.each(this._groupBy(dataEntregas, 'ZvhilmKu'), function (x, y) {
+ 						var objEmbalaje = {
+ 							"key": maximoemb + 1,
+ 							"nEmbalaje": parseInt(y[0].ZvhilmKu),
+ 							"selectedKey": y[0].Zvegr2,
+ 							"tipoEmbalaje": y[0].Zvegr2,
+ 							"desctipoEmbalaje": y[0].Zbezei,
+ 							"descripcionContenido": y[0].Zobservacion,
+ 							"peso": y[0].ZbrgewB,
+ 							"longitud": y[0].Zlaeng,
+ 							"ancho": y[0].Zbreit,
+ 							"altura": y[0].Zhoehe
+ 						};
+ 						maximoemb++;
+ 						embalajes.push(objEmbalaje);
+ 					});
+
+ 				}
+ 				that.oModel.setProperty("/DataEmbalajes", embalajes);
+
+ 				var maximoitem = 0;
+ 				var maxitem = 0;
+ 				var items = [];
+ 				var idDelete = [];
+ 				$.each(dataEntregas, function (x, y) {
+ 					if (sTarget == '02') {
+ 						var objItems = {
+ 							"key": maximoitem + 1,
+ 							"nEmbalaje": parseInt(y.VhilmKuD),
+ 							"keyEmbalaje": parseInt(y.VhilmKuD),
+ 							"selectedKey": y.MeinsD,
+ 							"itemkey": parseInt(y.EbelpD),
+ 							"descripcionMaterial": y.Txz01D,
+ 							"cantidad": y.MengeD,
+ 							"unmMaterial": y.MeinsD,
+ 							"descunmMaterial": y.DESCRIPCION_UNIDAD,
+ 							"obsMaterial": y.Tdline
+ 						}
+ 					} else {
+ 						var objItems = {
+ 							"key": maximoitem + 1,
+ 							"nEmbalaje": parseInt(y.ZvhilmKu),
+ 							"keyEmbalaje": parseInt(y.ZvhilmKu),
+ 							"selectedKey": y.Zunmed,
+ 							"itemkey": parseInt(y.Zmatnr),
+ 							"descripcionMaterial": y.Zmaktx,
+ 							"cantidad": y.Zvemng,
+ 							"unmMaterial": y.Zunmed,
+ 							"descunmMaterial": y.DESCRIPCION_UNIDAD,
+ 							"obsMaterial": y.Zobservacion
+ 						}
+ 					}
+ 					maximoitem++;
+ 					maxitem++;
+ 					items.push(objItems);
+ 					idDelete.push(y.ID_ENTREGA_SIN_OC_DETALLE);
+ 				});
+ 				that.oModel.setProperty("/DataItems", items);
+ 				that.oModel.setProperty("/idDelete", idDelete);
+				
+				this.setFragment("_dialogEmbalarBultosSinOCModificar", this.frgIdEmbalarBultosSinOCModificar, "EmbalarBultosSinOCModificar", this);
+ 			}
+
+ 		},
 	});
 });

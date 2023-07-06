@@ -1,0 +1,183 @@
+<core:FragmentDefinition
+		xmlns:core			="sap.ui.core"
+		controllerName		="com.rava.controller.Page1" 
+		xmlns				="sap.m" 
+		xmlns:form			="sap.ui.layout.form"
+		xmlns:l				="sap.ui.layout"
+		xmlns:ui			="sap.ui.table"
+		xmlns:custom="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
+    <Dialog id="idDialogModificaroModel"  
+    	horizontalScrolling="true" 
+    	showHeader="true"   
+    	state="None" 
+    	stretch="false" 
+    	title="Visualización de Entregas Sin OC" 
+    	type="Standard" 
+    	verticalScrolling="true" 
+    	class="sapUiResponsiveContentPadding"
+        contentHeight="auto" 
+        contentWidth="80%">
+        <content>
+        	
+        	<VBox alignItems="Stretch" direction="Column" fitContainer="false" width="auto" height="auto" justifyContent="Start" renderType="Div" visible="true" displayInline="false" class="sapUiResponsiveMargin">
+                <items>
+                    <form:SimpleForm maxContainerCols="4" editable="false" layout="ResponsiveGridLayout" labelSpanL="12" labelSpanM="12" emptySpanL="0"
+						emptySpanM="0" columnsL="2" columnsM="2">
+						<form:content>
+							<ui:Table
+								id="tableEmbalajes"
+								enableSelectAll="false"
+								rows="{path:'oModel>/DataEmbalajes', parameters: {arrayNames:['ArrayGeneral']}}"
+								selectionMode="None"
+								visibleRowCount="4"
+								selectionBehavior="RowSelector"
+								rowSelectionChange	="fnSelectionEmbalajes"
+								ariaLabelledBy="title">
+								<ui:extension>
+									<OverflowToolbar style="Clear">
+										<content>
+											<Title text="Embalajes"/>
+											<ToolbarSpacer width=""/>
+										</content>
+									</OverflowToolbar>
+								</ui:extension>
+								<ui:columns>
+									<ui:Column width="6rem" hAlign="Center">
+										<Label text="Nº Embalaje" />
+										<ui:template>
+											<Text text="{oModel>nEmbalaje}" wrapping="false" />
+										</ui:template>
+									</ui:Column>
+									<ui:Column width="10rem" hAlign="Center">
+										<Label text="Tipo de Embalaje" />
+										<ui:template>
+											<Select 
+												enabled = "false"
+												change		="fnSelectedTipoBultoEntregaOC" 
+												width		="auto" 
+												selectedKey	="{oModel>selectedKey}"
+												items		="{
+													path:'oModelGet>/oTipoBulto' , templateShareable:false
+												}">
+												
+												<core:Item 	 key="{oModelGet>Campo}" text="{oModelGet>DescripcionCampo}" />
+											</Select>
+										</ui:template>
+									</ui:Column>
+									<ui:Column width="auto" hAlign="Center">
+										<Label text="Descripción del Contenido" wrapping="true" />
+										<ui:template>
+											<Input type="Text" value="{oModel>descripcionContenido}"  maxLength="40" enabled = "false"/>
+										</ui:template>
+									</ui:Column>
+									<ui:Column width="8rem" hAlign="Center">
+										<Label text="Peso(Kg)" />
+										<ui:template>
+											<Input type="Text" value="{oModel>peso}" change="fnreemLetrasCant" maxLength="20" enabled = "false"/>
+										</ui:template>
+									</ui:Column>
+									<ui:Column width="8rem" hAlign="Center">
+										<Label text="Longitud(Cm)" />
+										<ui:template>
+											<Input type="Text" value="{oModel>longitud}" change="fnreemLetrasCant" maxLength="20" enabled = "false"/>
+										</ui:template>
+									</ui:Column>
+									<ui:Column width="8rem" hAlign="Center">
+										<Label text="Ancho(Cm)" />
+										<ui:template>
+											<Input type="Text" value="{oModel>ancho}" change="fnreemLetrasCant" maxLength="20" enabled = "false"/>
+										</ui:template>
+									</ui:Column>
+									<ui:Column width="8rem" hAlign="Center">
+										<Label text="Altura(Cm)" />
+										<ui:template>
+											<Input type="Text" value="{oModel>altura}" change="fnreemLetrasCant" maxLength="20" enabled = "false"/>
+										</ui:template>
+									</ui:Column>
+								</ui:columns>
+							</ui:Table>
+						</form:content>
+					</form:SimpleForm>
+					<form:SimpleForm maxContainerCols="4" editable="false" layout="ResponsiveGridLayout" labelSpanL="12" labelSpanM="12" emptySpanL="0"
+						emptySpanM="0" columnsL="2" columnsM="2">
+						<form:content>
+							<ui:Table
+								id="tableItems"
+								enableSelectAll="false"
+								rows="{path:'oModel>/DataItems', parameters: {arrayNames:['ArrayGeneral']}}"
+								selectionMode="None"
+								visibleRowCount="4"
+								ariaLabelledBy="title"
+								rowSelectionChange	="fnSelectionItems"
+								visible="true">
+								<ui:extension>
+									<OverflowToolbar style="Clear">
+										<content>
+											<Title text="Materiales"/>
+											<ToolbarSpacer width=""/>
+										</content>
+									</OverflowToolbar>
+								</ui:extension>
+								<ui:columns >
+									<ui:Column width="6rem" hAlign="Center">
+										<Label text="Nº Embalaje" />
+										<ui:template>
+											<Text text="{oModel>nEmbalaje}" wrapping="false" />
+										</ui:template>
+									</ui:Column>
+									<ui:Column width="4rem" hAlign="Center">
+										<Label text="Item" />
+										<ui:template>
+											<Text text="{oModel>itemkey}" wrapping="false" />
+										</ui:template>
+									</ui:Column>
+									<ui:Column width="auto" hAlign="Center">
+										<Label text="Descripción del Material"/>
+										<ui:template>
+											<Input type="Text" value="{oModel>descripcionMaterial}" maxLength="40" enabled = "false"/>
+										</ui:template>
+									</ui:Column>
+									<ui:Column width="8rem" hAlign="Center">
+										<Label text="Cantidad" />
+										<ui:template>
+											<Input type="Text" value="{oModel>cantidad}" change="fnreemLetrasCant" maxLength="20" enabled = "false"/>
+										</ui:template>
+									</ui:Column>
+									<ui:Column width="9rem" hAlign="Center">
+										<Label text="UNM Material" />
+										<ui:template>
+											<Select 
+												enabled = "false"
+												showSecondaryValues= "true"
+												change		="fnSelectedUnmMaterial" 
+												selectedKey	="{oModel>selectedKey}"
+												wrapItemsText="true"
+												columnRatio="1:5"
+												items="{ path:'oModelGet>/oUnidades' , templateShareable:false }">
+												<core:ListItem key="{oModelGet>Campo}" text="{oModelGet>DescripcionCampo}" additionalText="{oModelGet>Campo}"/>
+											</Select>
+										</ui:template>
+									</ui:Column>
+									<ui:Column width="auto" hAlign="Center">
+										<Label text="Observación Material" />
+										<ui:template>
+											<Input type="Text" value="{oModel>obsMaterial}"  maxLength="40" enabled = "false"/>
+										</ui:template>
+									</ui:Column>
+								</ui:columns>
+							</ui:Table>
+						</form:content>
+					</form:SimpleForm>
+                </items>
+            </VBox>
+			        
+        </content>
+        
+        <buttons>
+			<Button text="Cancelar" icon="sap-icon://decline" type="Reject" press="_onPressClose" custom:custom="ShowMaterials"/>
+        </buttons>
+        
+        
+    
+    </Dialog>
+</core:FragmentDefinition>

@@ -75,7 +75,7 @@
         <footer>
             <OverflowToolbar>
                 <content>
-                    <Button id="btChangeOrder" text="{i18n>textButtonChangeOrder}" type="Accept" icon="sap-icon://edit" visible="false"/>
+                    <Button id="btChangeOrder" text="{i18n>textButtonChangeOrder}" press="ModificarEntrega" type="Emphasized" icon="sap-icon://show" visible="false"/>
                     <Button id="btDeleteOrder" text="{i18n>textButtonDeleteOrder}" press="_onPressDeleteEnt" type="Reject" icon="sap-icon://delete" visible="false"/>
                     
                     <ToolbarSpacer width=""/>
