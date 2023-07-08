@@ -21,15 +21,15 @@
 						</HBox>
 					</VBox>
 					<HBox class="sapUiSmallMargin" alignItems="Center" direction="Row" width="80%" height="auto" justifyContent="Center">
-						<Link class="" text="¿Has olvidado tu correo electronico?" textAlign="Begin" width="auto" target="_blank" wrapping="true" enabled="true"
-							visible="true" emphasized="false" subtle="false"/>
+						<!--<Link class="" text="¿Has olvidado tu correo electronico?" textAlign="Begin" width="auto" target="_blank" wrapping="true" enabled="true"-->
+						<!--	visible="true" emphasized="false" subtle="false"/>-->
 					</HBox>
 					<HBox class="informacion" alignItems="Center" direction="Row" fitContainer="false" width="80%" height="auto" justifyContent="SpaceAround"
 						renderType="Div" visible="true" displayInline="false">
 						<Text text="¿No puedes iniciar sesión? Contacta con soporte para validar tu usuario." wrapping="true"/>
 					</HBox>
 					<HBox class="sapUiMediumMargin" alignItems="Center" width="100%" height="auto" justifyContent="SpaceAround">
-						<Link text="Crear cuenta" visible="true" press="botonRegistrarUsuario"/>
+						<Link text="Manual de Usuario" visible="true" href = "https://flpnwc-dm7jf5jpeb.dispatcher.us2.hana.ondemand.com/sites/iproviderqas#iprovider2manuales-Display"/>
 						<Button id="btLogin" text="{i18n>textLogin}" press="_onPressLogin" type="Default" icon="sap-icon://journey-arrive"
 							tooltip="{i18n>tooltipLogin}"/>
 					</HBox>

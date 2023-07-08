@@ -86,6 +86,7 @@ sap.ui.define([
 					var _24HoursInMilliseconds = 86400000;
 					var datesAfter = new Date(date.getTime() - 8 * _24HoursInMilliseconds);
 					var datesAgo = new Date(date.getTime() + 8 * _24HoursInMilliseconds);
+					var datesAgoMounth = new Date(date.getTime() + 30 * _24HoursInMilliseconds);
 					var mount = date.getMonth();
 					var year = date.getFullYear();
 					var dayAfter = datesAfter.getDate();
@@ -94,6 +95,8 @@ sap.ui.define([
 					var dayAgo = datesAgo.getDate();
 					var mountAgo = datesAgo.getMonth();
 					var yearAgo = datesAgo.getFullYear();
+					var mount2 = datesAgoMounth.getMonth();
+					var day2 = datesAgoMounth.getDate();
 					
 					var dateAfterDay = dayAfter +1;
 					if (dateAfterDay < 10) {
@@ -113,11 +116,16 @@ sap.ui.define([
 					if (dateActMonth < 10) {
 						dateActMonth = "0" + dateActMonth;
 					}
+					
+					var dateAgoMonth = mountAgo +1;
+					if (dateAgoMonth < 10) {
+						dateAgoMonth = "0" + dateAgoMonth;
+					}
 					that.oModel.setProperty("/sTimeHorizonInit", yearAfter+dateAfterMonth.toString()+dateAfterDay.toString()+"000000")
-					that.oModel.setProperty("/sTimeHorizonEnd", yearAfter+"0831000000")
+					that.oModel.setProperty("/sTimeHorizonEnd",  yearAgo+dateAgoMonth.toString()+dateAgoDay.toString()+"000000")
 					
 					that.oModel.setProperty("/sTimeVisibleInit", yearAfter+dateAfterMonth.toString()+dateAfterDay.toString()+"000000");
-					that.oModel.setProperty("/sTimeVisibleEnd", yearAgo+dateActMonth.toString()+dateAgoDay.toString()+"000000");
+					that.oModel.setProperty("/sTimeVisibleEnd", yearAgo+dateAgoMonth.toString()+dateAgoDay.toString()+"000000");
 					that.oModel.setProperty("/dPrueba", new Date());
 					that.oModel.setProperty("/dPrueba2", datesAgo);
 					
@@ -382,12 +390,12 @@ sap.ui.define([
  					var dDateActualYear = dDateActual.getFullYear();
  					var dDateActualMonth = dDateActual.getMonth();
  					var dDateActualDay = dDateActual.getDate().toString();
- 					var dDateEndDay = dDateActual.getDate().toString();
+ 					var dDateEndDay = dDateAgo.getDate().toString();
  					if (dDateActualMonth < 10) {
 						dDateActualMonth = "0" + (dDateActualMonth+1).toString();
 					}
-					var dDateActualInitDay = new Date(dDateActualYear.toString()+"/"+dDateActualMonth.toString()+"/"+"08");
-					var dDateActualEndDay = new Date(dDateActualYear.toString()+"/"+dDateActualMonth.toString()+"/"+"/09");
+					var dDateActualInitDay = new Date(dDateActualYear.toString()+"/"+dDateActualMonth.toString()+"/"+dDateActualDay);
+					var dDateActualEndDay = new Date(dDateActualYear.toString()+"/"+dDateActualMonth.toString()+"/"+dDateEndDay);
  					var dDateFechaCita = new Date( that.formatYYYYMMDDAbap(y[0].Zlfdat) + " " + that.formatHHMMSSAbap(y[0].Zlfuhr));
  					var dDateInit = "";
  					var dDateEnd = "";
@@ -395,8 +403,8 @@ sap.ui.define([
  					var sFill = "";
  					var sStatus = "";
  					if(dDateActualInitDay.getTime() < dDateFechaCita.getTime() && dDateFechaCita.getTime() < dDateActualEndDay.getTime()){
- 						dDateInit = dDateActual;
- 						dDateEnd = dDateFechaCita;
+ 						dDateInit = dDateActualInitDay;
+ 						dDateEnd = dDateActualEndDay;
  						sStroke = "#FFF943";
  						sFill = "#FFF943";
  						sStatus = "02";
